@@ -60,7 +60,13 @@ export async function POST(
     newTotalBet += callAmt
     actionAmount = callAmt
   } else if (body.action === 'raise') {
-    const raiseTotal = Math.max(body.amount ?? validActions.minRaise, validActions.minRaise)
+    if (!validActions.canRaise) return NextResponse.json({ error: 'Cannot raise' }, { status: 400 })
+    const requestedTotal = body.amount ?? validActions.minRaise
+    // Clamp: at least minRaise, at most all chips (all-in raise)
+    const raiseTotal = Math.min(
+      Math.max(requestedTotal, validActions.minRaise),
+      actingHandPlayer.current_bet + actingPlayer.chips  // max = current_bet + remaining chips
+    )
     const additionalChips = raiseTotal - actingHandPlayer.current_bet
     newChips -= additionalChips
     newCurrentBet = raiseTotal
