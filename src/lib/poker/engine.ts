@@ -46,8 +46,10 @@ export function isBettingRoundComplete(
   if (active.length === 0) return true
   const allMatch = active.every(p => p.current_bet >= currentBet)
   if (!allMatch) return false
-  // When currentBet is 0 and more than 1 active player, require everyone to have checked
-  if (currentBet === 0 && active.length > 1 && extra) {
+  // All bets match — but every active player must have had at least one turn.
+  // This handles both check-around (currentBet=0) and preflop BB option
+  // (currentBet=bigBlind after SB calls but BB hasn't acted yet).
+  if (extra) {
     return extra.actionCount >= active.length
   }
   return true
