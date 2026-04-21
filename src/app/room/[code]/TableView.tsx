@@ -18,8 +18,8 @@ function getSeatPosition(seatIndex: number, total: number, mySeatIndex: number |
   // If we know which seat is ours, rotate so our seat is always at the bottom
   const offset = mySeatIndex !== null ? mySeatIndex : 0
   const angle = ((seatIndex - offset) / total) * 2 * Math.PI + Math.PI / 2
-  const rx = 44
-  const ry = 38
+  const rx = 36  // reduced from 44 to keep side players on screen
+  const ry = 30  // reduced from 38 to keep top/bottom players inside oval
   return {
     left: `${50 + rx * Math.cos(angle)}%`,
     top: `${50 + ry * Math.sin(angle)}%`,
@@ -29,8 +29,8 @@ function getSeatPosition(seatIndex: number, total: number, mySeatIndex: number |
 function getBetPosition(seatIndex: number, total: number, mySeatIndex: number | null): { top: string; left: string } {
   const offset = mySeatIndex !== null ? mySeatIndex : 0
   const angle = ((seatIndex - offset) / total) * 2 * Math.PI + Math.PI / 2
-  const rx = 25
-  const ry = 20
+  const rx = 20
+  const ry = 15
   return {
     left: `${50 + rx * Math.cos(angle)}%`,
     top: `${50 + ry * Math.sin(angle)}%`,

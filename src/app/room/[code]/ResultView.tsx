@@ -93,7 +93,7 @@ export function ResultView({ rankings, t }: ResultViewProps) {
 
         {/* New Game button */}
         <button
-          onClick={() => router.push('/')}
+          onClick={() => router.push('/create')}
           className="mt-2 w-full py-3.5 rounded-xl bg-gradient-to-r from-[#D4AF37] via-[#F5D060] to-[#D4AF37] text-[#1a1a0a] font-bold text-lg shadow-lg shadow-[#D4AF37]/20 hover:shadow-[#D4AF37]/40 hover:brightness-110 transition-all duration-200 active:scale-[0.98]"
         >
           {t.newGame}

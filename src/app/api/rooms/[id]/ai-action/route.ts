@@ -73,7 +73,7 @@ fold
 all_in
 raise <amount>`
 
-  let action = valid.canCheck ? 'check' : (valid.canCall ? 'call' : 'fold')
+  let action = valid.canCheck ? 'check' : valid.canCall ? 'call' : valid.canAllIn ? 'all_in' : 'fold'
   let amount: number | undefined
 
   if (!GEMINI_API_KEY) {

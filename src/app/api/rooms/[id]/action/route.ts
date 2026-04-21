@@ -142,10 +142,15 @@ export async function POST(
     actionCount: actionsThisStreet,
   })
   if (roundComplete) {
-    await advanceStreet({
-      hand: { ...hand, current_bet: newHandCurrentBet },
-      roomId: id, handPlayers: updatedHandPlayers, players, room, pot, pots,
-    })
+    try {
+      await advanceStreet({
+        hand: { ...hand, current_bet: newHandCurrentBet },
+        roomId: id, handPlayers: updatedHandPlayers, players, room, pot, pots,
+      })
+    } catch (e) {
+      console.error('[action] advanceStreet failed:', e)
+      return NextResponse.json({ error: 'Internal error advancing street' }, { status: 500 })
+    }
   } else {
     // Find next active player
     const seatedActive = players
@@ -156,9 +161,17 @@ export async function POST(
       .map(p => ({ seatIndex: p.seat_index!, status: 'active' as const }))
 
     const nextSeat = getNextActiveSeat(seatedActive, actingPlayer.seat_index!)
+    if (nextSeat === -1) {
+      console.error('[action] getNextActiveSeat returned -1, no active player found')
+      return NextResponse.json({ error: 'No active player found' }, { status: 500 })
+    }
     await store.updateHand(hand.id, { current_seat: nextSeat })
 
-    const nextPlayer = players.find(p => p.seat_index === nextSeat)!
+    const nextPlayer = players.find(p => p.seat_index === nextSeat)
+    if (!nextPlayer) {
+      console.error('[action] nextPlayer not found for seat', nextSeat)
+      return NextResponse.json({ error: 'Next player not found' }, { status: 500 })
+    }
     await broadcastRoomEvent(id, {
       type: 'turn_started',
       playerId: nextPlayer.id,

@@ -91,7 +91,7 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
     : []
 
   return (
-    <main className="min-h-screen bg-green-800 flex flex-col">
+    <main className="h-[100dvh] bg-green-800 flex flex-col overflow-hidden">
       {/* Hand result overlay */}
       {handResult && (
         <HandResultOverlay
@@ -117,7 +117,7 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
         </div>
       )}
 
-      <div className="flex-1 relative overflow-hidden">
+      <div className="flex-1 min-h-0 flex items-center overflow-hidden">
         <TableView
           players={players}
           myPlayerId={myPlayer?.id ?? null}
@@ -129,7 +129,7 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
         />
       </div>
 
-      <div className="flex flex-col">
+      <div className="flex-shrink-0 flex flex-col">
         {isMyTurn && hand && (
           <TurnTimer
             key={`${hand.id}-${currentSeat}`}

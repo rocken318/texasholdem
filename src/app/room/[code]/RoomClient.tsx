@@ -74,7 +74,7 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
 
   // Bot action trigger (host-only): asks Gemini 2.5 Flash then executes
   const triggerBotAction = useCallback(async (playerId: string) => {
-    const safeFallback = handRef.current?.current_bet === 0 ? 'check' : 'call'
+    const safeFallback = handRef.current?.current_bet === 0 ? 'check' : 'fold'
     let action = safeFallback
     let amount: number | undefined
 
