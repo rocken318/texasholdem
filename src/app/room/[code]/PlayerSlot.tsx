@@ -3,9 +3,14 @@ import type { Player } from '@/types/domain'
 import { Card } from '@/components/Card'
 import { cn } from '@/lib/utils'
 
-export function PlayerSlot({ player, isMe, isActive }: {
-  player: Player; isMe: boolean; isActive: boolean
-}) {
+interface PlayerSlotProps {
+  player: Player
+  isMe: boolean
+  isActive: boolean
+  betAmount?: number
+}
+
+export function PlayerSlot({ player, isMe, isActive, betAmount = 0 }: PlayerSlotProps) {
   const inHand = player.status !== 'folded' && player.status !== 'out'
   const isFolded = player.status === 'folded'
   const isAllIn = player.status === 'all_in'
@@ -104,6 +109,30 @@ export function PlayerSlot({ player, isMe, isActive }: {
             {player.chips.toLocaleString()}
           </span>
         </div>
+
+        {/* Bet amount badge */}
+        {betAmount > 0 && (
+          <div
+            className="flex items-center gap-0.5 mt-0.5 px-1.5 py-0 rounded-sm"
+            style={{
+              background: 'linear-gradient(180deg, rgba(212,175,55,0.25) 0%, rgba(212,175,55,0.1) 100%)',
+              border: '1px solid rgba(212,175,55,0.3)',
+            }}
+          >
+            <span
+              className="text-[8px]"
+              style={{ color: '#D4AF37' }}
+            >
+              BET
+            </span>
+            <span
+              className="text-[10px] font-mono font-bold"
+              style={{ color: '#FFD700' }}
+            >
+              {betAmount.toLocaleString()}
+            </span>
+          </div>
+        )}
 
         {/* All-in badge */}
         {isAllIn && (

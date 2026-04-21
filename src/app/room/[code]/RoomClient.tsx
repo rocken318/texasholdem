@@ -23,6 +23,8 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
   const [hand, setHand] = useState<Hand | null>(null)
   const [myCards, setMyCards] = useState<PokerCard[]>([])
   const [myHandCurrentBet, setMyHandCurrentBet] = useState(0)
+  const [tableBets, setTableBets] = useState<Record<string, number>>({})
+  const [lastAction, setLastAction] = useState<{ playerId: string; action: string; amount: number } | null>(null)
   const [currentSeat, setCurrentSeat] = useState<number | null>(null)
   const [view, setView] = useState<ViewState>(initialRoom.status === 'finished' ? 'finished' : 'name_input')
   const [name, setName] = useState('')
@@ -67,6 +69,8 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
       setView('playing')
     }
     if (event.type === 'hand_started') {
+      setTableBets({})
+      setLastAction(null)
       // Always create a fresh hand object — even if hand is currently null
       setHand({
         id: event.handId,
@@ -90,6 +94,7 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
     }
     if (event.type === 'blinds_posted') {
       setHand(h => h ? { ...h, pot: event.pot, current_bet: event.bbAmount } : h)
+      setTableBets({ [event.sbPlayerId]: event.sbAmount, [event.bbPlayerId]: event.bbAmount })
       // Track my current bet if I posted a blind
       setMyPlayer(me => {
         if (!me) return me
@@ -104,9 +109,17 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
     if (event.type === 'community_dealt') {
       setHand(h => h ? { ...h, community_cards: event.cards, street: event.street as Hand['street'], current_bet: 0 } : h)
       setMyHandCurrentBet(0)
+      setTableBets({})
     }
     if (event.type === 'player_action') {
       setHand(h => h ? { ...h, pot: event.pot, current_bet: event.currentBet } : h)
+      setLastAction({ playerId: event.playerId, action: event.action, amount: event.amount })
+      if (event.action !== 'fold' && event.action !== 'check') {
+        setTableBets(prev => ({
+          ...prev,
+          [event.playerId]: (prev[event.playerId] ?? 0) + event.amount,
+        }))
+      }
       // If this was my action, update my current bet
       setMyPlayer(me => {
         if (!me) return me
@@ -223,6 +236,7 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
     <GameView
       room={room} players={players} myPlayer={myPlayer}
       hand={hand} myCards={myCards} myHandCurrentBet={myHandCurrentBet}
+      tableBets={tableBets} lastAction={lastAction}
       currentSeat={currentSeat} t={t}
     />
   )

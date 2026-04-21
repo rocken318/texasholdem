@@ -10,13 +10,29 @@ interface ActionBarProps {
   bigBlind: number
   onAction: (action: string, amount?: number) => void
   t: Translations
+  disabled?: boolean
 }
 
-export function ActionBar({ currentBet, myCurrentBet, myChips, bigBlind, onAction, t }: ActionBarProps) {
+export function ActionBar({ currentBet, myCurrentBet, myChips, bigBlind, onAction, t, disabled = false }: ActionBarProps) {
   const toCall = Math.max(0, currentBet - myCurrentBet)
   const canCheck = toCall === 0
   const minRaise = Math.max(currentBet + bigBlind, currentBet * 2)
   const [raiseAmount, setRaiseAmount] = useState(Math.min(minRaise, myChips))
+  const [pending, setPending] = useState(false)
+  const [pressedAction, setPressedAction] = useState<string | null>(null)
+
+  function handleAction(action: string, amount?: number) {
+    if (pending || disabled) return
+    setPending(true)
+    setPressedAction(action)
+    onAction(action, amount)
+    setTimeout(() => {
+      setPending(false)
+      setPressedAction(null)
+    }, 2000)
+  }
+
+  const isDisabled = pending || disabled
 
   const canRaise = myChips > toCall + bigBlind
   const effectiveCall = Math.min(toCall, myChips)
@@ -87,16 +103,29 @@ export function ActionBar({ currentBet, myCurrentBet, myChips, bigBlind, onActio
         </div>
       )}
 
+      {/* ── Pending indicator ── */}
+      {pending && (
+        <div className="flex items-center justify-center gap-2 py-1">
+          <div className="h-2 w-2 rounded-full bg-white/60 animate-pulse" />
+          <span className="text-xs text-white/60 font-medium tracking-wide">
+            {t.fold === 'Fold' ? 'Sending...' : '送信中...'}
+          </span>
+        </div>
+      )}
+
       {/* ── Action buttons ── */}
       <div className="flex gap-2">
         {/* Fold */}
         <button
-          onClick={() => onAction('fold')}
-          className="flex-1 min-h-[52px] rounded-2xl font-bold text-sm tracking-wide
+          onClick={() => handleAction('fold')}
+          disabled={isDisabled}
+          className={`flex-1 min-h-[52px] rounded-2xl font-bold text-sm tracking-wide
             bg-gradient-to-b from-red-700 to-red-900 text-red-100
             border border-red-600/50 shadow-lg shadow-red-900/30
             active:from-red-800 active:to-red-950 active:scale-[0.97]
-            transition-all duration-100"
+            transition-all duration-100
+            ${isDisabled ? 'opacity-50 pointer-events-none' : ''}
+            ${pressedAction === 'fold' ? 'ring-2 ring-red-400 animate-pulse' : ''}`}
         >
           {t.fold}
         </button>
@@ -104,23 +133,29 @@ export function ActionBar({ currentBet, myCurrentBet, myChips, bigBlind, onActio
         {/* Check / Call */}
         {canCheck ? (
           <button
-            onClick={() => onAction('check')}
-            className="flex-1 min-h-[52px] rounded-2xl font-bold text-sm tracking-wide
+            onClick={() => handleAction('check')}
+            disabled={isDisabled}
+            className={`flex-1 min-h-[52px] rounded-2xl font-bold text-sm tracking-wide
               bg-gradient-to-b from-teal-500 to-teal-700 text-white
               border border-teal-400/40 shadow-lg shadow-teal-900/30
               active:from-teal-600 active:to-teal-800 active:scale-[0.97]
-              transition-all duration-100"
+              transition-all duration-100
+              ${isDisabled ? 'opacity-50 pointer-events-none' : ''}
+              ${pressedAction === 'check' ? 'ring-2 ring-teal-300 animate-pulse' : ''}`}
           >
             {t.check}
           </button>
         ) : (
           <button
-            onClick={() => onAction('call')}
-            className="flex-1 min-h-[52px] rounded-2xl font-bold text-sm tracking-wide
+            onClick={() => handleAction('call')}
+            disabled={isDisabled}
+            className={`flex-1 min-h-[52px] rounded-2xl font-bold text-sm tracking-wide
               bg-gradient-to-b from-sky-500 to-sky-700 text-white
               border border-sky-400/40 shadow-lg shadow-sky-900/30
               active:from-sky-600 active:to-sky-800 active:scale-[0.97]
-              transition-all duration-100"
+              transition-all duration-100
+              ${isDisabled ? 'opacity-50 pointer-events-none' : ''}
+              ${pressedAction === 'call' ? 'ring-2 ring-sky-300 animate-pulse' : ''}`}
           >
             <span className="block leading-tight">{t.call}</span>
             <span className="block text-xs font-mono opacity-90">{effectiveCall}</span>
@@ -130,12 +165,15 @@ export function ActionBar({ currentBet, myCurrentBet, myChips, bigBlind, onActio
         {/* Raise */}
         {canRaise && (
           <button
-            onClick={() => onAction('raise', raiseAmount)}
-            className="flex-1 min-h-[52px] rounded-2xl font-bold text-sm tracking-wide
+            onClick={() => handleAction('raise', raiseAmount)}
+            disabled={isDisabled}
+            className={`flex-1 min-h-[52px] rounded-2xl font-bold text-sm tracking-wide
               bg-gradient-to-b from-amber-400 to-amber-600 text-gray-900
               border border-amber-300/60 shadow-lg shadow-amber-900/30
               active:from-amber-500 active:to-amber-700 active:scale-[0.97]
-              transition-all duration-100"
+              transition-all duration-100
+              ${isDisabled ? 'opacity-50 pointer-events-none' : ''}
+              ${pressedAction === 'raise' ? 'ring-2 ring-amber-300 animate-pulse' : ''}`}
           >
             <span className="block leading-tight">{t.raise}</span>
             <span className="block text-xs font-mono opacity-70">{raiseAmount}</span>
@@ -146,13 +184,16 @@ export function ActionBar({ currentBet, myCurrentBet, myChips, bigBlind, onActio
       {/* ── All-In ── */}
       {myChips > 0 && (
         <button
-          onClick={() => onAction('all_in')}
-          className="w-full min-h-[44px] rounded-2xl font-bold text-sm tracking-wider uppercase
+          onClick={() => handleAction('all_in')}
+          disabled={isDisabled}
+          className={`w-full min-h-[44px] rounded-2xl font-bold text-sm tracking-wider uppercase
             bg-gradient-to-r from-amber-500/10 via-yellow-400/15 to-amber-500/10
             text-yellow-300 border border-yellow-400/50
             shadow-[0_0_12px_rgba(250,204,21,0.15)]
             active:bg-yellow-400/20 active:border-yellow-300/70 active:scale-[0.98]
-            transition-all duration-100"
+            transition-all duration-100
+            ${isDisabled ? 'opacity-50 pointer-events-none' : ''}
+            ${pressedAction === 'all_in' ? 'ring-2 ring-yellow-300 animate-pulse' : ''}`}
         >
           {t.allIn}
           <span className="ml-2 font-mono text-yellow-200/80">{myChips}</span>

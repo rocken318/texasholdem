@@ -2,6 +2,7 @@
 import type { Player, PokerCard } from '@/types/domain'
 import { PlayerSlot } from './PlayerSlot'
 import { CommunityCards } from './CommunityCards'
+import { ChipStack } from '@/components/ChipStack'
 
 interface TableViewProps {
   players: Player[]
@@ -9,6 +10,7 @@ interface TableViewProps {
   currentSeat: number | null
   communityCards: PokerCard[]
   pot: number
+  tableBets: Record<string, number>
 }
 
 function getSeatPosition(seatIndex: number, total: number): { top: string; left: string } {
@@ -21,7 +23,17 @@ function getSeatPosition(seatIndex: number, total: number): { top: string; left:
   }
 }
 
-export function TableView({ players, myPlayerId, currentSeat, communityCards, pot }: TableViewProps) {
+function getBetPosition(seatIndex: number, total: number): { top: string; left: string } {
+  const angle = ((seatIndex / total) * 2 * Math.PI) - Math.PI / 2
+  const rx = 25
+  const ry = 20
+  return {
+    left: `${50 + rx * Math.cos(angle)}%`,
+    top: `${50 + ry * Math.sin(angle)}%`,
+  }
+}
+
+export function TableView({ players, myPlayerId, currentSeat, communityCards, pot, tableBets }: TableViewProps) {
   const seated = players.filter(p => p.seat_index !== null)
 
   return (
@@ -85,21 +97,40 @@ export function TableView({ players, myPlayerId, currentSeat, communityCards, po
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5">
         <CommunityCards cards={communityCards} />
         {pot > 0 && (
-          <div
-            className="flex items-center gap-1.5 px-3 py-1 rounded-full font-semibold text-sm"
-            style={{
-              background: 'linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.7) 100%)',
-              border: '1px solid rgba(212,175,55,0.3)',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
-            }}
-          >
-            <span className="text-xs opacity-60" style={{ color: '#D4AF37' }}>POT</span>
-            <span className="font-mono" style={{ color: '#5ce65c' }}>
-              {pot.toLocaleString()}
-            </span>
+          <div className="flex flex-col items-center gap-0.5">
+            <ChipStack amount={pot} />
+            <div
+              className="flex items-center gap-1.5 px-3 py-0.5 rounded-full font-semibold text-sm"
+              style={{
+                background: 'linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.7) 100%)',
+                border: '1px solid rgba(212,175,55,0.3)',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+              }}
+            >
+              <span className="text-xs opacity-60" style={{ color: '#D4AF37' }}>POT</span>
+              <span className="font-mono" style={{ color: '#5ce65c' }}>
+                {pot.toLocaleString()}
+              </span>
+            </div>
           </div>
         )}
       </div>
+
+      {/* Bet chip stacks */}
+      {seated.map(player => {
+        const bet = tableBets[player.id] ?? 0
+        if (bet <= 0) return null
+        const pos = getBetPosition(player.seat_index!, seated.length)
+        return (
+          <div
+            key={`bet-${player.id}`}
+            className="absolute -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none"
+            style={{ top: pos.top, left: pos.left }}
+          >
+            <ChipStack amount={bet} small />
+          </div>
+        )
+      })}
 
       {/* Player slots */}
       {seated.map(player => {
@@ -114,6 +145,7 @@ export function TableView({ players, myPlayerId, currentSeat, communityCards, po
               player={player}
               isMe={player.id === myPlayerId}
               isActive={player.seat_index === currentSeat}
+              betAmount={tableBets[player.id] ?? 0}
             />
           </div>
         )
