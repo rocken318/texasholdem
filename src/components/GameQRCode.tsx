@@ -13,14 +13,19 @@ export function GameQRCode({ joinCode, size = 180 }: GameQRCodeProps) {
 
   useEffect(() => {
     async function fetchUrl() {
-      try {
-        const res = await fetch('/api/local-url')
-        const { networkUrl } = await res.json()
-        const base = networkUrl ?? window.location.origin
-        setUrl(`${base}/room/${joinCode}`)
-      } catch {
-        setUrl(`${window.location.origin}/room/${joinCode}`)
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      if (isLocal) {
+        try {
+          const res = await fetch('/api/local-url')
+          const { networkUrl } = await res.json()
+          const base = networkUrl ?? window.location.origin
+          setUrl(`${base}/room/${joinCode}`)
+          return
+        } catch {
+          // fall through to origin
+        }
       }
+      setUrl(`${window.location.origin}/room/${joinCode}`)
     }
     fetchUrl()
   }, [joinCode])
