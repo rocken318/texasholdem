@@ -136,8 +136,11 @@ export async function POST(
     return NextResponse.json({ ok: true })
   }
 
-  // Check if betting round is complete
-  const roundComplete = isBettingRoundComplete(updatedHandPlayers, newHandCurrentBet)
+  // Count actions this street (including the current one just saved) for check-round detection
+  const actionsThisStreet = await store.countActionsForHandStreet(hand.id, hand.street)
+  const roundComplete = isBettingRoundComplete(updatedHandPlayers, newHandCurrentBet, {
+    actionCount: actionsThisStreet,
+  })
   if (roundComplete) {
     await advanceStreet({
       hand: { ...hand, current_bet: newHandCurrentBet },

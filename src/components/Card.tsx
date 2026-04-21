@@ -30,7 +30,7 @@ export function Card({ card, faceDown = false, small = false, large = false, cla
 
   const isRevealed = !faceDown && !!card
 
-  const sizeClass = small ? 'w-9 h-[52px]' : large ? 'w-20 h-28' : 'w-16 h-24'
+  const sizeClass = small ? 'w-9 h-[52px]' : large ? 'w-20 h-28' : 'w-16 h-[92px]'
 
   return (
     <div

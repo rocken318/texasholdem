@@ -9,10 +9,11 @@ interface LobbyViewProps {
   myPlayer: Player | null
   hostPlayerId: string | null
   onStart: () => void
+  onAddBot?: () => void
   t: Translations
 }
 
-export function LobbyView({ room, players, myPlayer, hostPlayerId, onStart, t }: LobbyViewProps) {
+export function LobbyView({ room, players, myPlayer, hostPlayerId, onStart, onAddBot, t }: LobbyViewProps) {
   const isHost = myPlayer?.is_host || myPlayer?.id === hostPlayerId
   const seated = players.filter(p => p.seat_index !== null)
 
@@ -106,17 +107,28 @@ export function LobbyView({ room, players, myPlayer, hostPlayerId, onStart, t }:
           </div>
         </div>
 
-        {/* Start Game button */}
-        {isHost && seated.length >= 2 && (
-          <button
-            onClick={onStart}
-            className="w-full py-4 rounded-xl bg-gradient-to-r from-[#D4AF37] via-[#F5D060] to-[#D4AF37] text-[#1a1a0a] font-bold text-xl shadow-lg shadow-[#D4AF37]/25 hover:shadow-[#D4AF37]/50 hover:brightness-110 transition-all duration-200 active:scale-[0.98]"
-          >
-            {t.startGame}
-          </button>
-        )}
-        {isHost && seated.length < 2 && (
-          <p className="text-white/40 text-sm text-center">{t.needMorePlayers}</p>
+        {/* Host actions */}
+        {isHost && (
+          <div className="w-full flex flex-col gap-2">
+            {onAddBot && seated.length < room.settings.maxPlayers && (
+              <button
+                onClick={onAddBot}
+                className="w-full py-3 rounded-xl border border-white/15 text-white/60 font-semibold text-sm hover:border-white/30 hover:text-white/80 transition-all duration-200 active:scale-[0.98]"
+              >
+                🤖 BOTを追加 / Add Bot
+              </button>
+            )}
+            {seated.length >= 2 ? (
+              <button
+                onClick={onStart}
+                className="w-full py-4 rounded-xl bg-gradient-to-r from-[#D4AF37] via-[#F5D060] to-[#D4AF37] text-[#1a1a0a] font-bold text-xl shadow-lg shadow-[#D4AF37]/25 hover:shadow-[#D4AF37]/50 hover:brightness-110 transition-all duration-200 active:scale-[0.98]"
+              >
+                {t.startGame}
+              </button>
+            ) : (
+              <p className="text-white/40 text-sm text-center">{t.needMorePlayers}</p>
+            )}
+          </div>
         )}
       </div>
     </main>

@@ -111,4 +111,14 @@ export const store = {
     const { error } = await db.from('actions').insert(action)
     if (error) throw error
   },
+
+  async countActionsForHandStreet(handId: string, street: string): Promise<number> {
+    const db = createServerClient()
+    const { count } = await db
+      .from('actions')
+      .select('*', { count: 'exact', head: true })
+      .eq('hand_id', handId)
+      .eq('street', street)
+    return count ?? 0
+  },
 }

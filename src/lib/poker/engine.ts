@@ -31,18 +31,26 @@ export function getValidActions(player: HandPlayer, ctx: ValidActionContext): Va
 }
 
 /**
- * Returns true when all active players have matched the current bet.
- * NOTE: The preflop big-blind option (BB gets one final action when
- * no one has raised) is NOT checked here. Callers must handle this
- * case separately by tracking whether BB has acted in preflop.
+ * Returns true when all active players have matched the current bet
+ * AND (when currentBet === 0) every active player has had a chance to act.
+ *
+ * When currentBet === 0 (no bet yet this street), we need actionCount to
+ * ensure we've gone all the way around the table before closing the round.
  */
 export function isBettingRoundComplete(
   handPlayers: HandPlayer[],
-  currentBet: number
+  currentBet: number,
+  extra?: { actionCount: number }
 ): boolean {
   const active = handPlayers.filter(p => p.status === 'active')
   if (active.length === 0) return true
-  return active.every(p => p.current_bet >= currentBet)
+  const allMatch = active.every(p => p.current_bet >= currentBet)
+  if (!allMatch) return false
+  // When currentBet is 0 and more than 1 active player, require everyone to have checked
+  if (currentBet === 0 && active.length > 1 && extra) {
+    return extra.actionCount >= active.length
+  }
+  return true
 }
 
 export function getNextActiveSeat(

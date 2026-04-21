@@ -1,6 +1,6 @@
 // src/app/room/[code]/RoomClient.tsx
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRoomStream } from '@/lib/hooks/useRoomStream'
 import { useLocalPlayer } from '@/lib/hooks/useLocalPlayer'
 import { useLanguage } from '@/lib/hooks/useLanguage'
@@ -9,6 +9,7 @@ import type { PokerEvent } from '@/lib/events/types'
 import { LobbyView } from './LobbyView'
 import { GameView } from './GameView'
 import { ResultView } from './ResultView'
+import type { ShowdownResult } from './HandResultOverlay'
 
 interface RoomClientProps {
   initialRoom: Room
@@ -31,7 +32,24 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
   const [joinError, setJoinError] = useState<string | null>(null)
   const [joining, setJoining] = useState(false)
   const [rankings, setRankings] = useState<{ playerId: string; displayName: string; chips: number; rank: number }[]>([])
+  const [showdownResults, setShowdownResults] = useState<ShowdownResult[]>([])
+  const [handResult, setHandResult] = useState<{ winnerIds: string[]; pot: number } | null>(null)
+  const [botIds, setBotIds] = useState<Set<string>>(() => {
+    if (typeof window === 'undefined') return new Set()
+    const stored = localStorage.getItem(`texasholdem_bots_${initialRoom.id}`)
+    return new Set(stored ? (JSON.parse(stored) as string[]) : [])
+  })
   const { t, toggleLang } = useLanguage()
+
+  // Refs for use inside SSE event handler closures
+  const handRef = useRef<Hand | null>(null)
+  const playersRef = useRef<Player[]>([])
+  const botIdsRef = useRef(botIds)
+
+  // Keep refs in sync
+  useEffect(() => { playersRef.current = players }, [players])
+  useEffect(() => { handRef.current = hand }, [hand])
+  useEffect(() => { botIdsRef.current = botIds }, [botIds])
 
   const { getPlayer, savePlayer } = useLocalPlayer(room.id)
   const hostPlayerId = typeof window !== 'undefined'
@@ -54,8 +72,35 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // myPlayer ref for use inside event handler closure
-  const myPlayerRef = { current: null as Player | null }
+  // Bot action trigger (host-only auto-play)
+  const triggerBotAction = useCallback(async (playerId: string) => {
+    const h = handRef.current
+    if (!h) return
+    const p = playersRef.current.find(pl => pl.id === playerId)
+    if (!p) return
+
+    let action = 'check'
+    let amount: number | undefined
+    if (h.current_bet > 0) {
+      const r = Math.random()
+      if (p.chips <= room.settings.bigBlind * 2) {
+        action = Math.random() < 0.5 ? 'all_in' : 'fold'
+      } else if (r < 0.22) {
+        action = 'fold'
+      } else if (r < 0.88) {
+        action = 'call'
+      } else {
+        action = 'raise'
+        amount = h.current_bet + room.settings.bigBlind * 2
+      }
+    }
+
+    await fetch(`/api/rooms/${room.id}/action`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerId, action, amount }),
+    })
+  }, [room.id, room.settings.bigBlind])
 
   useRoomStream(room.id, (event: PokerEvent) => {
     if (event.type === 'player_joined') {
@@ -71,6 +116,8 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
     if (event.type === 'hand_started') {
       setTableBets({})
       setLastAction(null)
+      setHandResult(null)
+      setShowdownResults([])
       // Always create a fresh hand object — even if hand is currently null
       setHand({
         id: event.handId,
@@ -105,6 +152,11 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
     }
     if (event.type === 'turn_started') {
       setCurrentSeat(event.seatIndex)
+      // Auto-act for bots (host only)
+      if (hostPlayerId && botIdsRef.current.has(event.playerId)) {
+        const delay = 600 + Math.random() * 1200
+        setTimeout(() => triggerBotAction(event.playerId), delay)
+      }
     }
     if (event.type === 'community_dealt') {
       setHand(h => h ? { ...h, community_cards: event.cards, street: event.street as Hand['street'], current_bet: 0 } : h)
@@ -142,8 +194,15 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
         return upd ? { ...me, chips: upd.chips } : me
       })
     }
+    if (event.type === 'showdown') {
+      setShowdownResults(event.results.map(r => ({
+        ...r,
+        displayName: playersRef.current.find(p => p.id === r.playerId)?.display_name ?? '?',
+      })))
+    }
     if (event.type === 'hand_finished') {
       setHand(h => h ? { ...h, street: 'finished', winner_ids: event.winnerIds } : h)
+      setHandResult({ winnerIds: event.winnerIds, pot: event.pot })
     }
     if (event.type === 'game_finished') {
       setRankings(event.rankings)
@@ -191,6 +250,22 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
     }
   }
 
+  async function handleAddBot() {
+    const res = await fetch(`/api/rooms/${room.id}/bots`, { method: 'POST' })
+    if (!res.ok) return
+    const { player } = await res.json() as { player: Player }
+    setBotIds(prev => {
+      const next = new Set(prev)
+      next.add(player.id)
+      localStorage.setItem(`texasholdem_bots_${room.id}`, JSON.stringify([...next]))
+      return next
+    })
+  }
+
+  function handleHandResultDismiss() {
+    setHandResult(null)
+  }
+
   async function handleStart() {
     if (!hostPlayerId) return
     await fetch(`/api/rooms/${room.id}/start`, {
@@ -225,7 +300,7 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
   }
 
   if (view === 'lobby') {
-    return <LobbyView room={room} players={players} myPlayer={myPlayer} hostPlayerId={hostPlayerId} onStart={handleStart} t={t} />
+    return <LobbyView room={room} players={players} myPlayer={myPlayer} hostPlayerId={hostPlayerId} onStart={handleStart} onAddBot={handleAddBot} t={t} />
   }
 
   if (view === 'finished') {
@@ -237,7 +312,11 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
       room={room} players={players} myPlayer={myPlayer}
       hand={hand} myCards={myCards} myHandCurrentBet={myHandCurrentBet}
       tableBets={tableBets} lastAction={lastAction}
-      currentSeat={currentSeat} t={t}
+      currentSeat={currentSeat}
+      handResult={handResult}
+      showdownResults={showdownResults}
+      onHandResultDismiss={handleHandResultDismiss}
+      t={t}
     />
   )
 }

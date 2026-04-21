@@ -7,6 +7,7 @@ import { TableView } from './TableView'
 import { MyCards } from './MyCards'
 import { ActionBar } from './ActionBar'
 import { TurnTimer } from './TurnTimer'
+import { HandResultOverlay, type ShowdownResult } from './HandResultOverlay'
 
 interface GameViewProps {
   room: Room
@@ -18,6 +19,9 @@ interface GameViewProps {
   tableBets: Record<string, number>
   lastAction: { playerId: string; action: string; amount: number } | null
   currentSeat: number | null
+  handResult: { winnerIds: string[]; pot: number } | null
+  showdownResults: ShowdownResult[]
+  onHandResultDismiss: () => void
   t: Translations
 }
 
@@ -43,7 +47,7 @@ function getActionColor(action: string): string {
   }
 }
 
-export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrentBet, tableBets, lastAction, currentSeat, t }: GameViewProps) {
+export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrentBet, tableBets, lastAction, currentSeat, handResult, showdownResults, onHandResultDismiss, t }: GameViewProps) {
   const isMyTurn = myPlayer?.seat_index === currentSeat && currentSeat !== null
 
   // Action toast state
@@ -81,8 +85,24 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
     })
   }
 
+  // Compute winner names for overlay
+  const winnerNames = handResult
+    ? handResult.winnerIds.map(id => players.find(p => p.id === id)?.display_name ?? '?')
+    : []
+
   return (
     <main className="min-h-screen bg-green-800 flex flex-col">
+      {/* Hand result overlay */}
+      {handResult && (
+        <HandResultOverlay
+          winnerIds={handResult.winnerIds}
+          winnerNames={winnerNames}
+          pot={handResult.pot}
+          showdownResults={showdownResults}
+          onDismiss={onHandResultDismiss}
+        />
+      )}
+
       {/* Action toast */}
       {toast && (
         <div
