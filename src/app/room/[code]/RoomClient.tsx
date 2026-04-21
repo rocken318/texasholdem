@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRoomStream } from '@/lib/hooks/useRoomStream'
 import { useLocalPlayer } from '@/lib/hooks/useLocalPlayer'
+import { useLanguage } from '@/lib/hooks/useLanguage'
 import type { Room, Player, Hand, PokerCard } from '@/types/domain'
 import type { PokerEvent } from '@/lib/events/types'
 import { LobbyView } from './LobbyView'
@@ -24,7 +25,10 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
   const [currentSeat, setCurrentSeat] = useState<number | null>(null)
   const [view, setView] = useState<ViewState>(initialRoom.status === 'finished' ? 'finished' : 'name_input')
   const [name, setName] = useState('')
+  const [joinError, setJoinError] = useState<string | null>(null)
+  const [joining, setJoining] = useState(false)
   const [rankings, setRankings] = useState<{ playerId: string; displayName: string; chips: number; rank: number }[]>([])
+  const { t, toggleLang } = useLanguage()
 
   const { getPlayer, savePlayer } = useLocalPlayer(room.id)
   const hostPlayerId = typeof window !== 'undefined'
@@ -59,7 +63,6 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
     }
     if (event.type === 'hand_started') {
       setHand(h => h ? { ...h, id: event.handId, hand_number: event.handNumber } : null)
-      // Fetch hole cards for this hand
       setMyCards([])
       if (myPlayer) {
         fetch(`/api/hands/${event.handId}/my-cards?playerId=${myPlayer.id}`)
@@ -89,18 +92,39 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
   })
 
   async function handleJoin() {
-    if (!name.trim()) return
-    const res = await fetch(`/api/rooms/${room.id}/players`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ displayName: name }),
-    })
-    if (!res.ok) { alert('Failed to join'); return }
-    const { player } = await res.json()
-    savePlayer(player.id, name)
-    setMyPlayer(player)
-    setPlayers(ps => [...ps, player])
-    setView('lobby')
+    const displayName = name.trim()
+    if (!displayName || joining) return
+    setJoinError(null)
+    setJoining(true)
+    try {
+      const res = await fetch(`/api/rooms/${room.id}/players`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ displayName }),
+      })
+      if (!res.ok) {
+        setJoinError(await getApiError(res))
+        return
+      }
+      const { player } = await res.json() as { player: Player }
+      if (!player?.id) {
+        setJoinError('Failed to join room')
+        return
+      }
+      savePlayer(player.id, displayName)
+      setMyPlayer(player)
+      setPlayers(ps => ps.some(p => p.id === player.id) ? ps : [...ps, player])
+      fetch(`/api/rooms/${room.id}/players`)
+        .then(r => r.ok ? r.json() : null)
+        .then((data: { players?: Player[] } | null) => {
+          if (data?.players) setPlayers(data.players)
+        })
+      setView('lobby')
+    } catch (e) {
+      setJoinError(e instanceof Error ? e.message : 'Network error')
+    } finally {
+      setJoining(false)
+    }
   }
 
   async function handleStart() {
@@ -115,32 +139,46 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
   if (view === 'name_input') {
     return (
       <main className="min-h-screen bg-green-900 flex flex-col items-center justify-center gap-6 p-6">
-        <h1 className="text-3xl font-bold text-white">Join Table</h1>
+        <button
+          onClick={toggleLang}
+          className="absolute top-4 right-4 px-3 py-1 rounded-lg border border-white/30 text-white/70 text-sm"
+        >
+          {t.switchLang}
+        </button>
+        <h1 className="text-3xl font-bold text-white">{t.joinTable}</h1>
         <input
           className="px-4 py-3 rounded-xl text-lg w-full max-w-xs bg-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white"
-          placeholder="Your name" value={name} maxLength={20}
+          placeholder={t.namePlaceholder} value={name} maxLength={20}
           onChange={e => setName(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleJoin()} />
-        <button onClick={handleJoin} disabled={!name.trim()}
+        {joinError && (
+          <p className="text-red-400 text-sm text-center max-w-xs">{joinError}</p>
+        )}
+        <button onClick={handleJoin} disabled={!name.trim() || joining}
           className="w-full max-w-xs py-3 rounded-xl bg-white text-green-900 font-bold text-lg disabled:opacity-40">
-          Sit Down
+          {joining ? t.joining : t.sitDown}
         </button>
       </main>
     )
   }
 
   if (view === 'lobby') {
-    return <LobbyView room={room} players={players} myPlayer={myPlayer} hostPlayerId={hostPlayerId} onStart={handleStart} />
+    return <LobbyView room={room} players={players} myPlayer={myPlayer} hostPlayerId={hostPlayerId} onStart={handleStart} t={t} />
   }
 
   if (view === 'finished') {
-    return <ResultView rankings={rankings} />
+    return <ResultView rankings={rankings} t={t} />
   }
 
   return (
     <GameView
       room={room} players={players} myPlayer={myPlayer}
-      hand={hand} myCards={myCards} currentSeat={currentSeat}
+      hand={hand} myCards={myCards} currentSeat={currentSeat} t={t}
     />
   )
+}
+
+async function getApiError(res: Response): Promise<string> {
+  const body = await res.json().catch(() => ({})) as { error?: string }
+  return body.error ?? `Error ${res.status}`
 }

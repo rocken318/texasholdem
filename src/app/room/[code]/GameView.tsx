@@ -1,5 +1,6 @@
 // src/app/room/[code]/GameView.tsx
 import type { Room, Player, Hand, PokerCard } from '@/types/domain'
+import type { Translations } from '@/lib/i18n'
 import { TableView } from './TableView'
 import { MyCards } from './MyCards'
 import { ActionBar } from './ActionBar'
@@ -12,9 +13,10 @@ interface GameViewProps {
   hand: Hand | null
   myCards: PokerCard[]
   currentSeat: number | null
+  t: Translations
 }
 
-export function GameView({ room, players, myPlayer, hand, myCards, currentSeat }: GameViewProps) {
+export function GameView({ room, players, myPlayer, hand, myCards, currentSeat, t }: GameViewProps) {
   const isMyTurn = myPlayer?.seat_index === currentSeat && currentSeat !== null
 
   async function handleAction(action: string, amount?: number) {
@@ -54,6 +56,7 @@ export function GameView({ room, players, myPlayer, hand, myCards, currentSeat }
             myChips={myPlayer.chips}
             bigBlind={room.settings.bigBlind}
             onAction={handleAction}
+            t={t}
           />
         )}
       </div>

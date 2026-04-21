@@ -1,6 +1,7 @@
 // src/app/room/[code]/ActionBar.tsx
 'use client'
 import { useState } from 'react'
+import type { Translations } from '@/lib/i18n'
 
 interface ActionBarProps {
   currentBet: number
@@ -8,9 +9,10 @@ interface ActionBarProps {
   myChips: number
   bigBlind: number
   onAction: (action: string, amount?: number) => void
+  t: Translations
 }
 
-export function ActionBar({ currentBet, myCurrentBet, myChips, bigBlind, onAction }: ActionBarProps) {
+export function ActionBar({ currentBet, myCurrentBet, myChips, bigBlind, onAction, t }: ActionBarProps) {
   const toCall = Math.max(0, currentBet - myCurrentBet)
   const canCheck = toCall === 0
   const minRaise = Math.max(currentBet + bigBlind, currentBet * 2)
@@ -20,7 +22,7 @@ export function ActionBar({ currentBet, myCurrentBet, myChips, bigBlind, onActio
     <div className="flex flex-col gap-2 p-3 bg-black/30">
       {myChips > toCall && (
         <div className="flex items-center gap-2 text-white text-sm">
-          <span className="w-12 text-right text-xs">Raise</span>
+          <span className="w-12 text-right text-xs">{t.raise}</span>
           <input
             type="range"
             className="flex-1"
@@ -38,7 +40,7 @@ export function ActionBar({ currentBet, myCurrentBet, myChips, bigBlind, onActio
           onClick={() => onAction('fold')}
           className="flex-1 py-3 rounded-xl bg-red-600 text-white font-bold text-sm"
         >
-          Fold
+          {t.fold}
         </button>
 
         {canCheck ? (
@@ -46,14 +48,14 @@ export function ActionBar({ currentBet, myCurrentBet, myChips, bigBlind, onActio
             onClick={() => onAction('check')}
             className="flex-1 py-3 rounded-xl bg-gray-600 text-white font-bold text-sm"
           >
-            Check
+            {t.check}
           </button>
         ) : (
           <button
             onClick={() => onAction('call')}
             className="flex-1 py-3 rounded-xl bg-blue-600 text-white font-bold text-sm"
           >
-            Call {Math.min(toCall, myChips)}
+            {t.call} {Math.min(toCall, myChips)}
           </button>
         )}
 
@@ -62,7 +64,7 @@ export function ActionBar({ currentBet, myCurrentBet, myChips, bigBlind, onActio
             onClick={() => onAction('raise', raiseAmount)}
             className="flex-1 py-3 rounded-xl bg-yellow-500 text-gray-900 font-bold text-sm"
           >
-            Raise
+            {t.raise}
           </button>
         )}
       </div>
@@ -72,7 +74,7 @@ export function ActionBar({ currentBet, myCurrentBet, myChips, bigBlind, onActio
           onClick={() => onAction('all_in')}
           className="w-full py-2 rounded-xl border border-yellow-400 text-yellow-400 font-bold text-sm"
         >
-          All In ({myChips})
+          {t.allIn} ({myChips})
         </button>
       )}
     </div>
