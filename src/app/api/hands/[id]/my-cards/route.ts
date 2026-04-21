@@ -12,5 +12,5 @@ export async function GET(
   const hp = await store.getHandPlayer(id, playerId)
   if (!hp) return NextResponse.json({ error: 'Not in this hand' }, { status: 404 })
 
-  return NextResponse.json({ cards: hp.hole_cards })
+  return NextResponse.json({ cards: hp.hole_cards, myCurrentBet: hp.current_bet })
 }

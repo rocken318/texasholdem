@@ -120,6 +120,7 @@ export async function POST(
     action: body.action,
     amount: actionAmount,
     pot,
+    currentBet: newHandCurrentBet,
   })
 
   // Check if only one player remaining (everyone else folded)

@@ -9,7 +9,7 @@ export type PokerEvent =
   | { type: 'hand_started'; handId: string; handNumber: number; dealerSeat: number }
   | { type: 'blinds_posted'; sbPlayerId: string; bbPlayerId: string; sbAmount: number; bbAmount: number; pot: number }
   | { type: 'turn_started'; playerId: string; seatIndex: number; timeoutSec: number }
-  | { type: 'player_action'; playerId: string; action: string; amount: number; pot: number }
+  | { type: 'player_action'; playerId: string; action: string; amount: number; pot: number; currentBet: number }
   | { type: 'community_dealt'; cards: PokerCard[]; street: string }
   | { type: 'showdown'; results: { playerId: string; holeCards: PokerCard[]; handName: string }[] }
   | { type: 'chips_updated'; players: { id: string; chips: number }[] }

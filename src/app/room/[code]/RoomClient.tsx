@@ -22,6 +22,7 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
   const [myPlayer, setMyPlayer] = useState<Player | null>(null)
   const [hand, setHand] = useState<Hand | null>(null)
   const [myCards, setMyCards] = useState<PokerCard[]>([])
+  const [myHandCurrentBet, setMyHandCurrentBet] = useState(0)
   const [currentSeat, setCurrentSeat] = useState<number | null>(null)
   const [view, setView] = useState<ViewState>(initialRoom.status === 'finished' ? 'finished' : 'name_input')
   const [name, setName] = useState('')
@@ -51,6 +52,9 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // myPlayer ref for use inside event handler closure
+  const myPlayerRef = { current: null as Player | null }
+
   useRoomStream(room.id, (event: PokerEvent) => {
     if (event.type === 'player_joined') {
       setPlayers(ps => ps.some(p => p.id === event.player.id) ? ps : [...ps, event.player])
@@ -59,37 +63,92 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
       setPlayers(ps => ps.filter(p => p.id !== event.playerId))
     }
     if (event.type === 'game_started') {
+      setPlayers(event.players)
       setView('playing')
     }
     if (event.type === 'hand_started') {
-      setHand(h => h ? { ...h, id: event.handId, hand_number: event.handNumber } : null)
+      // Always create a fresh hand object — even if hand is currently null
+      setHand({
+        id: event.handId,
+        room_id: room.id,
+        hand_number: event.handNumber,
+        dealer_seat: event.dealerSeat,
+        community_cards: [],
+        pot: 0,
+        side_pots: [],
+        street: 'preflop',
+        current_seat: null,
+        current_bet: 0,
+        deck: [],
+        winner_ids: null,
+        started_at: Date.now(),
+        finished_at: null,
+      })
       setMyCards([])
-      if (myPlayer) {
-        fetch(`/api/hands/${event.handId}/my-cards?playerId=${myPlayer.id}`)
-          .then(r => r.ok ? r.json() : null)
-          .then(data => { if (data?.cards) setMyCards(data.cards) })
-      }
+      setMyHandCurrentBet(0)
+      setCurrentSeat(null)
+    }
+    if (event.type === 'blinds_posted') {
+      setHand(h => h ? { ...h, pot: event.pot, current_bet: event.bbAmount } : h)
+      // Track my current bet if I posted a blind
+      setMyPlayer(me => {
+        if (!me) return me
+        if (me.id === event.bbPlayerId) setMyHandCurrentBet(event.bbAmount)
+        else if (me.id === event.sbPlayerId) setMyHandCurrentBet(event.sbAmount)
+        return me
+      })
     }
     if (event.type === 'turn_started') {
       setCurrentSeat(event.seatIndex)
     }
     if (event.type === 'community_dealt') {
-      setHand(h => h ? { ...h, community_cards: event.cards, street: event.street as Hand['street'] } : null)
+      setHand(h => h ? { ...h, community_cards: event.cards, street: event.street as Hand['street'], current_bet: 0 } : h)
+      setMyHandCurrentBet(0)
     }
     if (event.type === 'player_action') {
-      setHand(h => h ? { ...h, pot: event.pot } : null)
+      setHand(h => h ? { ...h, pot: event.pot, current_bet: event.currentBet } : h)
+      // If this was my action, update my current bet
+      setMyPlayer(me => {
+        if (!me) return me
+        if (me.id === event.playerId) {
+          if (event.action === 'call') setMyHandCurrentBet(prev => prev + event.amount)
+          else if (event.action === 'raise') setMyHandCurrentBet(event.currentBet)
+          else if (event.action === 'all_in') setMyHandCurrentBet(prev => prev + event.amount)
+        }
+        return me
+      })
     }
     if (event.type === 'chips_updated') {
       setPlayers(ps => ps.map(p => {
         const upd = event.players.find(u => u.id === p.id)
         return upd ? { ...p, chips: upd.chips } : p
       }))
+      setMyPlayer(me => {
+        if (!me) return me
+        const upd = event.players.find(u => u.id === me.id)
+        return upd ? { ...me, chips: upd.chips } : me
+      })
+    }
+    if (event.type === 'hand_finished') {
+      setHand(h => h ? { ...h, street: 'finished', winner_ids: event.winnerIds } : h)
     }
     if (event.type === 'game_finished') {
       setRankings(event.rankings)
       setView('finished')
     }
   })
+
+  // Fetch hole cards when hand changes (after hand_started sets hand.id)
+  useEffect(() => {
+    if (!hand?.id || !myPlayer?.id) return
+    fetch(`/api/hands/${hand.id}/my-cards?playerId=${myPlayer.id}`)
+      .then(r => r.ok ? r.json() : null)
+      .then((data: { cards?: PokerCard[]; myCurrentBet?: number } | null) => {
+        if (data?.cards) setMyCards(data.cards)
+        if (data?.myCurrentBet !== undefined) setMyHandCurrentBet(data.myCurrentBet)
+      })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hand?.id])
 
   async function handleJoin() {
     const displayName = name.trim()
@@ -107,18 +166,10 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
         return
       }
       const { player } = await res.json() as { player: Player }
-      if (!player?.id) {
-        setJoinError('Failed to join room')
-        return
-      }
+      if (!player?.id) { setJoinError('Failed to join room'); return }
       savePlayer(player.id, displayName)
       setMyPlayer(player)
       setPlayers(ps => ps.some(p => p.id === player.id) ? ps : [...ps, player])
-      fetch(`/api/rooms/${room.id}/players`)
-        .then(r => r.ok ? r.json() : null)
-        .then((data: { players?: Player[] } | null) => {
-          if (data?.players) setPlayers(data.players)
-        })
       setView('lobby')
     } catch (e) {
       setJoinError(e instanceof Error ? e.message : 'Network error')
@@ -139,10 +190,8 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
   if (view === 'name_input') {
     return (
       <main className="min-h-screen bg-green-900 flex flex-col items-center justify-center gap-6 p-6">
-        <button
-          onClick={toggleLang}
-          className="absolute top-4 right-4 px-3 py-1 rounded-lg border border-white/30 text-white/70 text-sm"
-        >
+        <button onClick={toggleLang}
+          className="absolute top-4 right-4 px-3 py-1 rounded-lg border border-white/30 text-white/70 text-sm">
           {t.switchLang}
         </button>
         <h1 className="text-3xl font-bold text-white">{t.joinTable}</h1>
@@ -173,7 +222,8 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
   return (
     <GameView
       room={room} players={players} myPlayer={myPlayer}
-      hand={hand} myCards={myCards} currentSeat={currentSeat} t={t}
+      hand={hand} myCards={myCards} myHandCurrentBet={myHandCurrentBet}
+      currentSeat={currentSeat} t={t}
     />
   )
 }

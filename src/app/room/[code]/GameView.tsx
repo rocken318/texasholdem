@@ -12,11 +12,12 @@ interface GameViewProps {
   myPlayer: Player | null
   hand: Hand | null
   myCards: PokerCard[]
+  myHandCurrentBet: number
   currentSeat: number | null
   t: Translations
 }
 
-export function GameView({ room, players, myPlayer, hand, myCards, currentSeat, t }: GameViewProps) {
+export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrentBet, currentSeat, t }: GameViewProps) {
   const isMyTurn = myPlayer?.seat_index === currentSeat && currentSeat !== null
 
   async function handleAction(action: string, amount?: number) {
@@ -52,7 +53,7 @@ export function GameView({ room, players, myPlayer, hand, myCards, currentSeat, 
         {isMyTurn && hand && myPlayer && (
           <ActionBar
             currentBet={hand.current_bet}
-            myCurrentBet={0}
+            myCurrentBet={myHandCurrentBet}
             myChips={myPlayer.chips}
             bigBlind={room.settings.bigBlind}
             onAction={handleAction}
