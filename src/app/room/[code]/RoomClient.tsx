@@ -72,35 +72,31 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Bot action trigger (host-only auto-play)
+  // Bot action trigger (host-only): asks Gemini 2.5 Flash then executes
   const triggerBotAction = useCallback(async (playerId: string) => {
-    const h = handRef.current
-    if (!h) return
-    const p = playersRef.current.find(pl => pl.id === playerId)
-    if (!p) return
-
-    let action = 'check'
-    let amount: number | undefined
-    if (h.current_bet > 0) {
-      const r = Math.random()
-      if (p.chips <= room.settings.bigBlind * 2) {
-        action = Math.random() < 0.5 ? 'all_in' : 'fold'
-      } else if (r < 0.22) {
-        action = 'fold'
-      } else if (r < 0.88) {
-        action = 'call'
-      } else {
-        action = 'raise'
-        amount = h.current_bet + room.settings.bigBlind * 2
-      }
+    try {
+      const aiRes = await fetch(`/api/rooms/${room.id}/ai-action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ botPlayerId: playerId }),
+      })
+      const { action, amount } = await aiRes.json() as { action: string; amount?: number }
+      await fetch(`/api/rooms/${room.id}/action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerId, action, amount }),
+      })
+    } catch {
+      // Fallback if Gemini is unreachable
+      const h = handRef.current
+      const fallback = h?.current_bet === 0 ? 'check' : 'call'
+      await fetch(`/api/rooms/${room.id}/action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerId, action: fallback }),
+      })
     }
-
-    await fetch(`/api/rooms/${room.id}/action`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ playerId, action, amount }),
-    })
-  }, [room.id, room.settings.bigBlind])
+  }, [room.id])
 
   useRoomStream(room.id, (event: PokerEvent) => {
     if (event.type === 'player_joined') {
