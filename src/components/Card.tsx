@@ -1,13 +1,18 @@
-// src/components/Card.tsx
 import { cn } from '@/lib/utils'
 import type { PokerCard } from '@/types/domain'
 
-const SUIT_SYMBOL: Record<string, string> = {
-  S: '♠', H: '♥', D: '♦', C: '♣',
+const RANK_MAP: Record<string, string> = {
+  A: '1', '2': '2', '3': '3', '4': '4', '5': '5',
+  '6': '6', '7': '7', '8': '8', '9': '9', T: '10',
+  J: 'jack', Q: 'queen', K: 'king',
 }
 
-const RANK_DISPLAY: Record<string, string> = {
-  T: '10', J: 'J', Q: 'Q', K: 'K', A: 'A',
+const SUIT_MAP: Record<string, string> = {
+  S: 'spade', H: 'heart', D: 'diamond', C: 'club',
+}
+
+function cardId(card: PokerCard): string {
+  return `${SUIT_MAP[card.suit]}_${RANK_MAP[card.rank]}`
 }
 
 interface CardProps {
@@ -18,49 +23,34 @@ interface CardProps {
 }
 
 export function Card({ card, faceDown = false, small = false, className }: CardProps) {
-  if (faceDown || !card) {
-    return (
-      <div className={cn(
-        'rounded-lg border-2 border-white/30 bg-blue-900 flex items-center justify-center shadow-md',
-        small ? 'w-8 h-11' : 'w-14 h-20',
-        className
-      )}>
-        <div className={cn(
-          'rounded border border-white/20 bg-blue-800',
-          small ? 'w-5 h-8' : 'w-9 h-14'
-        )} />
-      </div>
-    )
-  }
+  const svgHref = faceDown || !card
+    ? '/cards/svg-cards.svg#back'
+    : `/cards/svg-cards.svg#${cardId(card)}`
 
-  const isRed = card.suit === 'H' || card.suit === 'D'
-  const rankLabel = RANK_DISPLAY[card.rank] ?? card.rank
-  const suitSymbol = SUIT_SYMBOL[card.suit]
+  const isRevealed = !faceDown && !!card
 
   return (
-    <div className={cn(
-      'rounded-lg border border-gray-200 bg-white shadow-md flex flex-col justify-between p-1 select-none',
-      small ? 'w-8 h-11' : 'w-14 h-20',
-      className
-    )}>
-      <div className={cn(
-        'font-bold leading-none',
-        small ? 'text-xs' : 'text-base',
-        isRed ? 'text-red-500' : 'text-gray-900'
-      )}>
-        <div>{rankLabel}</div>
-        <div>{suitSymbol}</div>
-      </div>
-      {!small && (
-        <div className={cn(
-          'font-bold leading-none rotate-180 self-end',
-          'text-base',
-          isRed ? 'text-red-500' : 'text-gray-900'
-        )}>
-          <div>{rankLabel}</div>
-          <div>{suitSymbol}</div>
-        </div>
+    <div
+      className={cn(
+        'relative rounded-lg overflow-hidden border-2 bg-white shadow-lg select-none',
+        isRevealed
+          ? 'border-white/80 shadow-black/30'
+          : 'border-white/30 shadow-black/20',
+        small ? 'w-9 h-[52px]' : 'w-16 h-24',
+        className,
       )}
+    >
+      <svg
+        viewBox="0 0 169.075 244.640"
+        className="absolute inset-0 w-full h-full"
+        aria-label={
+          faceDown || !card
+            ? 'Card back'
+            : `${card.rank} of ${SUIT_MAP[card.suit]}s`
+        }
+      >
+        <use href={svgHref} />
+      </svg>
     </div>
   )
 }

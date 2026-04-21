@@ -55,52 +55,109 @@ export default function CreatePage() {
   }
 
   return (
-    <main className="min-h-screen bg-green-900 p-6 flex flex-col items-center gap-6">
+    <main className="min-h-screen bg-[#0a1a0a] p-6 flex flex-col items-center gap-6 relative overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_#1a3d1a_0%,_#0d1f0d_50%,_#060e06_100%)]" />
+      <div className="absolute inset-0 opacity-[0.03]" style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M5 0h1L0 5V4zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E")`,
+      }} />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_40%,_rgba(0,0,0,0.6)_100%)]" />
+
+      {/* Language toggle */}
       <button
         onClick={toggleLang}
-        className="absolute top-4 right-4 px-3 py-1 rounded-lg border border-white/30 text-white/70 text-sm"
+        className="absolute top-4 right-4 z-10 px-3 py-1.5 rounded-lg border border-[#D4AF37]/30 text-[#D4AF37]/70 text-sm hover:border-[#D4AF37]/60 hover:text-[#D4AF37] transition-all duration-200"
       >
         {t.switchLang}
       </button>
 
-      <h1 className="text-3xl font-bold text-white mt-4">{t.createRoomTitle}</h1>
-
-      <div className="w-full max-w-sm bg-white/10 rounded-2xl p-5 flex flex-col gap-4 text-white">
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-semibold">{t.yourName}</span>
-          <input className="px-3 py-2 rounded-lg bg-white/20 placeholder-white/40 focus:outline-none"
-            placeholder={t.displayName} value={name} maxLength={20}
-            onChange={e => setName(e.target.value)} />
-        </label>
-
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-semibold">{t.format}</span>
-          <div className="flex gap-2">
-            {(['cash', 'tournament'] as const).map(f => (
-              <button key={f} onClick={() => setFormat(f)}
-                className={`flex-1 py-2 rounded-lg font-semibold ${format === f ? 'bg-white text-green-900' : 'border border-white/40'}`}>
-                {f === 'cash' ? t.cash : t.tournament}
-              </button>
-            ))}
+      <div className="relative z-10 flex flex-col items-center gap-6 w-full max-w-sm mt-4">
+        {/* Title */}
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-white tracking-tight">{t.createRoomTitle}</h1>
+          <div className="mt-1.5 flex items-center justify-center gap-2">
+            <div className="h-px w-10 bg-gradient-to-r from-transparent to-[#D4AF37]/50" />
+            <span className="text-[#D4AF37]/50 text-xs">&#9824; &#9829; &#9830; &#9827;</span>
+            <div className="h-px w-10 bg-gradient-to-l from-transparent to-[#D4AF37]/50" />
           </div>
-        </label>
+        </div>
 
-        <NumberSetting label={t.maxPlayers} value={settings.maxPlayers} min={2} max={9} onChange={v => update('maxPlayers', v)} />
-        <NumberSetting label={t.startingChips} value={settings.startingChips} min={100} max={100000} step={100} onChange={v => update('startingChips', v)} />
-        <NumberSetting label={t.smallBlind} value={settings.smallBlind} min={1} max={1000} onChange={v => update('smallBlind', v)} />
-        <NumberSetting label={t.bigBlind} value={settings.bigBlind} min={2} max={2000} onChange={v => update('bigBlind', v)} />
-        <NumberSetting label={t.turnTimerSec} value={settings.turnTimerSec} min={10} max={60} onChange={v => update('turnTimerSec', v)} />
+        {/* Form card */}
+        <div className="w-full rounded-2xl border border-[#D4AF37]/15 bg-black/30 backdrop-blur-sm p-5 flex flex-col gap-5 text-white">
+          {/* Name */}
+          <label className="flex flex-col gap-1.5">
+            <span className="text-sm font-semibold text-white/70 uppercase tracking-wider">{t.yourName}</span>
+            <input
+              className="px-4 py-2.5 rounded-xl bg-white/[0.06] border border-white/10 placeholder-white/25 text-white focus:outline-none focus:border-[#D4AF37]/50 focus:bg-white/[0.08] transition-all duration-200"
+              placeholder={t.displayName}
+              value={name}
+              maxLength={20}
+              onChange={e => setName(e.target.value)}
+            />
+          </label>
 
-        <label className="flex items-center gap-3 cursor-pointer">
-          <input type="checkbox" checked={asPlayer} onChange={e => setAsPlayer(e.target.checked)}
-            className="w-5 h-5 rounded" />
-          <span className="text-sm font-semibold">{t.joinAsPlayer}</span>
-        </label>
+          {/* Format */}
+          <label className="flex flex-col gap-1.5">
+            <span className="text-sm font-semibold text-white/70 uppercase tracking-wider">{t.format}</span>
+            <div className="flex gap-2">
+              {(['cash', 'tournament'] as const).map(f => (
+                <button
+                  key={f}
+                  onClick={() => setFormat(f)}
+                  className={`flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 ${
+                    format === f
+                      ? 'bg-gradient-to-r from-[#D4AF37] to-[#F5D060] text-[#1a1a0a] shadow-md shadow-[#D4AF37]/20'
+                      : 'border border-white/15 text-white/60 hover:border-white/30 hover:text-white/80'
+                  }`}
+                >
+                  {f === 'cash' ? t.cash : t.tournament}
+                </button>
+              ))}
+            </div>
+          </label>
 
-        <button onClick={handleCreate} disabled={loading}
-          className="w-full py-3 rounded-xl bg-yellow-400 text-gray-900 font-bold text-lg disabled:opacity-40">
-          {loading ? t.creating : t.createRoomTitle}
-        </button>
+          {/* Divider */}
+          <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+          {/* Settings */}
+          <NumberSetting label={t.maxPlayers} value={settings.maxPlayers} min={2} max={9} onChange={v => update('maxPlayers', v)} />
+          <NumberSetting label={t.startingChips} value={settings.startingChips} min={100} max={100000} step={100} onChange={v => update('startingChips', v)} />
+          <NumberSetting label={t.smallBlind} value={settings.smallBlind} min={1} max={1000} onChange={v => update('smallBlind', v)} />
+          <NumberSetting label={t.bigBlind} value={settings.bigBlind} min={2} max={2000} onChange={v => update('bigBlind', v)} />
+          <NumberSetting label={t.turnTimerSec} value={settings.turnTimerSec} min={10} max={60} onChange={v => update('turnTimerSec', v)} />
+
+          {/* Divider */}
+          <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+          {/* Join as player checkbox */}
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={asPlayer}
+                onChange={e => setAsPlayer(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-5 h-5 rounded border border-white/20 bg-white/[0.06] peer-checked:bg-[#D4AF37] peer-checked:border-[#D4AF37] transition-all duration-200 flex items-center justify-center">
+                {asPlayer && (
+                  <svg className="w-3 h-3 text-[#1a1a0a]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </div>
+            </div>
+            <span className="text-sm font-semibold text-white/70 group-hover:text-white/90 transition-colors">{t.joinAsPlayer}</span>
+          </label>
+
+          {/* Create button */}
+          <button
+            onClick={handleCreate}
+            disabled={loading}
+            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#D4AF37] via-[#F5D060] to-[#D4AF37] text-[#1a1a0a] font-bold text-lg shadow-lg shadow-[#D4AF37]/20 disabled:opacity-30 disabled:shadow-none hover:shadow-[#D4AF37]/40 hover:brightness-110 transition-all duration-200 active:scale-[0.98]"
+          >
+            {loading ? t.creating : t.createRoomTitle}
+          </button>
+        </div>
       </div>
     </main>
   )
@@ -116,13 +173,20 @@ function NumberSetting({ label, value, min, max, step = 1, onChange }: {
   onChange: (v: number) => void
 }) {
   return (
-    <label className="flex flex-col gap-1">
-      <span className="text-sm font-semibold">{label}</span>
-      <div className="flex items-center gap-2">
-        <input type="range" min={min} max={max} step={step} value={value}
-          onChange={e => onChange(Number(e.target.value))} className="flex-1" />
-        <span className="w-14 text-right font-mono">{value}</span>
+    <label className="flex flex-col gap-1.5">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-semibold text-white/70 uppercase tracking-wider">{label}</span>
+        <span className="text-sm font-mono text-[#D4AF37] font-semibold">{value.toLocaleString()}</span>
       </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={e => onChange(Number(e.target.value))}
+        className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-white/10 accent-[#D4AF37] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#D4AF37] [&::-webkit-slider-thumb]:shadow-[0_0_8px_rgba(212,175,55,0.4)]"
+      />
     </label>
   )
 }
