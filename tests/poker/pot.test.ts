@@ -40,6 +40,27 @@ describe('calculatePots', () => {
     expect(pots[1].amount).toBe(100)
     expect(pots[1].eligiblePlayerIds).not.toContain('p1')
   })
+
+  it('handles multiple all-ins at different levels', () => {
+    const players = [
+      { playerId: 'p1', totalBet: 30,  status: 'all_in' as const },
+      { playerId: 'p2', totalBet: 60,  status: 'all_in' as const },
+      { playerId: 'p3', totalBet: 100, status: 'active' as const },
+      { playerId: 'p4', totalBet: 100, status: 'active' as const },
+    ]
+    const pots = calculatePots(players)
+    // pot1: 30*4=120, eligible: p1,p2,p3,p4
+    // pot2: 30*3=90,  eligible: p2,p3,p4
+    // pot3: 40*2=80,  eligible: p3,p4
+    expect(pots).toHaveLength(3)
+    expect(pots[0].amount).toBe(120)
+    expect(pots[0].eligiblePlayerIds).toContain('p1')
+    expect(pots[1].amount).toBe(90)
+    expect(pots[1].eligiblePlayerIds).not.toContain('p1')
+    expect(pots[1].eligiblePlayerIds).toContain('p2')
+    expect(pots[2].amount).toBe(80)
+    expect(pots[2].eligiblePlayerIds).not.toContain('p2')
+  })
 })
 
 describe('totalPot', () => {
