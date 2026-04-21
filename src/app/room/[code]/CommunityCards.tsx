@@ -12,8 +12,9 @@ export function CommunityCards({ cards }: { cards: PokerCard[] }) {
             className={
               revealed
                 ? '-translate-y-0.5 transition-transform duration-300'
-                : 'opacity-70'
+                : 'opacity-50'
             }
+            style={revealed ? { filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.5))' } : undefined}
           >
             <Card card={cards[i]} faceDown={!cards[i]} small />
           </div>

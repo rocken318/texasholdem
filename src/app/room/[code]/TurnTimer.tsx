@@ -5,6 +5,9 @@ import { useEffect, useState } from 'react'
 export function TurnTimer({ seconds, onTimeout }: { seconds: number; onTimeout: () => void }) {
   const [remaining, setRemaining] = useState(seconds)
 
+  // seconds === 0 means no time limit — render nothing, never auto-fold
+  if (seconds === 0) return null
+
   useEffect(() => {
     if (remaining <= 0) { onTimeout(); return }
     const timer = setTimeout(() => setRemaining(r => r - 1), 1000)

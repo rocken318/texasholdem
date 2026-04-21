@@ -19,15 +19,18 @@ interface CardProps {
   card?: PokerCard
   faceDown?: boolean
   small?: boolean
+  large?: boolean
   className?: string
 }
 
-export function Card({ card, faceDown = false, small = false, className }: CardProps) {
+export function Card({ card, faceDown = false, small = false, large = false, className }: CardProps) {
   const svgHref = faceDown || !card
     ? '/cards/svg-cards.svg#back'
     : `/cards/svg-cards.svg#${cardId(card)}`
 
   const isRevealed = !faceDown && !!card
+
+  const sizeClass = small ? 'w-9 h-[52px]' : large ? 'w-20 h-28' : 'w-16 h-24'
 
   return (
     <div
@@ -36,7 +39,7 @@ export function Card({ card, faceDown = false, small = false, className }: CardP
         isRevealed
           ? 'border-white/80 shadow-black/30'
           : 'border-white/30 shadow-black/20',
-        small ? 'w-9 h-[52px]' : 'w-16 h-24',
+        sizeClass,
         className,
       )}
     >

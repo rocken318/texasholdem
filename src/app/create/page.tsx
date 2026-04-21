@@ -124,7 +124,7 @@ export default function CreatePage() {
           <NumberSetting label={t.startingChips} value={settings.startingChips} min={100} max={100000} step={100} onChange={v => update('startingChips', v)} />
           <NumberSetting label={t.smallBlind} value={settings.smallBlind} min={1} max={1000} onChange={v => update('smallBlind', v)} />
           <NumberSetting label={t.bigBlind} value={settings.bigBlind} min={2} max={2000} onChange={v => update('bigBlind', v)} />
-          <NumberSetting label={t.turnTimerSec} value={settings.turnTimerSec} min={10} max={60} onChange={v => update('turnTimerSec', v)} />
+          <TimerSetting label={t.turnTimerSec} value={settings.turnTimerSec} onChange={v => update('turnTimerSec', v)} />
 
           {/* Divider */}
           <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
@@ -166,6 +166,36 @@ export default function CreatePage() {
 async function getApiError(res: Response): Promise<string> {
   const body = await res.json().catch(() => ({})) as { error?: string }
   return body.error ?? `Error ${res.status}`
+}
+
+function TimerSetting({ label, value, onChange }: {
+  label: string; value: number; onChange: (v: number) => void
+}) {
+  // 0 = no limit, 10-60 = seconds
+  const steps = [0, 10, 15, 20, 30, 45, 60]
+  const stepIndex = steps.indexOf(value) >= 0 ? steps.indexOf(value) : 3
+  return (
+    <label className="flex flex-col gap-1.5">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-semibold text-white/70 uppercase tracking-wider">{label}</span>
+        <span className="text-sm font-mono text-[#D4AF37] font-semibold">
+          {value === 0 ? '∞ なし' : `${value}s`}
+        </span>
+      </div>
+      <input
+        type="range"
+        min={0}
+        max={steps.length - 1}
+        step={1}
+        value={stepIndex}
+        onChange={e => onChange(steps[Number(e.target.value)])}
+        className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-white/10 accent-[#D4AF37] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#D4AF37] [&::-webkit-slider-thumb]:shadow-[0_0_8px_rgba(212,175,55,0.4)]"
+      />
+      <div className="flex justify-between text-[10px] text-white/30 px-0.5">
+        {steps.map(s => <span key={s}>{s === 0 ? '∞' : s}</span>)}
+      </div>
+    </label>
+  )
 }
 
 function NumberSetting({ label, value, min, max, step = 1, onChange }: {

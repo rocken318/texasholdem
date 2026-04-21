@@ -101,6 +101,7 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
         <TableView
           players={players}
           myPlayerId={myPlayer?.id ?? null}
+          mySeatIndex={myPlayer?.seat_index ?? null}
           currentSeat={currentSeat}
           communityCards={hand?.community_cards ?? []}
           pot={hand?.pot ?? 0}

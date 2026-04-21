@@ -7,14 +7,17 @@ import { ChipStack } from '@/components/ChipStack'
 interface TableViewProps {
   players: Player[]
   myPlayerId: string | null
+  mySeatIndex: number | null
   currentSeat: number | null
   communityCards: PokerCard[]
   pot: number
   tableBets: Record<string, number>
 }
 
-function getSeatPosition(seatIndex: number, total: number): { top: string; left: string } {
-  const angle = ((seatIndex / total) * 2 * Math.PI) - Math.PI / 2
+function getSeatPosition(seatIndex: number, total: number, mySeatIndex: number | null): { top: string; left: string } {
+  // If we know which seat is ours, rotate so our seat is always at the bottom
+  const offset = mySeatIndex !== null ? mySeatIndex : 0
+  const angle = ((seatIndex - offset) / total) * 2 * Math.PI + Math.PI / 2
   const rx = 44
   const ry = 38
   return {
@@ -23,8 +26,9 @@ function getSeatPosition(seatIndex: number, total: number): { top: string; left:
   }
 }
 
-function getBetPosition(seatIndex: number, total: number): { top: string; left: string } {
-  const angle = ((seatIndex / total) * 2 * Math.PI) - Math.PI / 2
+function getBetPosition(seatIndex: number, total: number, mySeatIndex: number | null): { top: string; left: string } {
+  const offset = mySeatIndex !== null ? mySeatIndex : 0
+  const angle = ((seatIndex - offset) / total) * 2 * Math.PI + Math.PI / 2
   const rx = 25
   const ry = 20
   return {
@@ -33,7 +37,7 @@ function getBetPosition(seatIndex: number, total: number): { top: string; left: 
   }
 }
 
-export function TableView({ players, myPlayerId, currentSeat, communityCards, pot, tableBets }: TableViewProps) {
+export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, communityCards, pot, tableBets }: TableViewProps) {
   const seated = players.filter(p => p.seat_index !== null)
 
   return (
@@ -120,7 +124,7 @@ export function TableView({ players, myPlayerId, currentSeat, communityCards, po
       {seated.map(player => {
         const bet = tableBets[player.id] ?? 0
         if (bet <= 0) return null
-        const pos = getBetPosition(player.seat_index!, seated.length)
+        const pos = getBetPosition(player.seat_index!, seated.length, mySeatIndex)
         return (
           <div
             key={`bet-${player.id}`}
@@ -134,7 +138,7 @@ export function TableView({ players, myPlayerId, currentSeat, communityCards, po
 
       {/* Player slots */}
       {seated.map(player => {
-        const pos = getSeatPosition(player.seat_index!, seated.length)
+        const pos = getSeatPosition(player.seat_index!, seated.length, mySeatIndex)
         return (
           <div
             key={player.id}
