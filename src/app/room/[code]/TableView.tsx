@@ -98,7 +98,7 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
       />
 
       {/* Center area - community cards + pot */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5">
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-10">
         <CommunityCards cards={communityCards} />
         {pot > 0 && (
           <div className="flex flex-col items-center gap-0.5">

@@ -3,7 +3,7 @@ import { Card } from '@/components/Card'
 
 export function CommunityCards({ cards }: { cards: PokerCard[] }) {
   return (
-    <div className="flex gap-1 scale-[1.2] origin-center">
+    <div className="flex gap-1 scale-[1.6] origin-center">
       {Array.from({ length: 5 }).map((_, i) => {
         const revealed = !!cards[i]
         return (

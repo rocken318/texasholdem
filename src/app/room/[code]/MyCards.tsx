@@ -4,7 +4,7 @@ import { Card } from '@/components/Card'
 export function MyCards({ cards }: { cards: PokerCard[] }) {
   if (cards.length === 0) return null
   return (
-    <div className="flex justify-center items-end gap-6 py-5 px-8 bg-gradient-to-t from-black/40 to-transparent">
+    <div className="flex justify-center items-end gap-6 py-2 px-8 bg-gradient-to-t from-black/40 to-transparent">
       {cards.map((card, i) => (
         <div
           key={i}
