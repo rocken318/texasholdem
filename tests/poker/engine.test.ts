@@ -40,6 +40,22 @@ describe('getValidActions', () => {
     const result = getValidActions(player, { currentBet: 20, bigBlind: 20, playerChips: 1000 })
     expect(result.minRaise).toBeGreaterThanOrEqual(40)
   })
+
+  it('cannot raise when chips only cover call plus less than one big blind', () => {
+    const player = makePlayer({ current_bet: 0 })
+    // currentBet=20, playerChips=25 — can call (20) but only 5 left which is less than bigBlind (20)
+    const result = getValidActions(player, { currentBet: 20, bigBlind: 20, playerChips: 25 })
+    expect(result.canRaise).toBe(false)
+    expect(result.canAllIn).toBe(true)  // can still go all-in
+  })
+
+  it('minRaise uses last raise increment, not always bigBlind', () => {
+    const player = makePlayer({ current_bet: 0 })
+    // currentBet=60, bigBlind=20, lastRaiseSize=40 (someone raised from 20 to 60)
+    const result = getValidActions(player, { currentBet: 60, bigBlind: 20, playerChips: 1000, lastRaiseSize: 40 })
+    // minRaise should be 60 + 40 = 100 (not 60 + 20 = 80)
+    expect(result.minRaise).toBe(100)
+  })
 })
 
 describe('isBettingRoundComplete', () => {

@@ -6,6 +6,7 @@ interface ValidActionContext {
   currentBet: number
   bigBlind: number
   playerChips: number
+  lastRaiseSize?: number  // defaults to bigBlind if not provided
 }
 
 export function getValidActions(player: HandPlayer, ctx: ValidActionContext): ValidActions {
@@ -13,8 +14,9 @@ export function getValidActions(player: HandPlayer, ctx: ValidActionContext): Va
   const canCheck = toCall === 0
   const callAmount = Math.min(toCall, ctx.playerChips)
   const canCall = toCall > 0 && toCall <= ctx.playerChips
-  const minRaise = Math.min(ctx.currentBet + ctx.bigBlind, ctx.playerChips)
-  const canRaise = ctx.playerChips > toCall + 1
+  const raiseIncrement = ctx.lastRaiseSize ?? ctx.bigBlind
+  const minRaise = Math.min(ctx.currentBet + raiseIncrement, ctx.playerChips)
+  const canRaise = ctx.playerChips >= toCall + ctx.bigBlind
 
   return {
     canFold: true,
@@ -28,6 +30,12 @@ export function getValidActions(player: HandPlayer, ctx: ValidActionContext): Va
   }
 }
 
+/**
+ * Returns true when all active players have matched the current bet.
+ * NOTE: The preflop big-blind option (BB gets one final action when
+ * no one has raised) is NOT checked here. Callers must handle this
+ * case separately by tracking whether BB has acted in preflop.
+ */
 export function isBettingRoundComplete(
   handPlayers: HandPlayer[],
   currentBet: number
