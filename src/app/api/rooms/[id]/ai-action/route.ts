@@ -15,6 +15,7 @@ export async function POST(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
+  try {
   const { id } = await context.params
   const { botPlayerId } = await req.json() as { botPlayerId: string }
 
@@ -107,4 +108,8 @@ raise <amount>`
   }
 
   return NextResponse.json({ action, amount })
+  } catch (e) {
+    console.error('[ai-action] unhandled error:', e)
+    return NextResponse.json({ action: 'fold' })
+  }
 }

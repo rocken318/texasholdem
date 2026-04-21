@@ -74,27 +74,35 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
 
   // Bot action trigger (host-only): asks Gemini 2.5 Flash then executes
   const triggerBotAction = useCallback(async (playerId: string) => {
+    const safeFallback = handRef.current?.current_bet === 0 ? 'check' : 'call'
+    let action = safeFallback
+    let amount: number | undefined
+
     try {
       const aiRes = await fetch(`/api/rooms/${room.id}/ai-action`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ botPlayerId: playerId }),
       })
-      const { action, amount } = await aiRes.json() as { action: string; amount?: number }
+      if (aiRes.ok) {
+        const data = await aiRes.json() as { action?: string; amount?: number }
+        if (data.action) {
+          action = data.action
+          amount = data.amount
+        }
+      }
+    } catch {
+      // network error — use fallback
+    }
+
+    try {
       await fetch(`/api/rooms/${room.id}/action`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ playerId, action, amount }),
       })
     } catch {
-      // Fallback if Gemini is unreachable
-      const h = handRef.current
-      const fallback = h?.current_bet === 0 ? 'check' : 'call'
-      await fetch(`/api/rooms/${room.id}/action`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ playerId, action: fallback }),
-      })
+      console.error('[bot] action submit failed for', playerId)
     }
   }, [room.id])
 
