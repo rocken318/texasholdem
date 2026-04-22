@@ -1,6 +1,6 @@
 // src/app/room/[code]/ActionBar.tsx
 'use client'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import type { Translations } from '@/lib/i18n'
 
 interface ActionBarProps {
@@ -21,15 +21,18 @@ export function ActionBar({ currentBet, myCurrentBet, myChips, bigBlind, onActio
   const [pending, setPending] = useState(false)
   const [pressedAction, setPressedAction] = useState<string | null>(null)
 
+  useEffect(() => {
+    if (disabled) {
+      setPending(false)
+      setPressedAction(null)
+    }
+  }, [disabled])
+
   function handleAction(action: string, amount?: number) {
     if (pending || disabled) return
     setPending(true)
     setPressedAction(action)
     onAction(action, amount)
-    setTimeout(() => {
-      setPending(false)
-      setPressedAction(null)
-    }, 2000)
   }
 
   const isDisabled = pending || disabled

@@ -189,7 +189,10 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
           </svg>
 
           {/* Center: community cards + pot */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 pointer-events-none">
+          <div
+            className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-2 pointer-events-none z-10"
+            style={{ top: isMobile ? '37%' : '48%' }}
+          >
             <CommunityCards cards={communityCards} />
             {pot > 0 && (
               <div className="flex items-center gap-1.5 px-3 py-0.5 rounded-full font-semibold"
