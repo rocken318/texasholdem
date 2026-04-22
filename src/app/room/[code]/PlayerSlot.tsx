@@ -40,11 +40,21 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0 }: PlayerSlot
         </div>
       )}
 
-      {/* Face-down hole cards above slot */}
-      {inHand && (
+      {/* Face-down hole cards above slot (or discarded cards when folded) */}
+      {inHand && !isFolded && (
         <div className="flex -space-x-2 mb-0.5">
           <div className="-rotate-6"><Card faceDown small /></div>
           <div className="rotate-6"><Card faceDown small /></div>
+        </div>
+      )}
+      {isFolded && (
+        <div className="flex -space-x-3 mb-0.5">
+          <div style={{ animation: 'foldDiscardL 0.45s ease-out forwards' }}>
+            <Card faceDown small />
+          </div>
+          <div style={{ animation: 'foldDiscardR 0.45s ease-out 0.06s forwards' }}>
+            <Card faceDown small />
+          </div>
         </div>
       )}
 

@@ -172,3 +172,15 @@ body {
   0%, 100% { transform: translateX(-50%) translateY(0); }
   50%       { transform: translateX(-50%) translateY(-5px); }
 }
+
+/* ── Fold discard animation ── */
+@keyframes foldDiscardL {
+  0%   { transform: rotate(-6deg) scale(1); opacity: 0.85; }
+  55%  { transform: rotate(-38deg) translateX(-6px) translateY(-6px) scale(0.9); opacity: 0.5; }
+  100% { transform: rotate(-35deg) translateX(-4px) translateY(5px) scale(0.82); opacity: 0.28; }
+}
+@keyframes foldDiscardR {
+  0%   { transform: rotate(6deg) scale(1); opacity: 0.85; }
+  55%  { transform: rotate(38deg) translateX(6px) translateY(-6px) scale(0.9); opacity: 0.5; }
+  100% { transform: rotate(35deg) translateX(4px) translateY(5px) scale(0.82); opacity: 0.28; }
+}

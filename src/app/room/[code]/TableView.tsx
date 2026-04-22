@@ -27,8 +27,8 @@ function getSeatPosition(seatIndex: number, total: number, mySeatIndex: number |
   const offset = mySeatIndex !== null ? mySeatIndex : 0
   const angle = ((seatIndex - offset) / total) * 2 * Math.PI + Math.PI / 2
   return {
-    left: `${50 + 36 * Math.cos(angle)}%`,
-    top:  `${50 + 30 * Math.sin(angle)}%`,
+    left: `${50 + 41 * Math.cos(angle)}%`,
+    top:  `${50 + 35 * Math.sin(angle)}%`,
   }
 }
 
@@ -36,8 +36,8 @@ function getBetPosition(seatIndex: number, total: number, mySeatIndex: number | 
   const offset = mySeatIndex !== null ? mySeatIndex : 0
   const angle = ((seatIndex - offset) / total) * 2 * Math.PI + Math.PI / 2
   return {
-    left: `${50 + 20 * Math.cos(angle)}%`,
-    top:  `${50 + 15 * Math.sin(angle)}%`,
+    left: `${50 + 24 * Math.cos(angle)}%`,
+    top:  `${50 + 18 * Math.sin(angle)}%`,
   }
 }
 
@@ -182,8 +182,8 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
               fill="rgba(110,35,210,0.14)" style={{ filter: 'blur(10px)' }} />
           </svg>
 
-          {/* Center: community cards + pot */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 pointer-events-none">
+          {/* Center: community cards + pot — shifted down so top players don't overlap */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 pointer-events-none" style={{ paddingTop: '14%' }}>
             <CommunityCards cards={communityCards} />
             {pot > 0 && (
               <div className="flex flex-col items-center gap-0.5">
