@@ -23,11 +23,11 @@ export function ActionBar({ currentBet, myCurrentBet, myChips, bigBlind, onActio
   const [pressedAction, setPressedAction] = useState<string | null>(null)
 
   useEffect(() => {
-    if (disabled) {
+    if (disabled || !isMyTurn) {
       setPending(false)
       setPressedAction(null)
     }
-  }, [disabled])
+  }, [disabled, isMyTurn])
 
   function handleAction(action: string, amount?: number) {
     if (pending || disabled) return
