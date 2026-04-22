@@ -173,14 +173,16 @@ body {
   50%       { transform: translateX(-50%) translateY(-5px); }
 }
 
-/* ── Fold discard animation (enhanced — dramatic fly to center) ── */
-@keyframes foldDiscardL {
-  0%   { transform: rotate(-6deg) scale(1); opacity: 0.85; }
-  100% { transform: rotate(-45deg) translateX(-40px) translateY(-20px) scale(0.3); opacity: 0; }
+/* ── Card throw animation ── */
+@keyframes cardThrowL {
+  0%   { transform: rotate(-6deg) translate(0, 0) scale(1);        opacity: 1; }
+  20%  { transform: rotate(-20deg) translate(-8px, -10px) scale(1.08); opacity: 1; }
+  100% { transform: rotate(-110deg) translate(-70px, -90px) scale(0.5); opacity: 0; }
 }
-@keyframes foldDiscardR {
-  0%   { transform: rotate(6deg) scale(1); opacity: 0.85; }
-  100% { transform: rotate(45deg) translateX(40px) translateY(-20px) scale(0.3); opacity: 0; }
+@keyframes cardThrowR {
+  0%   { transform: rotate(6deg) translate(0, 0) scale(1);         opacity: 1; }
+  20%  { transform: rotate(20deg) translate(8px, -10px) scale(1.08);  opacity: 1; }
+  100% { transform: rotate(110deg) translate(70px, -90px) scale(0.5); opacity: 0; }
 }
 
 /* ── Fold slot fade ── */

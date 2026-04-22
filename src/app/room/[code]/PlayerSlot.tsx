@@ -1,4 +1,6 @@
 // src/app/room/[code]/PlayerSlot.tsx
+'use client'
+import { useState, useEffect, useRef } from 'react'
 import type { Player, PokerCard } from '@/types/domain'
 import { Card } from '@/components/Card'
 import { cn } from '@/lib/utils'
@@ -22,12 +24,38 @@ function ChipIcon() {
   )
 }
 
+const THROW_MS = 580
+
 export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCardTap }: PlayerSlotProps) {
-  const inHand = player.status !== 'folded' && player.status !== 'out'
   const isFolded = player.status === 'folded'
   const isAllIn = player.status === 'all_in'
   const isOut = player.status === 'out'
+  const inHand = player.status !== 'folded' && player.status !== 'out'
   const initial = player.display_name.charAt(0).toUpperCase()
+
+  // Only play the throw animation once, when transitioning INTO folded state
+  const prevStatusRef = useRef(player.status)
+  const [foldAnimActive, setFoldAnimActive] = useState(false)
+
+  useEffect(() => {
+    if (prevStatusRef.current !== 'folded' && player.status === 'folded') {
+      setFoldAnimActive(true)
+      const t = setTimeout(() => setFoldAnimActive(false), THROW_MS)
+      return () => clearTimeout(t)
+    }
+    prevStatusRef.current = player.status
+  }, [player.status])
+
+  // Show cards when: actively animating fold, or in-hand (not yet folded)
+  const hasMyCards = isMe && !!cards?.length
+  const showCards = foldAnimActive || (inHand && (hasMyCards || !isMe))
+
+  const throwAnimL: React.CSSProperties = foldAnimActive
+    ? { animation: `cardThrowL ${THROW_MS}ms cubic-bezier(0.25,0.46,0.45,0.94) forwards` }
+    : {}
+  const throwAnimR: React.CSSProperties = foldAnimActive
+    ? { animation: `cardThrowR ${THROW_MS}ms cubic-bezier(0.25,0.46,0.45,0.94) forwards` }
+    : {}
 
   return (
     <div className="flex flex-col items-center gap-0.5 relative">
@@ -48,7 +76,6 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCar
             lineHeight: 1,
           }}
         >
-          {/* Primary arrow */}
           <svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg">
             <polygon
               points="7,10 0,0 14,0"
@@ -56,7 +83,6 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCar
               style={{ filter: 'drop-shadow(0 0 5px rgba(255,215,0,0.95)) drop-shadow(0 0 10px rgba(255,215,0,0.6))' }}
             />
           </svg>
-          {/* Secondary smaller arrow for double-arrow effect */}
           <svg width="9" height="7" viewBox="0 0 9 7" xmlns="http://www.w3.org/2000/svg">
             <polygon
               points="4.5,7 0,0 9,0"
@@ -64,7 +90,6 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCar
               style={{ opacity: 0.55, filter: 'drop-shadow(0 0 3px rgba(255,215,0,0.7))' }}
             />
           </svg>
-          {/* Glow trail below arrows */}
           <div
             style={{
               width: 2,
@@ -76,44 +101,47 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCar
         </div>
       )}
 
-      {/* Hole cards: face-up (mine) or face-down (others) */}
-      {isMe && cards && cards.length > 0 && !isFolded && (
+      {/* ── Card area ── */}
+      {showCards && (
         <div
-          className="flex flex-col items-center gap-0.5 mb-0.5"
-          onClick={onCardTap}
-          style={onCardTap ? { cursor: 'pointer' } : undefined}
+          className="flex mb-0.5"
+          style={{
+            transform: (!hasMyCards && !foldAnimActive) ? 'scale(0.7)' : undefined,
+            transformOrigin: 'bottom center',
+            cursor: (!foldAnimActive && hasMyCards && onCardTap) ? 'pointer' : undefined,
+          }}
+          onClick={(!foldAnimActive && hasMyCards && onCardTap) ? onCardTap : undefined}
         >
-          <div className="flex -space-x-3">
-            <div className="-rotate-6" style={{ filter: 'drop-shadow(0 4px 8px rgba(140,50,255,0.5))' }}>
-              <Card card={cards[0]} className="ring-1 ring-[#bf80ff]/60" />
-            </div>
-            <div className="rotate-6" style={{ filter: 'drop-shadow(0 4px 8px rgba(140,50,255,0.5))' }}>
-              <Card card={cards[1]} className="ring-1 ring-[#bf80ff]/60" />
-            </div>
+          {/* Left card */}
+          <div style={{ display: 'inline-block', ...(!foldAnimActive ? { transform: 'rotate(-6deg)' } : throwAnimL) }}>
+            {hasMyCards
+              ? (
+                <div style={{ filter: 'drop-shadow(0 4px 8px rgba(140,50,255,0.5))' }}>
+                  <Card card={cards![0]} className="ring-1 ring-[#bf80ff]/60" />
+                </div>
+              )
+              : <Card faceDown small />
+            }
           </div>
-          {onCardTap && (
-            <div className="text-[8px] text-center" style={{ color: 'rgba(180,80,255,0.6)' }}>👁</div>
-          )}
+          {/* Right card */}
+          <div style={{ display: 'inline-block', marginLeft: foldAnimActive ? 4 : -12, ...(!foldAnimActive ? { transform: 'rotate(6deg)' } : throwAnimR) }}>
+            {hasMyCards
+              ? (
+                <div style={{ filter: 'drop-shadow(0 4px 8px rgba(140,50,255,0.5))' }}>
+                  <Card card={cards![1]} className="ring-1 ring-[#bf80ff]/60" />
+                </div>
+              )
+              : <Card faceDown small />
+            }
+          </div>
         </div>
       )}
-      {inHand && !isFolded && (!isMe || !cards?.length) && (
-        <div className="flex -space-x-1.5 mb-0.5" style={{ transform: 'scale(0.7)', transformOrigin: 'bottom center' }}>
-          <div className="-rotate-6"><Card faceDown small /></div>
-          <div className="rotate-6"><Card faceDown small /></div>
-        </div>
-      )}
-      {isFolded && (
-        <div className="flex -space-x-1.5 mb-0.5" style={{ transform: 'scale(0.7)', transformOrigin: 'bottom center' }}>
-          <div style={{ animation: 'foldDiscardL 0.5s ease-in forwards' }}>
-            <Card faceDown small />
-          </div>
-          <div style={{ animation: 'foldDiscardR 0.5s ease-in forwards' }}>
-            <Card faceDown small />
-          </div>
-        </div>
+      {/* Eye hint for my cards */}
+      {hasMyCards && !foldAnimActive && !isFolded && onCardTap && (
+        <div className="text-[8px] text-center -mt-0.5 mb-0.5" style={{ color: 'rgba(180,80,255,0.6)' }}>👁</div>
       )}
 
-      {/* Main player HUD */}
+      {/* ── Main player HUD ── */}
       <div
         className={cn(
           'relative flex flex-col items-center rounded-lg px-1.5 py-1 min-w-[56px] max-w-[68px] transition-all duration-300',
@@ -190,7 +218,7 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCar
           </div>
         )}
 
-        {/* Avatar — styled as a casino chip */}
+        {/* Avatar */}
         <div
           className={cn(
             'w-6 h-6 rounded-full flex items-center justify-center text-[11px] shrink-0',
@@ -209,7 +237,7 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCar
           {initial}
         </div>
 
-        {/* Name — gold when active, purple when me, white otherwise */}
+        {/* Name */}
         <span
           className="text-[9px] font-semibold max-w-[60px] truncate block leading-tight mt-0.5"
           style={{
@@ -220,7 +248,7 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCar
           {player.display_name}
         </span>
 
-        {/* Chip count with inline chip icon */}
+        {/* Chip count */}
         <div className="flex items-center gap-0.5 mt-0.5">
           <ChipIcon />
           <span className="text-[8px] font-mono font-semibold" style={{ color: '#5ce65c' }}>
@@ -228,10 +256,9 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCar
           </span>
         </div>
 
-        {/* Bet amount badge — chip-style BET label */}
+        {/* Bet amount badge */}
         {betAmount > 0 && (
           <div className="flex items-center gap-0.5 mt-0.5">
-            {/* BET chip circle */}
             <div
               className="w-4 h-4 rounded-full flex items-center justify-center text-[6px] font-black"
               style={{
@@ -243,20 +270,16 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCar
             >
               BET
             </div>
-            {/* Amount */}
             <span
               className="text-[10px] font-mono font-bold"
-              style={{
-                color: '#d4a0ff',
-                textShadow: '0 0 6px rgba(180,80,255,0.5)',
-              }}
+              style={{ color: '#d4a0ff', textShadow: '0 0 6px rgba(180,80,255,0.5)' }}
             >
               {betAmount.toLocaleString()}
             </span>
           </div>
         )}
 
-        {/* All-in badge (second instance, after chip count) */}
+        {/* All-in badge (after chip count) */}
         {isAllIn && (
           <div
             className="text-[11px] font-bold uppercase tracking-wider px-1.5 py-0 rounded-sm mt-0.5"
@@ -279,7 +302,7 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCar
           </div>
         )}
 
-        {/* Eliminated overlay — fades in after shake animation */}
+        {/* Eliminated overlay */}
         {isOut && (
           <div
             className="absolute inset-0 rounded-xl flex items-center justify-center"
