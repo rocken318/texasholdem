@@ -38,14 +38,14 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0 }: PlayerSlot
         )}
         style={{
           background: isMe
-            ? 'linear-gradient(180deg, rgba(212,175,55,0.15) 0%, rgba(30,30,30,0.85) 40%, rgba(20,20,20,0.92) 100%)'
-            : 'linear-gradient(180deg, rgba(40,40,40,0.8) 0%, rgba(20,20,20,0.9) 100%)',
+            ? 'linear-gradient(180deg, rgba(140,50,255,0.18) 0%, rgba(20,10,40,0.88) 40%, rgba(12,5,28,0.95) 100%)'
+            : 'linear-gradient(180deg, rgba(30,15,55,0.82) 0%, rgba(15,8,30,0.92) 100%)',
           border: isMe
-            ? '1px solid rgba(212,175,55,0.4)'
-            : '1px solid rgba(255,255,255,0.1)',
+            ? '1px solid rgba(180,80,255,0.45)'
+            : '1px solid rgba(180,80,255,0.15)',
           boxShadow: isActive
-            ? '0 0 12px rgba(212,175,55,0.6), 0 0 24px rgba(212,175,55,0.3)'
-            : '0 2px 8px rgba(0,0,0,0.5)',
+            ? '0 0 14px rgba(180,80,255,0.75), 0 0 28px rgba(180,80,255,0.35)'
+            : '0 2px 8px rgba(0,0,0,0.6)',
           backdropFilter: 'blur(8px)',
         }}
       >
@@ -54,8 +54,8 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0 }: PlayerSlot
           <div
             className="absolute -inset-[2px] rounded-xl animate-pulse"
             style={{
-              border: '2px solid #D4AF37',
-              boxShadow: '0 0 8px rgba(212,175,55,0.5)',
+              border: '2px solid #bf80ff',
+              boxShadow: '0 0 8px rgba(180,80,255,0.6)',
             }}
           />
         )}
@@ -66,7 +66,7 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0 }: PlayerSlot
             <div
               className="h-full rounded-full"
               style={{
-                background: 'linear-gradient(90deg, #D4AF37, #F5D060)',
+                background: 'linear-gradient(90deg, #7c3aed, #bf80ff)',
                 animation: 'shrinkBar 15s linear infinite',
               }}
             />
@@ -77,13 +77,13 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0 }: PlayerSlot
         <div
           className={cn(
             'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0',
-            isActive && 'ring-2 ring-[#D4AF37] ring-offset-1 ring-offset-transparent',
+            isActive && 'ring-2 ring-[#bf80ff] ring-offset-1 ring-offset-transparent',
           )}
           style={{
             background: isMe
-              ? 'linear-gradient(135deg, #D4AF37 0%, #8B7320 100%)'
-              : 'linear-gradient(135deg, #4a5568 0%, #2d3748 100%)',
-            color: isMe ? '#1a1a1a' : '#e2e8f0',
+              ? 'linear-gradient(135deg, #bf80ff 0%, #7c3aed 100%)'
+              : 'linear-gradient(135deg, #3a2060 0%, #1e0f40 100%)',
+            color: '#fff',
           }}
         >
           {initial}
@@ -93,7 +93,7 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0 }: PlayerSlot
         <span
           className={cn(
             'text-[10px] font-semibold max-w-[70px] truncate block leading-tight mt-0.5',
-            isMe ? 'text-[#F5D060]' : 'text-white/90',
+            isMe ? 'text-[#d4a0ff]' : 'text-white/85',
           )}
         >
           {player.display_name}
@@ -115,19 +115,19 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0 }: PlayerSlot
           <div
             className="flex items-center gap-0.5 mt-0.5 px-1.5 py-0 rounded-sm"
             style={{
-              background: 'linear-gradient(180deg, rgba(212,175,55,0.25) 0%, rgba(212,175,55,0.1) 100%)',
-              border: '1px solid rgba(212,175,55,0.3)',
+              background: 'linear-gradient(180deg, rgba(180,80,255,0.25) 0%, rgba(180,80,255,0.1) 100%)',
+              border: '1px solid rgba(180,80,255,0.35)',
             }}
           >
             <span
               className="text-[8px]"
-              style={{ color: '#D4AF37' }}
+              style={{ color: '#bf80ff' }}
             >
               BET
             </span>
             <span
               className="text-[10px] font-mono font-bold"
-              style={{ color: '#FFD700' }}
+              style={{ color: '#d4a0ff' }}
             >
               {betAmount.toLocaleString()}
             </span>
@@ -139,8 +139,8 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0 }: PlayerSlot
           <div
             className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0 rounded-sm mt-0.5"
             style={{
-              background: 'linear-gradient(90deg, #D4AF37, #F5D060)',
-              color: '#1a1a1a',
+              background: 'linear-gradient(90deg, #7c3aed, #bf80ff)',
+              color: '#fff',
             }}
           >
             All In
