@@ -10,6 +10,8 @@ interface Gate {
 }
 
 const gates = new Map<string, Gate>()
+// Buffer for early ready calls that arrive before the gate opens
+const earlyReady = new Map<string, Set<string>>()
 
 export function openGate(
   roomId: string,
@@ -29,23 +31,43 @@ export function openGate(
       if (!gate) return
       clearTimeout(gate.timer)
       gates.delete(roomId)
+      earlyReady.delete(roomId)
       resolve()
     }
 
     const timer = setTimeout(tryResolve, timeoutMs)
 
+    const readyIds = new Set<string>()
+
+    // Apply any early ready calls that arrived before the gate opened
+    const buffered = earlyReady.get(roomId)
+    if (buffered) {
+      for (const id of buffered) readyIds.add(id)
+      earlyReady.delete(roomId)
+    }
+
     gates.set(roomId, {
       resolve: tryResolve,
-      readyIds: new Set(),
+      readyIds,
       requiredIds: new Set(playerIds),
       timer,
     })
+
+    // Check if already all ready (from buffered calls)
+    if (readyIds.size >= playerIds.length) {
+      tryResolve()
+    }
   })
 }
 
 export function markReady(roomId: string, playerId: string): void {
   const gate = gates.get(roomId)
-  if (!gate) return
+  if (!gate) {
+    // Gate not open yet — buffer the ready call
+    if (!earlyReady.has(roomId)) earlyReady.set(roomId, new Set())
+    earlyReady.get(roomId)!.add(playerId)
+    return
+  }
   gate.readyIds.add(playerId)
   if (gate.readyIds.size >= gate.requiredIds.size) {
     gate.resolve()
