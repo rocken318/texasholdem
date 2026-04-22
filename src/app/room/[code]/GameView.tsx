@@ -1,12 +1,13 @@
 // src/app/room/[code]/GameView.tsx
 'use client'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { Room, Player, Hand, PokerCard } from '@/types/domain'
 import type { Translations } from '@/lib/i18n'
 import { TableView } from './TableView'
 import { ActionBar } from './ActionBar'
 import { TurnTimer } from './TurnTimer'
 import { HandResultOverlay, type ShowdownResult } from './HandResultOverlay'
+import { Card } from '@/components/Card'
 
 interface GameViewProps {
   room: Room
@@ -24,6 +25,38 @@ interface GameViewProps {
   t: Translations
 }
 
+
+function CardPeekModal({ cards, onClose }: { cards: PokerCard[]; onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center"
+      style={{ background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(8px)' }}
+      onClick={onClose}
+    >
+      <div className="flex flex-col items-center gap-6">
+        {/* Title */}
+        <div className="text-xs font-bold tracking-[0.3em] uppercase" style={{ color: '#bf80ff' }}>
+          YOUR HAND / あなたの手
+        </div>
+
+        {/* Large cards */}
+        <div className="flex gap-4">
+          <div style={{ filter: 'drop-shadow(0 0 20px rgba(140,50,255,0.8))' }}>
+            <Card card={cards[0]} large />
+          </div>
+          <div style={{ filter: 'drop-shadow(0 0 20px rgba(140,50,255,0.8))' }}>
+            <Card card={cards[1]} large />
+          </div>
+        </div>
+
+        {/* Card details */}
+        <div className="text-center">
+          <div className="text-xs text-white/40 tracking-wide">タップして閉じる</div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function getActionLabel(action: string, amount: number, t: Translations): string {
   switch (action) {
@@ -49,6 +82,7 @@ function getActionColor(action: string): string {
 
 export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrentBet, tableBets, lastAction, currentSeat, handResult, showdownResults, onHandResultDismiss, t }: GameViewProps) {
   const isMyTurn = myPlayer?.seat_index === currentSeat && currentSeat !== null
+  const [peekingCards, setPeekingCards] = useState(false)
 
   // Action toast — derived from lastAction, no setState in effects
   const toastData = useMemo(() => {
@@ -90,6 +124,11 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
 
       {/* Content above overlay */}
       <div className="relative z-10 flex flex-col h-full overflow-hidden">
+        {/* Card peek modal */}
+        {peekingCards && myCards.length > 0 && (
+          <CardPeekModal cards={myCards} onClose={() => setPeekingCards(false)} />
+        )}
+
         {/* Hand result overlay */}
         {handResult && (
           <HandResultOverlay
@@ -124,6 +163,7 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
             pot={hand?.pot ?? 0}
             tableBets={tableBets}
             myCards={myCards}
+            onMyCardTap={() => setPeekingCards(true)}
           />
         </div>
 

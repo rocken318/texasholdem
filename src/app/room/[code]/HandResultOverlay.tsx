@@ -19,7 +19,8 @@ interface HandResultOverlayProps {
   onDismiss: () => void
 }
 
-const DURATION_MS = 5000
+const DURATION_MS = 7000
+const WINNER_PHASE_MS = 2500
 
 // Deterministic confetti pieces — fixed positions & colors to avoid hydration mismatches
 const CONFETTI_PIECES = [
@@ -48,12 +49,13 @@ const CONFETTI_PIECES = [
 
 export function HandResultOverlay({ winnerIds, winnerNames, pot, showdownResults, onDismiss }: HandResultOverlayProps) {
   const [progress, setProgress] = useState(100)
+  const [phase, setPhase] = useState<'winner' | 'showdown'>('winner')
   // Track which player indices have been revealed so far
   const [revealedCount, setRevealedCount] = useState(0)
 
   const dismiss = useCallback(() => onDismiss(), [onDismiss])
 
-  // Countdown bar
+  // Countdown bar — always from mount, total DURATION_MS
   useEffect(() => {
     const start = Date.now()
     const id = setInterval(() => {
@@ -64,18 +66,29 @@ export function HandResultOverlay({ winnerIds, winnerNames, pot, showdownResults
     return () => clearInterval(id)
   }, [dismiss])
 
-  // Staggered card reveal: reveal one player every 300 ms
+  // Phase transition: winner → showdown after WINNER_PHASE_MS (only if there are showdown results)
   useEffect(() => {
     if (showdownResults.length === 0) return
-    // Start revealing immediately
+    const t = setTimeout(() => setPhase('showdown'), WINNER_PHASE_MS)
+    return () => clearTimeout(t)
+  }, [showdownResults.length])
+
+  // Staggered card reveal — reset and re-run when entering showdown phase
+  useEffect(() => {
+    if (showdownResults.length === 0) return
+    if (phase === 'winner') {
+      setRevealedCount(0)
+      return
+    }
+    // showdown phase: reveal one player at a time, 400ms apart
     setRevealedCount(1)
     const timers: ReturnType<typeof setTimeout>[] = []
     for (let i = 1; i < showdownResults.length; i++) {
-      const t = setTimeout(() => setRevealedCount(i + 1), i * 300)
+      const t = setTimeout(() => setRevealedCount(i + 1), i * 400)
       timers.push(t)
     }
     return () => timers.forEach(clearTimeout)
-  }, [showdownResults.length])
+  }, [phase, showdownResults.length])
 
   // Pot count-up: start with potVisible false, flip to true after short mount delay
   const [potVisible, setPotVisible] = useState(false)
@@ -94,11 +107,13 @@ export function HandResultOverlay({ winnerIds, winnerNames, pot, showdownResults
       onClick={dismiss}
     >
       <div
-        className="w-full max-w-sm rounded-2xl overflow-hidden relative"
+        className="w-full rounded-2xl overflow-hidden relative"
         style={{
+          maxWidth: phase === 'showdown' ? 520 : 384,
           background: 'linear-gradient(180deg, #1c1c0e 0%, #0d1f0d 100%)',
           border: '1.5px solid rgba(212,175,55,0.45)',
           boxShadow: '0 0 80px rgba(212,175,55,0.18), 0 24px 80px rgba(0,0,0,0.85)',
+          transition: 'max-width 0.4s ease',
         }}
         onClick={e => e.stopPropagation()}
       >
@@ -248,8 +263,8 @@ export function HandResultOverlay({ winnerIds, winnerNames, pot, showdownResults
             )}
           </div>
 
-          {/* Showdown hands — staggered reveal */}
-          {showdownResults.length > 0 && (
+          {/* ── WINNER PHASE: compact showdown list ── */}
+          {phase === 'winner' && showdownResults.length > 0 && (
             <>
               <div className="w-full h-px bg-gradient-to-r from-transparent via-[#D4AF37]/20 to-transparent" />
               <div className="w-full flex flex-col gap-3">
@@ -268,7 +283,6 @@ export function HandResultOverlay({ winnerIds, winnerNames, pot, showdownResults
                     >
                       {/* Hole cards — flip reveal on appearance */}
                       <div className="flex gap-1 shrink-0" style={{ perspective: 600 }}>
-                        {/* Shimmer wrapper for winner cards */}
                         <div style={{ position: 'relative', overflow: 'hidden', display: 'flex', gap: 4 }}>
                           {r.holeCards.map((card, i) => (
                             <div
@@ -292,7 +306,6 @@ export function HandResultOverlay({ winnerIds, winnerNames, pot, showdownResults
                               />
                             </div>
                           ))}
-                          {/* Gold shimmer sweep for winner cards */}
                           {isWinner && isRevealed && (
                             <div
                               style={{
@@ -311,17 +324,13 @@ export function HandResultOverlay({ winnerIds, winnerNames, pot, showdownResults
                       <div className="flex flex-col min-w-0 flex-1">
                         <span
                           className="text-sm font-bold truncate"
-                          style={{
-                            color: isWinner ? '#F5D060' : 'rgba(255,255,255,0.6)',
-                          }}
+                          style={{ color: isWinner ? '#F5D060' : 'rgba(255,255,255,0.6)' }}
                         >
                           {r.displayName}
                         </span>
                         <span
                           className="text-xs font-medium"
-                          style={{
-                            color: isWinner ? '#D4AF37' : 'rgba(255,255,255,0.3)',
-                          }}
+                          style={{ color: isWinner ? '#D4AF37' : 'rgba(255,255,255,0.3)' }}
                         >
                           {r.handName}
                         </span>
@@ -337,6 +346,131 @@ export function HandResultOverlay({ winnerIds, winnerNames, pot, showdownResults
                 })}
               </div>
             </>
+          )}
+
+          {/* ── SHOWDOWN PHASE: dramatic full card-reveal layout ── */}
+          {phase === 'showdown' && showdownResults.length > 0 && (
+            <div
+              className="w-full flex flex-col gap-0"
+              style={{ animation: 'fadeUp 0.4s ease both' }}
+            >
+              {/* Showdown header */}
+              <div className="w-full h-px bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent mb-3" />
+              <div
+                className="flex items-center gap-2 mb-3"
+                style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11, letterSpacing: '0.25em', textTransform: 'uppercase', fontWeight: 700 }}
+              >
+                <span style={{ fontSize: 16 }}>🃏</span>
+                <span>Showdown</span>
+              </div>
+
+              {/* Player rows */}
+              <div className="flex flex-col gap-2">
+                {showdownResults.map((r, idx) => {
+                  const isWinner = winnerIds.includes(r.playerId)
+                  const isRevealed = idx < revealedCount
+
+                  return (
+                    <div
+                      key={r.playerId}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                        padding: '10px 12px',
+                        borderRadius: 12,
+                        border: isWinner ? '1px solid rgba(212,175,55,0.6)' : '1px solid rgba(255,255,255,0.06)',
+                        background: isWinner ? 'rgba(212,175,55,0.10)' : 'rgba(255,255,255,0.03)',
+                        boxShadow: isWinner ? '0 0 20px rgba(212,175,55,0.12)' : 'none',
+                        opacity: isRevealed ? 1 : 0,
+                        filter: isRevealed && !isWinner ? 'grayscale(0.6) opacity(0.7)' : 'none',
+                        transition: 'opacity 0.2s ease, filter 0.2s ease',
+                      }}
+                    >
+                      {/* Large cards */}
+                      <div
+                        className="flex shrink-0"
+                        style={{ gap: 6, perspective: 800 }}
+                      >
+                        <div style={{ position: 'relative', overflow: 'hidden', display: 'flex', gap: 6 }}>
+                          {r.holeCards.map((card, i) => (
+                            <div
+                              key={i}
+                              style={{
+                                animation: isRevealed
+                                  ? `flipReveal 0.44s ease-in-out ${i * 120}ms both`
+                                  : 'none',
+                                filter: isRevealed && isWinner
+                                  ? 'drop-shadow(0 0 14px rgba(255,215,0,0.85)) drop-shadow(0 0 28px rgba(255,215,0,0.45))'
+                                  : 'none',
+                                display: 'inline-block',
+                              }}
+                            >
+                              <Card
+                                card={card}
+                                className={isWinner ? 'ring-2 ring-[#D4AF37]/70' : ''}
+                              />
+                            </div>
+                          ))}
+                          {/* Gold shimmer sweep for winner cards */}
+                          {isWinner && isRevealed && (
+                            <div
+                              style={{
+                                position: 'absolute',
+                                inset: 0,
+                                background: 'linear-gradient(105deg, transparent 40%, rgba(255,215,0,0.35) 50%, transparent 60%)',
+                                animation: 'cardGoldSweep 0.8s 0.5s ease both',
+                                pointerEvents: 'none',
+                              }}
+                            />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Name + hand name */}
+                      <div className="flex flex-col min-w-0 flex-1 gap-1">
+                        <div className="flex items-center gap-2">
+                          {isWinner && (
+                            <span style={{ fontSize: 14, lineHeight: 1 }}>🏆</span>
+                          )}
+                          <span
+                            className="font-bold truncate"
+                            style={{
+                              color: isWinner ? '#F5D060' : 'rgba(255,255,255,0.65)',
+                              fontSize: 15,
+                            }}
+                          >
+                            {r.displayName}
+                          </span>
+                        </div>
+                        <span
+                          style={{
+                            color: isWinner ? '#D4AF37' : 'rgba(255,255,255,0.4)',
+                            fontWeight: isWinner ? 700 : 400,
+                            fontSize: isWinner ? 13 : 11,
+                            letterSpacing: '0.03em',
+                          }}
+                        >
+                          {r.handName}
+                        </span>
+                      </div>
+
+                      {/* Win amount */}
+                      {isWinner && (
+                        <span
+                          className="font-mono font-bold shrink-0"
+                          style={{ color: '#5ce65c', fontSize: 15 }}
+                        >
+                          +{pot.toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+
+              <div className="w-full h-px bg-gradient-to-r from-transparent via-[#D4AF37]/20 to-transparent mt-3" />
+            </div>
           )}
 
           <p className="text-white/20 text-xs">タップして続ける</p>

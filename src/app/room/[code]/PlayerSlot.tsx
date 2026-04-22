@@ -9,6 +9,7 @@ interface PlayerSlotProps {
   isActive: boolean
   betAmount?: number
   cards?: PokerCard[]
+  onCardTap?: () => void
 }
 
 /** Tiny inline SVG chip icon — 8×8 circle with a center dot */
@@ -21,7 +22,7 @@ function ChipIcon() {
   )
 }
 
-export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards }: PlayerSlotProps) {
+export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCardTap }: PlayerSlotProps) {
   const inHand = player.status !== 'folded' && player.status !== 'out'
   const isFolded = player.status === 'folded'
   const isAllIn = player.status === 'all_in'
@@ -77,13 +78,22 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards }: Pla
 
       {/* Hole cards: face-up (mine) or face-down (others) */}
       {isMe && cards && cards.length > 0 && !isFolded && (
-        <div className="flex -space-x-3 mb-0.5">
-          <div className="-rotate-6" style={{ filter: 'drop-shadow(0 4px 8px rgba(140,50,255,0.5))' }}>
-            <Card card={cards[0]} className="ring-1 ring-[#bf80ff]/60" />
+        <div
+          className="flex flex-col items-center gap-0.5 mb-0.5"
+          onClick={onCardTap}
+          style={onCardTap ? { cursor: 'pointer' } : undefined}
+        >
+          <div className="flex -space-x-3">
+            <div className="-rotate-6" style={{ filter: 'drop-shadow(0 4px 8px rgba(140,50,255,0.5))' }}>
+              <Card card={cards[0]} className="ring-1 ring-[#bf80ff]/60" />
+            </div>
+            <div className="rotate-6" style={{ filter: 'drop-shadow(0 4px 8px rgba(140,50,255,0.5))' }}>
+              <Card card={cards[1]} className="ring-1 ring-[#bf80ff]/60" />
+            </div>
           </div>
-          <div className="rotate-6" style={{ filter: 'drop-shadow(0 4px 8px rgba(140,50,255,0.5))' }}>
-            <Card card={cards[1]} className="ring-1 ring-[#bf80ff]/60" />
-          </div>
+          {onCardTap && (
+            <div className="text-[8px] text-center" style={{ color: 'rgba(180,80,255,0.6)' }}>👁</div>
+          )}
         </div>
       )}
       {inHand && !isFolded && (!isMe || !cards?.length) && (

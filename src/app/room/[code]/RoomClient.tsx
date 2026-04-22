@@ -46,11 +46,14 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
   const playersRef = useRef<Player[]>([])
   const botIdsRef = useRef(botIds)
   const nameInputRef = useRef<HTMLInputElement>(null)
+  const handResultRef = useRef<{ winnerIds: string[]; pot: number } | null>(null)
+  const pendingHandStartRef = useRef<(PokerEvent & { type: 'hand_started' }) | null>(null)
 
   // Keep refs in sync
   useEffect(() => { playersRef.current = players }, [players])
   useEffect(() => { handRef.current = hand }, [hand])
   useEffect(() => { botIdsRef.current = botIds }, [botIds])
+  useEffect(() => { handResultRef.current = handResult }, [handResult])
 
   const { getPlayer, savePlayer } = useLocalPlayer(room.id)
   const hostPlayerId = typeof window !== 'undefined'
@@ -136,6 +139,12 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
       setView('playing')
     }
     if (event.type === 'hand_started') {
+      // If the hand result overlay is currently showing, buffer this event and
+      // apply it after the overlay is dismissed to avoid immediately clearing it.
+      if (handResultRef.current !== null) {
+        pendingHandStartRef.current = event
+        return
+      }
       setTableBets({})
       setLastAction(null)
       setHandResult(null)
@@ -289,6 +298,33 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
 
   function handleHandResultDismiss() {
     setHandResult(null)
+    setShowdownResults([])
+    // Apply any hand_started event that arrived while the overlay was showing
+    const pending = pendingHandStartRef.current
+    if (pending) {
+      pendingHandStartRef.current = null
+      setTableBets({})
+      setLastAction(null)
+      setHand({
+        id: pending.handId,
+        room_id: room.id,
+        hand_number: pending.handNumber,
+        dealer_seat: pending.dealerSeat,
+        community_cards: [],
+        pot: 0,
+        side_pots: [],
+        street: 'preflop',
+        current_seat: null,
+        current_bet: 0,
+        deck: [],
+        winner_ids: null,
+        started_at: Date.now(),
+        finished_at: null,
+      })
+      setMyCards([])
+      setMyHandCurrentBet(0)
+      setCurrentSeat(null)
+    }
   }
 
   async function handleStart() {

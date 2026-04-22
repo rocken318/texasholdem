@@ -187,6 +187,9 @@ export async function resolveHand(params: {
     return
   }
 
+  // Give clients time to view showdown results before next hand starts
+  await new Promise<void>(resolve => setTimeout(resolve, 4000))
+
   // Start next hand
   await startNewHand(roomId, activePlayers, nextDealerSeat, room.settings, handNumber + 1)
 }
