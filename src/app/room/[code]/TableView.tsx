@@ -30,8 +30,9 @@ function getSeatPosition(seatIndex: number, total: number, mySeatIndex: number |
   const angle = ((seatIndex - offset) / total) * 2 * Math.PI + Math.PI / 2
   const sinA = Math.sin(angle)
   // Upper-side players (sinA < 0) pull upward; lower-side players push downward.
+  // Players at exact left/right (sinA = 0) get boost = 0 — neither up nor down.
   // cos² targets side seats; top/bottom seats (cos≈0) are unaffected.
-  const boost = sideBoost * Math.pow(Math.cos(angle), 2) * Math.sign(sinA || 1)
+  const boost = sideBoost * Math.pow(Math.cos(angle), 2) * Math.sign(sinA)
   return {
     left: `${50 + rx * Math.cos(angle)}%`,
     top:  `${50 + ry * sinA + boost}%`,
