@@ -28,12 +28,13 @@ interface FlyingChip {
 function getSeatPosition(seatIndex: number, total: number, mySeatIndex: number | null, rx = 41, ry = 35, sideBoost = 0) {
   const offset = mySeatIndex !== null ? mySeatIndex : 0
   const angle = ((seatIndex - offset) / total) * 2 * Math.PI + Math.PI / 2
-  // Push side players (where cos² is large) further down to avoid
-  // overlapping with community cards in the center.
-  const boost = sideBoost * Math.pow(Math.cos(angle), 2)
+  const sinA = Math.sin(angle)
+  // Upper-side players (sinA < 0) pull upward; lower-side players push downward.
+  // cos² targets side seats; top/bottom seats (cos≈0) are unaffected.
+  const boost = sideBoost * Math.pow(Math.cos(angle), 2) * Math.sign(sinA || 1)
   return {
     left: `${50 + rx * Math.cos(angle)}%`,
-    top:  `${50 + ry * Math.sin(angle) + boost}%`,
+    top:  `${50 + ry * sinA + boost}%`,
   }
 }
 
@@ -224,7 +225,7 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
           {/* Center: community cards + pot */}
           <div
             className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-2 pointer-events-none z-10"
-            style={{ top: isMobile ? '37%' : '48%' }}
+            style={{ top: isMobile ? '44%' : '50%' }}
           >
             <CommunityCards cards={communityCards} />
             {pot > 0 && (
@@ -279,7 +280,7 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
           {/* Player slots */}
           {seated.map(player => {
             const isMe = player.id === myPlayerId
-            const pos = getSeatPosition(player.seat_index!, seated.length, mySeatIndex, isMobile ? 42 : 41, isMobile ? 32 : 34, isMobile ? 10 : 0)
+            const pos = getSeatPosition(player.seat_index!, seated.length, mySeatIndex, isMobile ? 42 : 41, isMobile ? 32 : 34, isMobile ? 13 : 9)
             return (
               <div
                 key={player.id}
