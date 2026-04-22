@@ -1,6 +1,6 @@
 // src/app/room/[code]/GameView.tsx
 'use client'
-import { useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import type { Room, Player, Hand, PokerCard } from '@/types/domain'
 import type { Translations } from '@/lib/i18n'
 import { TableView } from './TableView'
@@ -50,31 +50,17 @@ function getActionColor(action: string): string {
 export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrentBet, tableBets, lastAction, currentSeat, handResult, showdownResults, onHandResultDismiss, t }: GameViewProps) {
   const isMyTurn = myPlayer?.seat_index === currentSeat && currentSeat !== null
 
-  // Action toast state
-  const [toast, setToast] = useState<{ message: string; color: string } | null>(null)
-  const [toastVisible, setToastVisible] = useState(false)
-
-  useEffect(() => {
-    if (!lastAction) return
+  // Action toast — derived from lastAction, no setState in effects
+  const toastData = useMemo(() => {
+    if (!lastAction) return null
     const player = players.find(p => p.id === lastAction.playerId)
-    const playerName = player?.display_name ?? '?'
-    const label = getActionLabel(lastAction.action, lastAction.amount, t)
-    const color = getActionColor(lastAction.action)
-    setToast({ message: `${playerName}: ${label}`, color })
-    setToastVisible(true)
-    const timer = setTimeout(() => {
-      setToastVisible(false)
-    }, 1500)
-    return () => clearTimeout(timer)
-  }, [lastAction, players, t])
-
-  // Clear toast from DOM after fade-out
-  useEffect(() => {
-    if (!toastVisible && toast) {
-      const timer = setTimeout(() => setToast(null), 300)
-      return () => clearTimeout(timer)
+    return {
+      // key encodes enough action data to restart CSS animation on each unique action
+      key: `toast-${lastAction.playerId}-${lastAction.action}-${lastAction.amount}`,
+      message: `${player?.display_name ?? '?'}: ${getActionLabel(lastAction.action, lastAction.amount, t)}`,
+      color: getActionColor(lastAction.action),
     }
-  }, [toastVisible, toast])
+  }, [lastAction, players, t])
 
   async function handleAction(action: string, amount?: number) {
     if (!myPlayer) return
@@ -91,63 +77,75 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
     : []
 
   return (
-    <main className="h-[100dvh] bg-green-800 flex flex-col overflow-hidden">
-      {/* Hand result overlay */}
-      {handResult && (
-        <HandResultOverlay
-          winnerIds={handResult.winnerIds}
-          winnerNames={winnerNames}
-          pot={handResult.pot}
-          showdownResults={showdownResults}
-          onDismiss={onHandResultDismiss}
-        />
-      )}
+    <main
+      className="h-[100dvh] flex flex-col overflow-hidden relative"
+      style={{
+        backgroundImage: "url('/bg/casino.png')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center 30%',
+      }}
+    >
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-black/60 pointer-events-none z-0" />
 
-      {/* Action toast */}
-      {toast && (
-        <div
-          className={`fixed top-4 left-1/2 -translate-x-1/2 z-50
-            bg-black/80 rounded-xl py-2 px-5 shadow-lg
-            transition-all duration-300 ease-out
-            ${toastVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}`}
-        >
-          <span className={`font-bold text-sm whitespace-nowrap ${toast.color}`}>
-            {toast.message}
-          </span>
+      {/* Content above overlay */}
+      <div className="relative z-10 flex flex-col h-full overflow-hidden">
+        {/* Hand result overlay */}
+        {handResult && (
+          <HandResultOverlay
+            winnerIds={handResult.winnerIds}
+            winnerNames={winnerNames}
+            pot={handResult.pot}
+            showdownResults={showdownResults}
+            onDismiss={onHandResultDismiss}
+          />
+        )}
+
+        {/* Action toast — key restarts CSS animation on each new action */}
+        {toastData && (
+          <div
+            key={toastData.key}
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-black/80 rounded-xl py-2 px-5 shadow-lg"
+            style={{ animation: 'toastFade 1.8s ease-out forwards' }}
+          >
+            <span className={`font-bold text-sm whitespace-nowrap ${toastData.color}`}>
+              {toastData.message}
+            </span>
+          </div>
+        )}
+
+        <div className="flex-1 min-h-0 flex items-center overflow-hidden">
+          <TableView
+            players={players}
+            myPlayerId={myPlayer?.id ?? null}
+            mySeatIndex={myPlayer?.seat_index ?? null}
+            currentSeat={currentSeat}
+            communityCards={hand?.community_cards ?? []}
+            pot={hand?.pot ?? 0}
+            tableBets={tableBets}
+          />
         </div>
-      )}
 
-      <div className="flex-1 min-h-0 flex items-center overflow-hidden">
-        <TableView
-          players={players}
-          myPlayerId={myPlayer?.id ?? null}
-          mySeatIndex={myPlayer?.seat_index ?? null}
-          currentSeat={currentSeat}
-          communityCards={hand?.community_cards ?? []}
-          pot={hand?.pot ?? 0}
-          tableBets={tableBets}
-        />
-      </div>
-
-      <div className="flex-shrink-0 flex flex-col">
-        {isMyTurn && hand && (
-          <TurnTimer
-            key={`${hand.id}-${currentSeat}`}
-            seconds={room.settings.turnTimerSec}
-            onTimeout={() => handleAction('fold')}
-          />
-        )}
-        <MyCards cards={myCards} />
-        {isMyTurn && hand && myPlayer && (
-          <ActionBar
-            currentBet={hand.current_bet}
-            myCurrentBet={myHandCurrentBet}
-            myChips={myPlayer.chips}
-            bigBlind={room.settings.bigBlind}
-            onAction={handleAction}
-            t={t}
-          />
-        )}
+        <div className="flex-shrink-0 flex flex-col">
+          {isMyTurn && hand && (
+            <TurnTimer
+              key={`${hand.id}-${currentSeat}`}
+              seconds={room.settings.turnTimerSec}
+              onTimeout={() => handleAction('fold')}
+            />
+          )}
+          <MyCards cards={myCards} />
+          {isMyTurn && hand && myPlayer && (
+            <ActionBar
+              currentBet={hand.current_bet}
+              myCurrentBet={myHandCurrentBet}
+              myChips={myPlayer.chips}
+              bigBlind={room.settings.bigBlind}
+              onAction={handleAction}
+              t={t}
+            />
+          )}
+        </div>
       </div>
     </main>
   )
