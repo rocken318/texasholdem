@@ -38,33 +38,49 @@ export function playCardSound() {
   } catch {}
 }
 
-/** Chip bet / collect — clink sound */
+/** Chip bet / collect — ceramic chip clatter "kasha" */
 export function playChipSound() {
   try {
     const ac = getCtx()
     const t = ac.currentTime
 
-    // Two short tones = ceramic chip clink
-    const osc1 = ac.createOscillator()
-    osc1.type = 'sine'
-    osc1.frequency.setValueAtTime(3200, t)
-    osc1.frequency.exponentialRampToValueAtTime(1800, t + 0.04)
+    // Layer 1: filtered noise burst for the "kasha" attack
+    const n1 = noise(ac, 0.08, 0.6)
+    const bp1 = ac.createBiquadFilter()
+    bp1.type = 'bandpass'
+    bp1.frequency.value = 4000
+    bp1.Q.value = 2
+    const g1 = ac.createGain()
+    g1.gain.setValueAtTime(0.35, t)
+    g1.gain.exponentialRampToValueAtTime(0.001, t + 0.08)
+    n1.connect(bp1).connect(g1).connect(ac.destination)
+    n1.start(t)
+    n1.stop(t + 0.08)
 
-    const osc2 = ac.createOscillator()
-    osc2.type = 'sine'
-    osc2.frequency.setValueAtTime(4500, t + 0.02)
-    osc2.frequency.exponentialRampToValueAtTime(2200, t + 0.06)
+    // Layer 2: second hit slightly delayed (chips stacking)
+    const n2 = noise(ac, 0.06, 0.5)
+    const bp2 = ac.createBiquadFilter()
+    bp2.type = 'bandpass'
+    bp2.frequency.value = 3200
+    bp2.Q.value = 1.8
+    const g2 = ac.createGain()
+    g2.gain.setValueAtTime(0.25, t + 0.03)
+    g2.gain.exponentialRampToValueAtTime(0.001, t + 0.09)
+    n2.connect(bp2).connect(g2).connect(ac.destination)
+    n2.start(t + 0.03)
+    n2.stop(t + 0.09)
 
-    const gain = ac.createGain()
-    gain.gain.setValueAtTime(0.2, t)
-    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1)
-
-    osc1.connect(gain).connect(ac.destination)
-    osc2.connect(gain)
-    osc1.start(t)
-    osc1.stop(t + 0.05)
-    osc2.start(t + 0.02)
-    osc2.stop(t + 0.08)
+    // Layer 3: short metallic ring for ceramic resonance
+    const osc = ac.createOscillator()
+    osc.type = 'sine'
+    osc.frequency.setValueAtTime(6000, t)
+    osc.frequency.exponentialRampToValueAtTime(2500, t + 0.05)
+    const g3 = ac.createGain()
+    g3.gain.setValueAtTime(0.06, t)
+    g3.gain.exponentialRampToValueAtTime(0.001, t + 0.07)
+    osc.connect(g3).connect(ac.destination)
+    osc.start(t)
+    osc.stop(t + 0.07)
   } catch {}
 }
 

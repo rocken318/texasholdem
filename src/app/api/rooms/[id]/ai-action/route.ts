@@ -73,8 +73,64 @@ fold
 all_in
 raise <amount>`
 
-  let action = valid.canCheck ? 'check' : valid.canCall ? 'call' : valid.canAllIn ? 'all_in' : 'fold'
+  // Simple heuristic fallback AI (used when Gemini unavailable or as default)
+  let action: string
   let amount: number | undefined
+
+  {
+    // Evaluate hand strength roughly: pair, suited, high cards
+    const ranks = botHp.hole_cards.map(c => 'A23456789TJQKA'.indexOf(c.rank === 'A' ? 'A' : c.rank))
+    const highCard = Math.max(...ranks)
+    const suited = botHp.hole_cards[0].suit === botHp.hole_cards[1].suit
+    const paired = botHp.hole_cards[0].rank === botHp.hole_cards[1].rank
+    const hasBoard = hand.community_cards.length > 0
+    const potOdds = hand.pot > 0 ? (valid.callAmount / (hand.pot + valid.callAmount)) : 0
+
+    // Randomness factor
+    const r = Math.random()
+
+    if (paired || (highCard >= 12 && suited)) {
+      // Strong hand: raise often
+      if (valid.canRaise && r < 0.6) {
+        action = 'raise'
+        const sizeFactor = paired ? 2.5 + r * 2 : 2 + r * 1.5
+        amount = Math.min(Math.round(hand.pot * sizeFactor / room.settings.bigBlind) * room.settings.bigBlind + hand.current_bet, valid.maxRaise)
+        amount = Math.max(amount, valid.minRaise)
+      } else if (valid.canCall) {
+        action = 'call'
+      } else if (valid.canCheck) {
+        action = 'check'
+      } else {
+        action = valid.canAllIn ? 'all_in' : 'fold'
+      }
+    } else if (highCard >= 10 || suited) {
+      // Medium hand: sometimes raise, usually call
+      if (valid.canRaise && r < 0.25) {
+        action = 'raise'
+        amount = valid.minRaise
+      } else if (valid.canCheck) {
+        action = 'check'
+      } else if (valid.canCall && (potOdds < 0.35 || r < 0.7)) {
+        action = 'call'
+      } else {
+        action = r < 0.15 && valid.canCall ? 'call' : 'fold'
+      }
+    } else {
+      // Weak hand: bluff occasionally, otherwise fold/check
+      if (valid.canCheck) {
+        action = r < 0.1 && valid.canRaise ? 'raise' : 'check'
+        if (action === 'raise') amount = valid.minRaise
+      } else if (valid.canCall && potOdds < 0.2 && r < 0.4) {
+        action = 'call'
+      } else if (valid.canRaise && r < 0.08) {
+        // Bluff raise
+        action = 'raise'
+        amount = Math.min(valid.minRaise + room.settings.bigBlind, valid.maxRaise)
+      } else {
+        action = 'fold'
+      }
+    }
+  }
 
   if (!GEMINI_API_KEY) {
     return NextResponse.json({ action, amount })
