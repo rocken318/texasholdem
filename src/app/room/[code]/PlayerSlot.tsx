@@ -42,13 +42,13 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0 }: PlayerSlot
 
       {/* Face-down hole cards above slot (or discarded cards when folded) */}
       {inHand && !isFolded && (
-        <div className="flex -space-x-2 mb-0.5">
+        <div className="flex -space-x-1.5 mb-0.5" style={{ transform: 'scale(0.7)', transformOrigin: 'bottom center' }}>
           <div className="-rotate-6"><Card faceDown small /></div>
           <div className="rotate-6"><Card faceDown small /></div>
         </div>
       )}
       {isFolded && (
-        <div className="flex -space-x-3 mb-0.5">
+        <div className="flex -space-x-1.5 mb-0.5" style={{ transform: 'scale(0.7)', transformOrigin: 'bottom center' }}>
           <div style={{ animation: 'foldDiscardL 0.45s ease-out forwards' }}>
             <Card faceDown small />
           </div>
@@ -61,7 +61,7 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0 }: PlayerSlot
       {/* Main player HUD */}
       <div
         className={cn(
-          'relative flex flex-col items-center rounded-xl px-2 py-1.5 min-w-[72px] max-w-[90px] transition-all duration-300',
+          'relative flex flex-col items-center rounded-lg px-1.5 py-1 min-w-[52px] max-w-[64px] transition-all duration-300',
           !inHand && 'opacity-50',
         )}
         style={{
@@ -98,7 +98,7 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0 }: PlayerSlot
         {/* Avatar */}
         <div
           className={cn(
-            'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0',
+            'w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0',
             isActive && 'ring-2 ring-[#bf80ff] ring-offset-1 ring-offset-transparent',
           )}
           style={{
@@ -113,7 +113,7 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0 }: PlayerSlot
 
         {/* Name — gold when active, purple when me, white otherwise */}
         <span
-          className="text-[10px] font-semibold max-w-[70px] truncate block leading-tight mt-0.5"
+          className="text-[8px] font-semibold max-w-[56px] truncate block leading-tight mt-0.5"
           style={{ color: isActive ? '#ffd700' : isMe ? '#d4a0ff' : 'rgba(255,255,255,0.85)' }}
         >
           {player.display_name}
@@ -121,8 +121,8 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0 }: PlayerSlot
 
         {/* Chip count */}
         <div className="flex items-center gap-0.5 mt-0.5">
-          <span className="text-[9px]" style={{ color: '#5ce65c' }}>$</span>
-          <span className="text-[11px] font-mono font-semibold" style={{ color: '#5ce65c' }}>
+          <span className="text-[7px]" style={{ color: '#5ce65c' }}>$</span>
+          <span className="text-[8px] font-mono font-semibold" style={{ color: '#5ce65c' }}>
             {player.chips.toLocaleString()}
           </span>
         </div>

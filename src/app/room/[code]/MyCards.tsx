@@ -44,6 +44,7 @@ export function MyCards({ cards, isMyTurn = false }: MyCardsProps) {
           >
             <Card
               card={card}
+              small
               className="ring-2 ring-[#bf80ff]/70 shadow-2xl"
             />
           </div>
