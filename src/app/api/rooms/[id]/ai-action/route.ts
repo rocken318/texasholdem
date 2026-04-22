@@ -59,12 +59,19 @@ export async function POST(
   ].filter(Boolean).join(' | ')
 
   const prompt =
-`Texas Hold'em. You are the bot player.
+`Texas Hold'em. You are a casual bot player. Play conservatively.
 Hand: ${myCards}
 Board: ${board} (${hand.street})
 Pot: ${hand.pot}  CurrentBet: ${hand.current_bet}  YourChips: ${bot.chips}  BB: ${room.settings.bigBlind}
 Opponents: ${others}
 Valid: ${validList}
+
+Rules:
+- Prefer check or call with medium hands.
+- Only raise with strong hands (top pair+, two pair+, sets, straights, flushes).
+- When raising, keep it small: 2-3x the big blind above current bet.
+- NEVER go all_in unless you have a very strong hand (two pair+ on the board) AND are short-stacked (chips < 5x BB).
+- Fold weak hands when facing large bets.
 
 Reply with exactly one line, nothing else:
 check
