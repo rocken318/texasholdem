@@ -218,3 +218,27 @@ body {
   40%  { opacity: 0; }
   100% { opacity: 1; }
 }
+
+/* ── HandResultOverlay premium animations ── */
+
+@keyframes goldShimmer {
+  0%,100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+@keyframes confettiFall {
+  0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(120px) rotate(720deg); opacity: 0; }
+}
+
+@keyframes potReveal {
+  0%   { transform: scale(0.5); opacity: 0; }
+  60%  { transform: scale(1.15); opacity: 1; }
+  80%  { transform: scale(0.94); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes goldRingPulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(255,215,0,0.15), 0 0 24px rgba(255,215,0,0.35); }
+  50%       { box-shadow: 0 0 0 8px rgba(255,215,0,0.28), 0 0 40px rgba(255,215,0,0.55); }
+}
