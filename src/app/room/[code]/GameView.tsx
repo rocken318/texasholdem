@@ -134,8 +134,26 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
               onTimeout={() => handleAction('fold')}
             />
           )}
-          <MyCards cards={myCards} />
-          {isMyTurn && hand && myPlayer && (
+
+          {isMyTurn && (
+            <div className="flex justify-center py-1">
+              <div
+                className="px-5 py-1 rounded-full text-xs font-black tracking-[0.2em] uppercase"
+                style={{
+                  background: 'linear-gradient(90deg, rgba(255,215,0,0.12), rgba(255,215,0,0.22), rgba(255,215,0,0.12))',
+                  border: '1px solid rgba(255,215,0,0.5)',
+                  color: '#ffd700',
+                  boxShadow: '0 0 12px rgba(255,215,0,0.25), 0 0 24px rgba(255,215,0,0.1)',
+                  animation: 'cardPulse 1.8s ease-in-out infinite',
+                }}
+              >
+                {t.fold === 'Fold' ? 'YOUR TURN' : 'あなたのターン'}
+              </div>
+            </div>
+          )}
+
+          <MyCards cards={myCards} isMyTurn={isMyTurn} />
+          {hand && myPlayer && (
             <ActionBar
               currentBet={hand.current_bet}
               myCurrentBet={myHandCurrentBet}
@@ -143,6 +161,7 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
               bigBlind={room.settings.bigBlind}
               onAction={handleAction}
               t={t}
+              disabled={!isMyTurn}
             />
           )}
         </div>

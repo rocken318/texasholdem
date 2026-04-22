@@ -104,11 +104,13 @@ export function ActionBar({ currentBet, myCurrentBet, myChips, bigBlind, onActio
       )}
 
       {/* ── Pending indicator ── */}
-      {pending && (
+      {(pending || disabled) && (
         <div className="flex items-center justify-center gap-2 py-1">
-          <div className="h-2 w-2 rounded-full bg-white/60 animate-pulse" />
-          <span className="text-xs text-white/60 font-medium tracking-wide">
-            {t.fold === 'Fold' ? 'Sending...' : '送信中...'}
+          <div className={`h-2 w-2 rounded-full animate-pulse ${disabled && !pending ? 'bg-white/25' : 'bg-white/60'}`} />
+          <span className={`text-xs font-medium tracking-wide ${disabled && !pending ? 'text-white/30' : 'text-white/60'}`}>
+            {pending
+              ? (t.fold === 'Fold' ? 'Sending...' : '送信中...')
+              : (t.fold === 'Fold' ? 'Waiting for others...' : '他のプレイヤーのターン')}
           </span>
         </div>
       )}
