@@ -48,9 +48,9 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCar
     prevStatusRef.current = player.status
   }, [player.status])
 
-  // Show cards when: actively animating fold, or in-hand (not yet folded)
+  // Show cards only when in-hand (not folded, not eliminated)
   const hasMyCards = isMe && !!cards?.length
-  const showCards = foldAnimActive || (inHand && (hasMyCards || !isMe))
+  const showCards = inHand && (hasMyCards || !isMe)
 
   const throwAnimL: React.CSSProperties = foldAnimActive
     ? { animation: `cardThrowL ${THROW_MS}ms cubic-bezier(0.25,0.46,0.45,0.94) forwards` }

@@ -9,7 +9,8 @@
       "Bash(gh api:*)",
       "Bash(python3 -c \"import sys,json,base64; print\\(base64.b64decode\\(json.load\\(sys.stdin\\)['content']\\).decode\\(\\)\\)\")",
       "Bash(python3 -c \"import sys,json; [print\\(f['name']\\) for f in json.load\\(sys.stdin\\)]\")",
-      "WebSearch"
+      "WebSearch",
+      "Bash(find:*)"
     ]
   }
 }

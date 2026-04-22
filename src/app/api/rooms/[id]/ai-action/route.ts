@@ -89,43 +89,42 @@ raise <amount>`
     // Randomness factor
     const r = Math.random()
 
+    // Cap raise to reasonable % of stack to avoid instant bust scenarios
+    const bb = room.settings.bigBlind
+    const maxReasonableRaise = Math.min(valid.maxRaise, bot.chips * 0.3 + hand.current_bet)
+
     if (paired || (highCard >= 12 && suited)) {
-      // Strong hand: raise often
-      if (valid.canRaise && r < 0.6) {
+      // Strong hand: raise sometimes, modest sizing
+      if (valid.canRaise && r < 0.5) {
         action = 'raise'
-        const sizeFactor = paired ? 2.5 + r * 2 : 2 + r * 1.5
-        amount = Math.min(Math.round(hand.pot * sizeFactor / room.settings.bigBlind) * room.settings.bigBlind + hand.current_bet, valid.maxRaise)
+        // Raise 2-3x big blind above current bet
+        amount = Math.min(hand.current_bet + bb * (2 + Math.floor(r * 2)), maxReasonableRaise)
         amount = Math.max(amount, valid.minRaise)
-      } else if (valid.canCall) {
-        action = 'call'
       } else if (valid.canCheck) {
         action = 'check'
+      } else if (valid.canCall) {
+        action = 'call'
       } else {
-        action = valid.canAllIn ? 'all_in' : 'fold'
+        action = 'fold'
       }
     } else if (highCard >= 10 || suited) {
-      // Medium hand: sometimes raise, usually call
-      if (valid.canRaise && r < 0.25) {
+      // Medium hand: sometimes raise min, usually call/check
+      if (valid.canRaise && r < 0.15) {
         action = 'raise'
         amount = valid.minRaise
       } else if (valid.canCheck) {
         action = 'check'
-      } else if (valid.canCall && (potOdds < 0.35 || r < 0.7)) {
+      } else if (valid.canCall && potOdds < 0.3) {
         action = 'call'
       } else {
-        action = r < 0.15 && valid.canCall ? 'call' : 'fold'
+        action = valid.canCheck ? 'check' : 'fold'
       }
     } else {
-      // Weak hand: bluff occasionally, otherwise fold/check
+      // Weak hand: mostly fold/check
       if (valid.canCheck) {
-        action = r < 0.1 && valid.canRaise ? 'raise' : 'check'
-        if (action === 'raise') amount = valid.minRaise
-      } else if (valid.canCall && potOdds < 0.2 && r < 0.4) {
+        action = 'check'
+      } else if (valid.canCall && potOdds < 0.15 && r < 0.3) {
         action = 'call'
-      } else if (valid.canRaise && r < 0.08) {
-        // Bluff raise
-        action = 'raise'
-        amount = Math.min(valid.minRaise + room.settings.bigBlind, valid.maxRaise)
       } else {
         action = 'fold'
       }
