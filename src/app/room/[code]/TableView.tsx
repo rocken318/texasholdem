@@ -87,13 +87,18 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
   }, [tableBets, seated, mySeatIndex])
 
   return (
-    <div style={{ perspective: isMobile ? 'none' : '900px', width: '100%' }}>
+    <div
+      style={{ perspective: isMobile ? 'none' : '900px' }}
+      className="absolute inset-0"
+    >
       <div style={{
         transform: isMobile ? 'none' : 'rotateX(16deg) scaleX(0.93)',
         transformOrigin: '50% 85%',
         transformStyle: 'preserve-3d',
+        width: '100%',
+        height: '100%',
       }}>
-        <div ref={wrapRef} className="relative w-full" style={{ paddingBottom: '70%' }}>
+        <div ref={wrapRef} className="relative w-full h-full">
 
           {/* SVG table surface */}
           <svg
@@ -183,8 +188,8 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
               fill="rgba(110,35,210,0.14)" style={{ filter: 'blur(10px)' }} />
           </svg>
 
-          {/* Center: community cards + pot — shifted down so top players don't overlap */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 pointer-events-none" style={{ paddingTop: isMobile ? '10%' : '14%' }}>
+          {/* Center: community cards + pot */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 pointer-events-none" style={{ paddingTop: isMobile ? '16%' : '14%' }}>
             <CommunityCards cards={communityCards} />
             {pot > 0 && (
               <div className="flex flex-col items-center gap-0.5">

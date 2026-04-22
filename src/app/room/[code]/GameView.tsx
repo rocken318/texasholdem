@@ -114,7 +114,7 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
           </div>
         )}
 
-        <div className="flex-1 min-h-0 flex items-center overflow-hidden">
+        <div className="flex-1 min-h-0 relative overflow-hidden">
           <TableView
             players={players}
             myPlayerId={myPlayer?.id ?? null}
