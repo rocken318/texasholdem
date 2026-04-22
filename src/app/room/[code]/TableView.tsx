@@ -23,21 +23,21 @@ interface FlyingChip {
   fy: number
 }
 
-function getSeatPosition(seatIndex: number, total: number, mySeatIndex: number | null) {
+function getSeatPosition(seatIndex: number, total: number, mySeatIndex: number | null, rx = 41, ry = 35) {
   const offset = mySeatIndex !== null ? mySeatIndex : 0
   const angle = ((seatIndex - offset) / total) * 2 * Math.PI + Math.PI / 2
   return {
-    left: `${50 + 41 * Math.cos(angle)}%`,
-    top:  `${50 + 35 * Math.sin(angle)}%`,
+    left: `${50 + rx * Math.cos(angle)}%`,
+    top:  `${50 + ry * Math.sin(angle)}%`,
   }
 }
 
-function getBetPosition(seatIndex: number, total: number, mySeatIndex: number | null) {
+function getBetPosition(seatIndex: number, total: number, mySeatIndex: number | null, rx = 24, ry = 18) {
   const offset = mySeatIndex !== null ? mySeatIndex : 0
   const angle = ((seatIndex - offset) / total) * 2 * Math.PI + Math.PI / 2
   return {
-    left: `${50 + 24 * Math.cos(angle)}%`,
-    top:  `${50 + 18 * Math.sin(angle)}%`,
+    left: `${50 + rx * Math.cos(angle)}%`,
+    top:  `${50 + ry * Math.sin(angle)}%`,
   }
 }
 
@@ -183,7 +183,7 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
           </svg>
 
           {/* Center: community cards + pot — shifted down so top players don't overlap */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 pointer-events-none" style={{ paddingTop: '14%' }}>
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 pointer-events-none" style={{ paddingTop: isMobile ? '10%' : '14%' }}>
             <CommunityCards cards={communityCards} />
             {pot > 0 && (
               <div className="flex flex-col items-center gap-0.5">
@@ -229,7 +229,7 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
           {seated.map(player => {
             const bet = tableBets[player.id] ?? 0
             if (bet <= 0) return null
-            const pos = getBetPosition(player.seat_index!, seated.length, mySeatIndex)
+            const pos = getBetPosition(player.seat_index!, seated.length, mySeatIndex, isMobile ? 20 : 24, isMobile ? 15 : 18)
             return (
               <div
                 key={`bet-${player.id}`}
@@ -243,7 +243,7 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
 
           {/* Player slots */}
           {seated.map(player => {
-            const pos = getSeatPosition(player.seat_index!, seated.length, mySeatIndex)
+            const pos = getSeatPosition(player.seat_index!, seated.length, mySeatIndex, isMobile ? 33 : 41, isMobile ? 32 : 35)
             return (
               <div
                 key={player.id}

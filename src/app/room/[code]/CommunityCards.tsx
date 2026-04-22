@@ -3,6 +3,17 @@ import { useRef, useState, useEffect } from 'react'
 import type { PokerCard } from '@/types/domain'
 import { Card } from '@/components/Card'
 
+function useIsMobile() {
+  const [mobile, setMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setMobile(window.innerWidth < 640)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+  return mobile
+}
+
 interface FlipState {
   [index: number]: 'flipping' | 'done' | undefined
 }
@@ -10,6 +21,7 @@ interface FlipState {
 export function CommunityCards({ cards }: { cards: PokerCard[] }) {
   const prevCardsRef = useRef<(PokerCard | undefined)[]>([])
   const [flipState, setFlipState] = useState<FlipState>({})
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     const prev = prevCardsRef.current
@@ -30,7 +42,7 @@ export function CommunityCards({ cards }: { cards: PokerCard[] }) {
   }
 
   return (
-    <div className="flex gap-1 scale-[1.2] origin-center">
+    <div className="flex gap-1">
       {Array.from({ length: 5 }).map((_, i) => {
         const card = cards[i]
         const revealed = !!card
@@ -56,7 +68,7 @@ export function CommunityCards({ cards }: { cards: PokerCard[] }) {
               }}
               onAnimationEnd={() => isFlipping && handleFlipEnd(i)}
             >
-              <Card card={card} faceDown={!card} />
+              <Card card={card} faceDown={!card} small={isMobile} />
             </div>
           </div>
         )
