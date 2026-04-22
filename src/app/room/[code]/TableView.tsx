@@ -42,60 +42,59 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
 
   return (
     <div className="relative w-full" style={{ paddingBottom: '70%' }}>
-      {/* Outer rail - dark wood/leather */}
-      <div
-        className="absolute inset-2 rounded-[50%] shadow-[0_0_40px_rgba(0,0,0,0.8),inset_0_2px_4px_rgba(255,255,255,0.05)]"
-        style={{
-          background: 'linear-gradient(180deg, #4a2c17 0%, #2d1a0e 30%, #1a0f07 70%, #2d1a0e 100%)',
-        }}
-      />
+      {/* ── Wood-grain rail + neon felt (SVG) ── */}
+      <svg
+        className="absolute inset-2"
+        style={{ borderRadius: '50%', overflow: 'hidden' }}
+        width="100%" height="100%"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <filter id="woodgrain" x="0%" y="0%" width="100%" height="100%" colorInterpolationFilters="sRGB">
+            <feTurbulence type="turbulence" baseFrequency="0.012 0.45" numOctaves={5} seed={8} result="grain" />
+            <feColorMatrix in="grain" type="matrix"
+              values="0.55 0.25 0.05 0 0.10
+                      0.28 0.12 0.02 0 0.04
+                      0.08 0.03 0.01 0 0.01
+                      0    0    0    1 0"
+            />
+          </filter>
+          <radialGradient id="feltGrad" cx="50%" cy="40%" r="65%">
+            <stop offset="0%"   stopColor="#1a0040" />
+            <stop offset="45%"  stopColor="#0f0028" />
+            <stop offset="100%" stopColor="#08001a" />
+          </radialGradient>
+        </defs>
 
-      {/* Rail highlight / bevel */}
-      <div
-        className="absolute inset-3 rounded-[50%]"
-        style={{
-          background: 'linear-gradient(180deg, #5c3a22 0%, #3d2415 50%, #5c3a22 100%)',
-          boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.15), inset 0 -1px 2px rgba(0,0,0,0.4)',
-        }}
-      />
+        {/* Drop shadow */}
+        <ellipse cx="50%" cy="50%" rx="49%" ry="49%"
+          fill="rgba(0,0,0,0.8)" style={{ filter: 'blur(10px)' }} />
 
-      {/* Gold trim ring */}
-      <div
-        className="absolute inset-5 rounded-[50%]"
-        style={{
-          border: '1.5px solid rgba(212,175,55,0.35)',
-          boxShadow: '0 0 8px rgba(212,175,55,0.15)',
-        }}
-      />
+        {/* Wood grain rail */}
+        <ellipse cx="50%" cy="50%" rx="48%" ry="48%"
+          fill="#3d1f0a" style={{ filter: 'url(#woodgrain)' }} />
 
-      {/* Main felt surface */}
-      <div
-        className="absolute inset-6 rounded-[50%]"
-        style={{
-          background: `
-            radial-gradient(ellipse at 50% 40%, rgba(34,120,50,0.9) 0%, rgba(20,80,30,0.95) 40%, rgba(12,55,18,1) 80%),
-            radial-gradient(ellipse at 50% 50%, #1a6b2a 0%, #0f4a1a 50%, #0a3012 100%)
-          `,
-          boxShadow: 'inset 0 4px 30px rgba(0,0,0,0.5), inset 0 0 60px rgba(0,0,0,0.3)',
-        }}
-      />
+        {/* Top bevel highlight */}
+        <ellipse cx="50%" cy="44%" rx="45%" ry="42%"
+          fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="2" />
 
-      {/* Felt texture overlay (subtle noise) */}
-      <div
-        className="absolute inset-6 rounded-[50%] opacity-[0.04]"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-          backgroundSize: '128px 128px',
-        }}
-      />
+        {/* Neon purple glow ring */}
+        <ellipse cx="50%" cy="50%" rx="41%" ry="41%"
+          fill="none"
+          stroke="rgba(180,80,255,0.8)"
+          strokeWidth="1.5"
+          style={{ filter: 'drop-shadow(0 0 5px rgba(180,80,255,0.9)) drop-shadow(0 0 12px rgba(180,80,255,0.5))' }}
+        />
 
-      {/* Center glow on felt */}
-      <div
-        className="absolute inset-6 rounded-[50%]"
-        style={{
-          background: 'radial-gradient(ellipse at 50% 45%, rgba(50,160,70,0.25) 0%, transparent 50%)',
-        }}
-      />
+        {/* Felt */}
+        <ellipse cx="50%" cy="50%" rx="39%" ry="39%"
+          fill="url(#feltGrad)" />
+
+        {/* Felt center glow */}
+        <ellipse cx="50%" cy="45%" rx="24%" ry="20%"
+          fill="rgba(120,40,200,0.12)"
+          style={{ filter: 'blur(8px)' }} />
+      </svg>
 
       {/* Center area - community cards + pot */}
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-10">
@@ -107,12 +106,12 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
               className="flex items-center gap-1.5 px-3 py-0.5 rounded-full font-semibold text-sm"
               style={{
                 background: 'linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.7) 100%)',
-                border: '1px solid rgba(212,175,55,0.3)',
+                border: '1px solid rgba(180,80,255,0.35)',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
               }}
             >
-              <span className="text-xs opacity-60" style={{ color: '#D4AF37' }}>POT</span>
-              <span className="font-mono" style={{ color: '#5ce65c' }}>
+              <span className="text-xs opacity-60" style={{ color: '#bf80ff' }}>POT</span>
+              <span className="font-mono" style={{ color: '#bf80ff' }}>
                 {pot.toLocaleString()}
               </span>
             </div>
