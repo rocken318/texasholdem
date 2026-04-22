@@ -17,16 +17,34 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0 }: PlayerSlot
   const initial = player.display_name.charAt(0).toUpperCase()
 
   return (
-    <div className="flex flex-col items-center gap-0.5">
+    <div className="flex flex-col items-center gap-0.5 relative">
+      {/* Turn indicator arrow */}
+      {isActive && (
+        <div
+          style={{
+            position: 'absolute',
+            top: -22,
+            left: '50%',
+            animation: 'arrowBob 0.9s ease-in-out infinite',
+            zIndex: 20,
+            lineHeight: 1,
+          }}
+        >
+          <svg width="14" height="12" viewBox="0 0 14 12" xmlns="http://www.w3.org/2000/svg">
+            <polygon
+              points="7,12 0,0 14,0"
+              fill="#ffd700"
+              style={{ filter: 'drop-shadow(0 0 4px rgba(255,215,0,0.9)) drop-shadow(0 0 8px rgba(255,215,0,0.5))' }}
+            />
+          </svg>
+        </div>
+      )}
+
       {/* Face-down hole cards above slot */}
       {inHand && (
         <div className="flex -space-x-2 mb-0.5">
-          <div className="-rotate-6">
-            <Card faceDown small />
-          </div>
-          <div className="rotate-6">
-            <Card faceDown small />
-          </div>
+          <div className="-rotate-6"><Card faceDown small /></div>
+          <div className="rotate-6"><Card faceDown small /></div>
         </div>
       )}
 
@@ -49,31 +67,25 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0 }: PlayerSlot
           backdropFilter: 'blur(8px)',
         }}
       >
-        {/* Active turn pulsing ring */}
+        {/* Active pulsing ring */}
         {isActive && (
           <div
             className="absolute -inset-[2px] rounded-xl animate-pulse"
-            style={{
-              border: '2px solid #bf80ff',
-              boxShadow: '0 0 8px rgba(180,80,255,0.6)',
-            }}
+            style={{ border: '2px solid #bf80ff', boxShadow: '0 0 8px rgba(180,80,255,0.6)' }}
           />
         )}
 
-        {/* Countdown-style bar (visual only, for active player) */}
+        {/* Countdown bar */}
         {isActive && (
           <div className="absolute top-0 left-2 right-2 h-[2px] rounded-full overflow-hidden">
             <div
               className="h-full rounded-full"
-              style={{
-                background: 'linear-gradient(90deg, #7c3aed, #bf80ff)',
-                animation: 'shrinkBar 15s linear infinite',
-              }}
+              style={{ background: 'linear-gradient(90deg, #7c3aed, #bf80ff)', animation: 'shrinkBar 15s linear infinite' }}
             />
           </div>
         )}
 
-        {/* Avatar circle */}
+        {/* Avatar */}
         <div
           className={cn(
             'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0',
@@ -89,12 +101,10 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0 }: PlayerSlot
           {initial}
         </div>
 
-        {/* Name */}
+        {/* Name — gold when active, purple when me, white otherwise */}
         <span
-          className={cn(
-            'text-[10px] font-semibold max-w-[70px] truncate block leading-tight mt-0.5',
-            isMe ? 'text-[#d4a0ff]' : 'text-white/85',
-          )}
+          className="text-[10px] font-semibold max-w-[70px] truncate block leading-tight mt-0.5"
+          style={{ color: isActive ? '#ffd700' : isMe ? '#d4a0ff' : 'rgba(255,255,255,0.85)' }}
         >
           {player.display_name}
         </span>
@@ -102,10 +112,7 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0 }: PlayerSlot
         {/* Chip count */}
         <div className="flex items-center gap-0.5 mt-0.5">
           <span className="text-[9px]" style={{ color: '#5ce65c' }}>$</span>
-          <span
-            className="text-[11px] font-mono font-semibold"
-            style={{ color: '#5ce65c' }}
-          >
+          <span className="text-[11px] font-mono font-semibold" style={{ color: '#5ce65c' }}>
             {player.chips.toLocaleString()}
           </span>
         </div>
@@ -119,16 +126,8 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0 }: PlayerSlot
               border: '1px solid rgba(180,80,255,0.35)',
             }}
           >
-            <span
-              className="text-[8px]"
-              style={{ color: '#bf80ff' }}
-            >
-              BET
-            </span>
-            <span
-              className="text-[10px] font-mono font-bold"
-              style={{ color: '#d4a0ff' }}
-            >
+            <span className="text-[8px]" style={{ color: '#bf80ff' }}>BET</span>
+            <span className="text-[10px] font-mono font-bold" style={{ color: '#d4a0ff' }}>
               {betAmount.toLocaleString()}
             </span>
           </div>
@@ -138,10 +137,7 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0 }: PlayerSlot
         {isAllIn && (
           <div
             className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0 rounded-sm mt-0.5"
-            style={{
-              background: 'linear-gradient(90deg, #7c3aed, #bf80ff)',
-              color: '#fff',
-            }}
+            style={{ background: 'linear-gradient(90deg, #7c3aed, #bf80ff)', color: '#fff' }}
           >
             All In
           </div>
@@ -150,10 +146,7 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0 }: PlayerSlot
         {/* Fold overlay */}
         {isFolded && (
           <div className="absolute inset-0 rounded-xl flex items-center justify-center bg-black/50">
-            <span
-              className="text-[10px] font-bold uppercase tracking-widest"
-              style={{ color: 'rgba(255,255,255,0.5)' }}
-            >
+            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.5)' }}>
               FOLD
             </span>
           </div>
