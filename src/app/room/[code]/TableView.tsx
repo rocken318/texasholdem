@@ -207,7 +207,7 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, table
           {seated.map(player => {
             const bet = tableBets[player.id] ?? 0
             if (bet <= 0) return null
-            const pos = getBetPosition(player.seat_index!, seated.length, mySeatIndex, isMobile ? 20 : 24, isMobile ? 15 : 18)
+            const pos = getBetPosition(player.seat_index!, seated.length, mySeatIndex, isMobile ? 28 : 24, isMobile ? 24 : 18)
             return (
               <div
                 key={`bet-${player.id}`}
@@ -222,7 +222,7 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, table
           {/* Player slots */}
           {seated.map(player => {
             const isMe = player.id === myPlayerId
-            const pos = getSeatPosition(player.seat_index!, seated.length, mySeatIndex, isMobile ? 33 : 41, isMobile ? 32 : 35)
+            const pos = getSeatPosition(player.seat_index!, seated.length, mySeatIndex, isMobile ? 42 : 41, isMobile ? 40 : 35)
             return (
               <div
                 key={player.id}
