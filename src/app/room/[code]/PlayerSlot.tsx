@@ -43,12 +43,12 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards }: Pla
 
       {/* Hole cards: face-up (mine) or face-down (others) */}
       {isMe && cards && cards.length > 0 && !isFolded && (
-        <div className="flex -space-x-2 mb-0.5">
+        <div className="flex -space-x-3 mb-0.5">
           <div className="-rotate-6" style={{ filter: 'drop-shadow(0 4px 8px rgba(140,50,255,0.5))' }}>
-            <Card card={cards[0]} small className="ring-1 ring-[#bf80ff]/60" />
+            <Card card={cards[0]} className="ring-1 ring-[#bf80ff]/60" />
           </div>
           <div className="rotate-6" style={{ filter: 'drop-shadow(0 4px 8px rgba(140,50,255,0.5))' }}>
-            <Card card={cards[1]} small className="ring-1 ring-[#bf80ff]/60" />
+            <Card card={cards[1]} className="ring-1 ring-[#bf80ff]/60" />
           </div>
         </div>
       )}
