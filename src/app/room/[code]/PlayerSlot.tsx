@@ -119,18 +119,18 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCar
             {hasMyCards
               ? (
                 <div style={{ filter: 'drop-shadow(0 4px 8px rgba(140,50,255,0.5))' }}>
-                  <Card card={cards![0]} mid className="ring-1 ring-[#bf80ff]/60" />
+                  <Card card={cards![0]} className="ring-1 ring-[#bf80ff]/60" />
                 </div>
               )
               : <Card faceDown small />
             }
           </div>
           {/* Right card */}
-          <div style={{ display: 'inline-block', marginLeft: foldAnimActive ? 4 : -8, ...(!foldAnimActive ? { transform: 'rotate(6deg)' } : throwAnimR) }}>
+          <div style={{ display: 'inline-block', marginLeft: foldAnimActive ? 4 : -12, ...(!foldAnimActive ? { transform: 'rotate(6deg)' } : throwAnimR) }}>
             {hasMyCards
               ? (
                 <div style={{ filter: 'drop-shadow(0 4px 8px rgba(140,50,255,0.5))' }}>
-                  <Card card={cards![1]} mid className="ring-1 ring-[#bf80ff]/60" />
+                  <Card card={cards![1]} className="ring-1 ring-[#bf80ff]/60" />
                 </div>
               )
               : <Card faceDown small />

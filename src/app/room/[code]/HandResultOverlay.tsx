@@ -20,8 +20,8 @@ interface HandResultOverlayProps {
   onReady: () => void
 }
 
-const DURATION_MS = 7000
-const WINNER_PHASE_MS = 3500
+const DURATION_MS = 4000
+const WINNER_PHASE_MS = 2000
 
 // Deterministic confetti pieces — fixed positions & colors to avoid hydration mismatches
 const CONFETTI_PIECES = [
