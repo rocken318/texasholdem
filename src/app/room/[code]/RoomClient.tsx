@@ -45,6 +45,7 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
   const handRef = useRef<Hand | null>(null)
   const playersRef = useRef<Player[]>([])
   const botIdsRef = useRef(botIds)
+  const nameInputRef = useRef<HTMLInputElement>(null)
 
   // Keep refs in sync
   useEffect(() => { playersRef.current = players }, [players])
@@ -244,8 +245,11 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
   }, [hand?.id])
 
   async function handleJoin() {
-    const displayName = name.trim()
-    if (!displayName || joining) return
+    // On mobile, IME keyboards may not fire onChange during composition.
+    // Fall back to reading the DOM value directly so the button always works.
+    const displayName = (name || nameInputRef.current?.value || '').trim()
+    if (joining) return
+    if (!displayName) { setJoinError(t.enterYourName); return }
     setJoinError(null)
     setJoining(true)
     try {
@@ -306,14 +310,16 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
         <div className="flex flex-col items-center gap-6 w-full max-w-xs my-auto">
           <h1 className="text-3xl font-bold text-white">{t.joinTable}</h1>
           <input
+            ref={nameInputRef}
             className="px-4 py-3 rounded-xl text-lg w-full bg-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white"
             placeholder={t.namePlaceholder} value={name} maxLength={20}
             onChange={e => setName(e.target.value)}
+            onInput={e => setName((e.target as HTMLInputElement).value)}
             onKeyDown={e => e.key === 'Enter' && handleJoin()} />
           {joinError && (
             <p className="text-red-400 text-sm text-center">{joinError}</p>
           )}
-          <button onClick={handleJoin} disabled={!name.trim() || joining}
+          <button onClick={handleJoin} disabled={joining}
             className="w-full py-3 rounded-xl bg-white text-green-900 font-bold text-lg disabled:opacity-40">
             {joining ? t.joining : t.sitDown}
           </button>
