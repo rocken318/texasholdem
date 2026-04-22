@@ -90,7 +90,7 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
   return (
     <div
       style={{ perspective: isMobile ? 'none' : '900px' }}
-      className="absolute inset-0 relative"
+      className="absolute inset-0"
     >
       <div style={{
         transform: isMobile ? 'none' : 'rotateX(16deg) scaleX(0.93)',
