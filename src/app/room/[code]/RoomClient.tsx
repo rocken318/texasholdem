@@ -298,24 +298,26 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
 
   if (view === 'name_input') {
     return (
-      <main className="min-h-screen bg-green-900 flex flex-col items-center justify-center gap-6 p-6">
+      <main className="min-h-[100dvh] bg-green-900 flex flex-col items-center overflow-y-auto p-6 pt-16">
         <button onClick={toggleLang}
           className="absolute top-4 right-4 px-3 py-1 rounded-lg border border-white/30 text-white/70 text-sm">
           {t.switchLang}
         </button>
-        <h1 className="text-3xl font-bold text-white">{t.joinTable}</h1>
-        <input
-          className="px-4 py-3 rounded-xl text-lg w-full max-w-xs bg-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white"
-          placeholder={t.namePlaceholder} value={name} maxLength={20}
-          onChange={e => setName(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleJoin()} />
-        {joinError && (
-          <p className="text-red-400 text-sm text-center max-w-xs">{joinError}</p>
-        )}
-        <button onClick={handleJoin} disabled={!name.trim() || joining}
-          className="w-full max-w-xs py-3 rounded-xl bg-white text-green-900 font-bold text-lg disabled:opacity-40">
-          {joining ? t.joining : t.sitDown}
-        </button>
+        <div className="flex flex-col items-center gap-6 w-full max-w-xs my-auto">
+          <h1 className="text-3xl font-bold text-white">{t.joinTable}</h1>
+          <input
+            className="px-4 py-3 rounded-xl text-lg w-full bg-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white"
+            placeholder={t.namePlaceholder} value={name} maxLength={20}
+            onChange={e => setName(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleJoin()} />
+          {joinError && (
+            <p className="text-red-400 text-sm text-center">{joinError}</p>
+          )}
+          <button onClick={handleJoin} disabled={!name.trim() || joining}
+            className="w-full py-3 rounded-xl bg-white text-green-900 font-bold text-lg disabled:opacity-40">
+            {joining ? t.joining : t.sitDown}
+          </button>
+        </div>
       </main>
     )
   }
