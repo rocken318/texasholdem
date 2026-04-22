@@ -1,6 +1,6 @@
 // src/app/room/[code]/GameView.tsx
 'use client'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import type { Room, Player, Hand, PokerCard } from '@/types/domain'
 import type { Translations } from '@/lib/i18n'
 import { TableView } from './TableView'
@@ -81,8 +81,13 @@ function getActionColor(action: string): string {
 }
 
 export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrentBet, tableBets, lastAction, currentSeat, handResult, showdownResults, onHandResultDismiss, t }: GameViewProps) {
-  const isMyTurn = myPlayer?.seat_index === currentSeat && currentSeat !== null
+  const [submittingAction, setSubmittingAction] = useState(false)
+  const isMyTurn = !submittingAction && myPlayer?.seat_index === currentSeat && currentSeat !== null
   const [peekingCards, setPeekingCards] = useState(false)
+
+  useEffect(() => {
+    setSubmittingAction(false)
+  }, [currentSeat])
 
   // Action toast — derived from lastAction, no setState in effects
   const toastData = useMemo(() => {
@@ -98,6 +103,7 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
 
   async function handleAction(action: string, amount?: number) {
     if (!myPlayer) return
+    setSubmittingAction(true)
     await fetch(`/api/rooms/${room.id}/action`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

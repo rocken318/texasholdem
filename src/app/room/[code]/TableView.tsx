@@ -261,7 +261,7 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
           {seated.map(player => {
             const bet = tableBets[player.id] ?? 0
             if (bet <= 0) return null
-            const pos = getBetPosition(player.seat_index!, seated.length, mySeatIndex, isMobile ? 28 : 24, isMobile ? 24 : 18)
+            const pos = getBetPosition(player.seat_index!, seated.length, mySeatIndex, isMobile ? 33 : 30, isMobile ? 27 : 22)
             return (
               <div
                 key={`bet-${player.id}`}

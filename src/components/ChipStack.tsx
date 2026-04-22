@@ -12,12 +12,12 @@ type ChipConfig = {
 }
 
 function getChipConfig(amount: number): ChipConfig {
-  if (amount >= 1000) return { body: '#0a0020', bodyEnd: '#1a0050' }
-  if (amount >= 500)  return { body: '#0f0000', bodyEnd: '#200000' }
-  if (amount >= 100)  return { body: '#000a00', bodyEnd: '#001500' }
-  if (amount >= 25)   return { body: '#000510', bodyEnd: '#001030' }
-  if (amount >= 5)    return { body: '#0f0000', bodyEnd: '#1a0000' }
-  return               { body: '#111111',  bodyEnd: '#222222' }
+  if (amount >= 1000) return { body: '#7a5800', bodyEnd: '#c8960a' }   // gold
+  if (amount >= 500)  return { body: '#3a0870', bodyEnd: '#6d22d0' }   // purple
+  if (amount >= 100)  return { body: '#1a1a1a', bodyEnd: '#3a3a3a' }   // black/dark gray
+  if (amount >= 25)   return { body: '#0a500a', bodyEnd: '#198019' }   // green
+  if (amount >= 5)    return { body: '#7a0808', bodyEnd: '#c01515' }   // red
+  return               { body: '#606060',  bodyEnd: '#aaaaaa' }          // silver/white
 }
 
 function getChipCount(amount: number): number {
@@ -75,8 +75,8 @@ function SingleChip({ config, size, label }: { config: ChipConfig; size: number;
 
       {/* Gold rim */}
       <circle cx={r} cy={r} r={r - 0.5} fill="none"
-        stroke={`url(#gold-${uid})`} strokeWidth={Math.max(2, size * 0.1)}
-        style={{ filter: `drop-shadow(0 0 ${size * 0.08}px rgba(255,215,0,0.55))` }} />
+        stroke={`url(#gold-${uid})`} strokeWidth={Math.max(2.5, size * 0.12)}
+        style={{ filter: `drop-shadow(0 0 ${size * 0.12}px rgba(255,215,0,0.75))` }} />
 
       {/* Edge spots — cardinal */}
       <circle cx={r}            cy={spotR}         r={spotR} fill="#ffd700" opacity="0.9" />
@@ -127,8 +127,8 @@ export function ChipStack({ amount, small = false, className = '' }: ChipStackPr
   const chipCount = getChipCount(amount)
   const config = getChipConfig(amount)
   const label = getLabel(amount)
-  const size = small ? 22 : 28
-  const sliceH = small ? 4 : 5
+  const size = small ? 26 : 32
+  const sliceH = small ? 5 : 6
   const slices = chipCount - 1
   const totalH = size + slices * sliceH
 
@@ -157,20 +157,21 @@ export function ChipStack({ amount, small = false, className = '' }: ChipStackPr
         </div>
       </div>
       {/* Amount label */}
-      <span
-        style={{
-          fontSize: small ? 8 : 10,
-          color: '#ffd700',
-          fontWeight: 900,
-          fontFamily: 'monospace',
-          textShadow: '0 1px 3px rgba(0,0,0,0.9)',
-          lineHeight: 1,
-          marginTop: 2,
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {amount.toLocaleString()}
-      </span>
+      <div style={{ background: 'rgba(0,0,0,0.5)', borderRadius: 3, padding: '0 2px', marginTop: 1 }}>
+        <span
+          style={{
+            fontSize: small ? 9 : 11,
+            color: '#ffd700',
+            fontWeight: 900,
+            fontFamily: 'monospace',
+            textShadow: '0 0 6px rgba(0,0,0,1), 0 1px 3px rgba(0,0,0,0.9)',
+            lineHeight: 1,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {amount.toLocaleString()}
+        </span>
+      </div>
     </div>
   )
 }
