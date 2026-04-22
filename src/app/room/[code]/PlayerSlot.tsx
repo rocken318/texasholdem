@@ -1,5 +1,5 @@
 // src/app/room/[code]/PlayerSlot.tsx
-import type { Player } from '@/types/domain'
+import type { Player, PokerCard } from '@/types/domain'
 import { Card } from '@/components/Card'
 import { cn } from '@/lib/utils'
 
@@ -8,9 +8,10 @@ interface PlayerSlotProps {
   isMe: boolean
   isActive: boolean
   betAmount?: number
+  cards?: PokerCard[]
 }
 
-export function PlayerSlot({ player, isMe, isActive, betAmount = 0 }: PlayerSlotProps) {
+export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards }: PlayerSlotProps) {
   const inHand = player.status !== 'folded' && player.status !== 'out'
   const isFolded = player.status === 'folded'
   const isAllIn = player.status === 'all_in'
@@ -40,8 +41,18 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0 }: PlayerSlot
         </div>
       )}
 
-      {/* Face-down hole cards above slot (or discarded cards when folded) */}
-      {inHand && !isFolded && (
+      {/* Hole cards: face-up (mine) or face-down (others) */}
+      {isMe && cards && cards.length > 0 && !isFolded && (
+        <div className="flex -space-x-2 mb-0.5">
+          <div className="-rotate-6" style={{ filter: 'drop-shadow(0 4px 8px rgba(140,50,255,0.5))' }}>
+            <Card card={cards[0]} small className="ring-1 ring-[#bf80ff]/60" />
+          </div>
+          <div className="rotate-6" style={{ filter: 'drop-shadow(0 4px 8px rgba(140,50,255,0.5))' }}>
+            <Card card={cards[1]} small className="ring-1 ring-[#bf80ff]/60" />
+          </div>
+        </div>
+      )}
+      {inHand && !isFolded && (!isMe || !cards?.length) && (
         <div className="flex -space-x-1.5 mb-0.5" style={{ transform: 'scale(0.7)', transformOrigin: 'bottom center' }}>
           <div className="-rotate-6"><Card faceDown small /></div>
           <div className="rotate-6"><Card faceDown small /></div>

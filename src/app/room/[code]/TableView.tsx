@@ -14,6 +14,7 @@ interface TableViewProps {
   communityCards: PokerCard[]
   pot: number
   tableBets: Record<string, number>
+  myCards?: PokerCard[]
 }
 
 interface FlyingChip {
@@ -41,7 +42,7 @@ function getBetPosition(seatIndex: number, total: number, mySeatIndex: number | 
   }
 }
 
-export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, communityCards, pot, tableBets }: TableViewProps) {
+export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, communityCards, pot, tableBets, myCards = [] }: TableViewProps) {
   const seated = players.filter(p => p.seat_index !== null)
   const wrapRef = useRef<HTMLDivElement>(null)
   const prevBetsRef = useRef<Record<string, number>>({})
@@ -243,6 +244,7 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
 
           {/* Player slots */}
           {seated.map(player => {
+            const isMe = player.id === myPlayerId
             const pos = getSeatPosition(player.seat_index!, seated.length, mySeatIndex, isMobile ? 33 : 41, isMobile ? 32 : 35)
             return (
               <div
@@ -252,9 +254,10 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
               >
                 <PlayerSlot
                   player={player}
-                  isMe={player.id === myPlayerId}
+                  isMe={isMe}
                   isActive={player.seat_index === currentSeat}
                   betAmount={tableBets[player.id] ?? 0}
+                  cards={isMe ? myCards : undefined}
                 />
               </div>
             )

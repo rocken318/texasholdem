@@ -4,7 +4,6 @@ import { useMemo } from 'react'
 import type { Room, Player, Hand, PokerCard } from '@/types/domain'
 import type { Translations } from '@/lib/i18n'
 import { TableView } from './TableView'
-import { MyCards } from './MyCards'
 import { ActionBar } from './ActionBar'
 import { TurnTimer } from './TurnTimer'
 import { HandResultOverlay, type ShowdownResult } from './HandResultOverlay'
@@ -24,6 +23,7 @@ interface GameViewProps {
   onHandResultDismiss: () => void
   t: Translations
 }
+
 
 function getActionLabel(action: string, amount: number, t: Translations): string {
   switch (action) {
@@ -123,6 +123,7 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
             communityCards={hand?.community_cards ?? []}
             pot={hand?.pot ?? 0}
             tableBets={tableBets}
+            myCards={myCards}
           />
         </div>
 
@@ -152,7 +153,6 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
             </div>
           )}
 
-          <MyCards cards={myCards} isMyTurn={isMyTurn} />
           {hand && myPlayer && (
             <ActionBar
               currentBet={hand.current_bet}
