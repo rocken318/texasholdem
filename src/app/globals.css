@@ -242,3 +242,62 @@ body {
   0%, 100% { box-shadow: 0 0 0 4px rgba(255,215,0,0.15), 0 0 24px rgba(255,215,0,0.35); }
   50%       { box-shadow: 0 0 0 8px rgba(255,215,0,0.28), 0 0 40px rgba(255,215,0,0.55); }
 }
+
+/* ════════════════════════════════════════
+   Result / Game-Over screen animations
+   ════════════════════════════════════════ */
+
+/* Subtle purple-hued background pulse */
+@keyframes bgPulse {
+  0%, 100% { filter: hue-rotate(0deg) brightness(1); }
+  50%       { filter: hue-rotate(12deg) brightness(1.04); }
+}
+
+/* Title drops in from above */
+@keyframes titleDrop {
+  0%   { opacity: 0; transform: translateY(-60px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Suit symbols slide in from left */
+@keyframes suitSlideLeft {
+  0%   { opacity: 0; transform: translateX(-40px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* Suit symbols slide in from right */
+@keyframes suitSlideRight {
+  0%   { opacity: 0; transform: translateX(40px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* Each player row slides up from below */
+@keyframes rankSlideUp {
+  0%   { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Gold border glow pulse for 1st place */
+@keyframes goldBorderPulse {
+  0%, 100% { box-shadow: 0 0 18px rgba(212,175,55,0.25), 0 0 0 1.5px rgba(212,175,55,0.3); }
+  50%       { box-shadow: 0 0 38px rgba(212,175,55,0.55), 0 0 0 2px rgba(212,175,55,0.6); }
+}
+
+/* Chip count scale-in for champion */
+@keyframes chipCountEntrance {
+  0%   { opacity: 0; transform: scale(0.6); }
+  70%  { transform: scale(1.12); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* New Game button entrance */
+@keyframes btnEntrance {
+  0%   { opacity: 0; transform: translateY(20px) scale(0.92); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* New Game button subtle attention pulse */
+@keyframes btnPulse {
+  0%, 100% { box-shadow: 0 0 24px rgba(212,175,55,0.4), 0 4px 16px rgba(0,0,0,0.4); }
+  50%       { box-shadow: 0 0 44px rgba(212,175,55,0.7), 0 4px 20px rgba(0,0,0,0.5); }
+}
