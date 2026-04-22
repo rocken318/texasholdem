@@ -160,8 +160,11 @@ export async function resolveHand(params: {
 
   const effectiveWinnerIds = allPotWinnerIds.size > 0 ? [...allPotWinnerIds] : winnerIds
 
+  // Re-fetch players from DB so chip counts reflect bets already deducted this hand.
+  // The `players` param is loaded before the final action is applied and would be stale.
+  const freshPlayers = await store.getPlayersByRoom(roomId)
   for (const [wId, delta] of Object.entries(chipDeltas)) {
-    const p = players.find(pl => pl.id === wId)
+    const p = freshPlayers.find(pl => pl.id === wId)
     if (p) await store.updatePlayer(wId, { chips: p.chips + delta })
   }
 
@@ -188,7 +191,7 @@ export async function resolveHand(params: {
   }
 
   // Give clients time to view showdown results before next hand starts
-  await new Promise<void>(resolve => setTimeout(resolve, 4000))
+  await new Promise<void>(resolve => setTimeout(resolve, 10000))
 
   // Start next hand
   await startNewHand(roomId, activePlayers, nextDealerSeat, room.settings, handNumber + 1)
