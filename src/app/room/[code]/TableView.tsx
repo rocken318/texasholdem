@@ -221,7 +221,7 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
           {/* Center: community cards + pot */}
           <div
             className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-2 pointer-events-none z-10"
-            style={{ top: isMobile ? '52%' : '50%' }}
+            style={{ top: isMobile ? '46%' : '48%' }}
           >
             <CommunityCards cards={communityCards} />
             {pot > 0 && (
@@ -276,7 +276,7 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
           {/* Player slots */}
           {seated.map(player => {
             const isMe = player.id === myPlayerId
-            const pos = getSeatPosition(player.seat_index!, seated.length, mySeatIndex, isMobile ? 42 : 41, isMobile ? 40 : 35)
+            const pos = getSeatPosition(player.seat_index!, seated.length, mySeatIndex, isMobile ? 42 : 41, isMobile ? 42 : 35)
             return (
               <div
                 key={player.id}

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la /y/texasholdem/*.config.* /y/texasholdem/tailwind.*)",
+      "Bash(npx next:*)"
+    ]
+  }
+}

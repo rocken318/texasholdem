@@ -74,7 +74,7 @@ export function CommunityCards({ cards }: { cards: PokerCard[] }) {
               }}
               onAnimationEnd={() => isFlipping && handleFlipEnd(i)}
             >
-              <Card card={card} faceDown={!card} />
+              <Card card={card} faceDown={!card} mid={isMobile} />
             </div>
           </div>
         )
