@@ -20,6 +20,14 @@ const CONFETTI = [
   { left: '88%', color: '#ff6b6b', delay: '0.6s', dur: '2.3s' },
 ]
 
+// Accent bar colors by rank
+function accentColor(rank: number): string {
+  if (rank === 1) return '#D4AF37'
+  if (rank === 2) return '#C0C0C0'
+  if (rank === 3) return '#CD7F32'
+  return 'rgba(255,255,255,0.1)'
+}
+
 export function ResultView({ rankings, t }: ResultViewProps) {
   const router = useRouter()
 
@@ -31,9 +39,9 @@ export function ResultView({ rankings, t }: ResultViewProps) {
       style={{ animation: 'bgPulse 4s ease-in-out infinite' }}
     >
       {/* Background layers */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_#1a3d1a_0%,_#0d1f0d_50%,_#060e06_100%)]" />
+      <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, #1a3d2a 0%, #0d1f14 40%, #060e0a 100%)' }} />
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0 opacity-[0.05]"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M5 0h1L0 5V4zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E")`,
         }}
@@ -44,9 +52,18 @@ export function ResultView({ rankings, t }: ResultViewProps) {
 
         {/* ── Title ── */}
         <div className="text-center" style={{ animation: 'titleDrop 0.7s cubic-bezier(0.22,1,0.36,1) both' }}>
-          <h1 className="text-5xl font-black text-white tracking-tight drop-shadow-[0_0_24px_rgba(212,175,55,0.5)]">
+          <h1
+            className="text-5xl font-black text-white tracking-tight drop-shadow-[0_0_24px_rgba(212,175,55,0.5)]"
+            style={{ textShadow: '0 0 40px rgba(212,175,55,0.4), 0 2px 0 rgba(0,0,0,0.8)' }}
+          >
             {t.gameOver.toUpperCase()}
           </h1>
+
+          {/* Golden underline bar */}
+          <div
+            className="h-0.5 w-32 mx-auto mt-2 rounded-full"
+            style={{ background: 'linear-gradient(90deg, transparent, #D4AF37, transparent)' }}
+          />
 
           {/* Suit symbols — slide in from sides after 0.4s */}
           <div
@@ -124,6 +141,19 @@ export function ResultView({ rankings, t }: ResultViewProps) {
                     animation: isFirst ? 'goldBorderPulse 2.5s ease-in-out infinite' : undefined,
                   }}
                 >
+                  {/* Left accent bar */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      top: 8,
+                      bottom: 8,
+                      width: 2,
+                      borderRadius: '0 9999px 9999px 0',
+                      background: accentColor(r.rank),
+                    }}
+                  />
+
                   {/* Confetti layer for 1st place */}
                   {isFirst && (
                     <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl">
@@ -143,6 +173,32 @@ export function ResultView({ rankings, t }: ResultViewProps) {
                           }}
                         />
                       ))}
+
+                      {/* Spotlight beams */}
+                      <div
+                        style={{
+                          position: 'absolute',
+                          left: '20%',
+                          top: 0,
+                          width: 2,
+                          height: 40,
+                          background: 'rgba(255,255,255,0.10)',
+                          transform: 'rotate(5deg)',
+                          animation: 'spotBeam 3s ease-in-out infinite',
+                        }}
+                      />
+                      <div
+                        style={{
+                          position: 'absolute',
+                          left: '80%',
+                          top: 0,
+                          width: 2,
+                          height: 40,
+                          background: 'rgba(255,255,255,0.10)',
+                          transform: 'rotate(-5deg)',
+                          animation: 'spotBeam 3s ease-in-out 1.5s infinite',
+                        }}
+                      />
                     </div>
                   )}
 
@@ -186,7 +242,7 @@ export function ResultView({ rankings, t }: ResultViewProps) {
         {/* ── New Game button ── */}
         <button
           onClick={() => router.push('/create')}
-          className="mt-2 w-full py-3.5 rounded-xl font-black text-lg text-[#1a1a0a] active:scale-[0.97] transition-transform duration-100"
+          className="mt-2 w-full py-3.5 rounded-xl font-black text-lg text-[#1a1a0a] active:scale-[0.97] transition-transform duration-100 relative overflow-hidden"
           style={{
             background: 'linear-gradient(135deg, #D4AF37, #F5D060, #D4AF37)',
             backgroundSize: '200% 100%',
@@ -195,6 +251,46 @@ export function ResultView({ rankings, t }: ResultViewProps) {
           }}
         >
           {t.newGame}
+          {/* Sparkle particles */}
+          <span
+            style={{
+              position: 'absolute',
+              left: '15%',
+              top: '20%',
+              width: 4,
+              height: 4,
+              borderRadius: '50%',
+              background: '#ffd700',
+              animation: `btnSparkle 2s ease-in-out 0.2s infinite`,
+              pointerEvents: 'none',
+            }}
+          />
+          <span
+            style={{
+              position: 'absolute',
+              left: '50%',
+              top: '70%',
+              width: 4,
+              height: 4,
+              borderRadius: '50%',
+              background: '#ffd700',
+              animation: `btnSparkle 2s ease-in-out 0.7s infinite`,
+              pointerEvents: 'none',
+            }}
+          />
+          <span
+            style={{
+              position: 'absolute',
+              left: '80%',
+              top: '25%',
+              width: 4,
+              height: 4,
+              borderRadius: '50%',
+              background: '#ffd700',
+              animation: `btnSparkle 2s ease-in-out 1.2s infinite`,
+              pointerEvents: 'none',
+            }}
+          />
         </button>
       </div>
     </main>

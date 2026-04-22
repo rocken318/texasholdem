@@ -18,9 +18,12 @@ export function LobbyView({ room, players, myPlayer, hostPlayerId, onStart, onAd
   const seated = players.filter(p => p.seat_index !== null)
 
   return (
-    <main className="min-h-screen bg-[#0a1a0a] flex flex-col items-center gap-6 p-6 relative overflow-hidden">
+    <main
+      className="min-h-screen flex flex-col items-center gap-6 p-6 relative overflow-hidden"
+      style={{ background: 'linear-gradient(180deg, #0c0518 0%, #060310 100%)' }}
+    >
       {/* Background */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_#1a3d1a_0%,_#0d1f0d_50%,_#060e06_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(60,20,100,0.4)_0%,_rgba(12,5,24,0.8)_50%,_rgba(4,2,12,1)_100%)]" />
       <div className="absolute inset-0 opacity-[0.03]" style={{
         backgroundImage: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M5 0h1L0 5V4zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E")`,
       }} />
@@ -30,13 +33,16 @@ export function LobbyView({ room, players, myPlayer, hostPlayerId, onStart, onAd
         {/* Header with animated pulse dots */}
         <div className="flex items-center gap-3">
           <div className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse" />
-          <h1 className="text-2xl font-bold text-white tracking-wide">{t.waitingForPlayers}</h1>
+          <h1
+            className="text-2xl font-bold text-white tracking-wide animate-pulse"
+            style={{ color: 'rgba(180,80,255,0.85)', textShadow: '0 0 20px rgba(140,50,255,0.5)' }}
+          >{t.waitingForPlayers}</h1>
           <div className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse" />
         </div>
 
         {/* QR Code with gold frame */}
         <div className="relative p-[1px] rounded-2xl bg-gradient-to-b from-[#D4AF37]/40 to-[#D4AF37]/10">
-          <div className="bg-[#0d1f0d] rounded-2xl p-4">
+          <div className="bg-[#0c0518] rounded-2xl p-4">
             <GameQRCode joinCode={room.join_code} />
           </div>
         </div>
@@ -56,6 +62,7 @@ export function LobbyView({ room, players, myPlayer, hostPlayerId, onStart, onAd
                     ? 'bg-[#D4AF37]/10 border border-[#D4AF37]/20'
                     : 'bg-white/[0.03] hover:bg-white/[0.06]'
                 }`}
+                style={{ borderLeft: '2px solid rgba(140,50,255,0.3)' }}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-7 h-7 rounded-full bg-[#2d5a27] flex items-center justify-center text-white/70 text-xs font-bold border border-white/10">
@@ -121,12 +128,26 @@ export function LobbyView({ room, players, myPlayer, hostPlayerId, onStart, onAd
             {seated.length >= 2 ? (
               <button
                 onClick={onStart}
-                className="w-full py-4 rounded-xl bg-gradient-to-r from-[#D4AF37] via-[#F5D060] to-[#D4AF37] text-[#1a1a0a] font-bold text-xl shadow-lg shadow-[#D4AF37]/25 hover:shadow-[#D4AF37]/50 hover:brightness-110 transition-all duration-200 active:scale-[0.98]"
+                className="w-full py-4 rounded-xl font-bold text-xl active:scale-[0.98] transition-all duration-200"
+                style={{
+                  background: 'linear-gradient(135deg, #D4AF37, #F5D060, #D4AF37)',
+                  color: '#1a1a0a',
+                  boxShadow: '0 0 20px rgba(212,175,55,0.4), 0 4px 16px rgba(212,175,55,0.25)',
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 32px rgba(212,175,55,0.6), 0 4px 24px rgba(212,175,55,0.4)'
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 20px rgba(212,175,55,0.4), 0 4px 16px rgba(212,175,55,0.25)'
+                }}
               >
                 {t.startGame}
               </button>
             ) : (
-              <p className="text-white/40 text-sm text-center">{t.needMorePlayers}</p>
+              <p
+                className="text-sm text-center animate-pulse"
+                style={{ color: 'rgba(180,80,255,0.7)' }}
+              >{t.needMorePlayers}</p>
             )}
           </div>
         )}

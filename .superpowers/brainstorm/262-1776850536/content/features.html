@@ -1,0 +1,64 @@
+<h2>ポーカーUX強化 — 実装したい機能を選んでください</h2>
+<p class="subtitle">複数選択OK。優先度の高いものを選んでください。</p>
+
+<div class="options" data-multiselect>
+
+  <div class="option" data-choice="fold" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>🃏 フォールドアニメーション</h3>
+      <p>フォールドしたプレイヤーのカードが <strong>テーブル中央に向かって飛んで消える</strong>。席は暗くなり、プレイヤーが脱落したことが一目瞭然。</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="winner" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>🏆 ハンド勝利演出</h3>
+      <p>勝者のカードが <strong>ゴールドに光り</strong>、チップが勝者の席に向かってアーク飛翔。オーバーレイにコンフェッティ。負けたプレイヤーのカードはフェードアウト。</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="allin" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>💥 オールインドラマ</h3>
+      <p>オールインを宣言した瞬間、席が <strong>赤く激しくパルス</strong>。「ALL IN」テキストが爆発的に出現。テーブル全体が一瞬揺れるシェイクエフェクト。</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="bust" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>💀 バスト（脱落）演出</h3>
+      <p>チップが0になったプレイヤーの席が <strong>崩れ落ちるアニメーション</strong>で消える。「ELIMINATED」テキストが出て、席がグレーアウト。</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="gameover" onclick="toggleSelect(this)">
+    <div class="letter">E</div>
+    <div class="content">
+      <h3>🎰 ゲームオーバー画面</h3>
+      <p>トーナメント終了時に <strong>シネマティックな演出</strong>。1位が金色の光で照らされ、コンフェッティが降り注ぐ。ランキングが下からスライドインで登場。</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="reveal" onclick="toggleSelect(this)">
+    <div class="letter">F</div>
+    <div class="content">
+      <h3>🎴 ショーダウン（カード公開）演出</h3>
+      <p>手が終わった時に全プレイヤーのカードが <strong>順番にフリップ公開</strong>。最強の役のカードがゴールドにハイライト。弱い手はフェードアウト。</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="deal" onclick="toggleSelect(this)">
+    <div class="letter">G</div>
+    <div class="content">
+      <h3>🎯 ディール演出強化</h3>
+      <p>ゲーム開始時にディーラーから各プレイヤーへ <strong>カードが順番に飛んでいく</strong>アニメーション。コミュニティカードも1枚ずつ劇的にめくれる。</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:24px">選択後、ターミナルで「これでいく」と送ってください</p>

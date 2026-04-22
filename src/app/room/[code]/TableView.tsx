@@ -89,7 +89,7 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
   return (
     <div
       style={{ perspective: isMobile ? 'none' : '900px' }}
-      className="absolute inset-0"
+      className="absolute inset-0 relative"
     >
       <div style={{
         transform: isMobile ? 'none' : 'rotateX(16deg) scaleX(0.93)',
@@ -99,6 +99,12 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
         height: '100%',
       }}>
         <div ref={wrapRef} className="relative w-full h-full">
+
+          {/* Ambient purple glow behind table */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: 'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(80,30,160,0.08) 0%, transparent 100%)' }}
+          />
 
           {/* SVG table surface */}
           <svg
@@ -147,15 +153,22 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
                 <stop offset="40%"  stopColor="#2e1205" />
                 <stop offset="100%" stopColor="#160800" />
               </linearGradient>
+              <radialGradient id="feltSpot" cx="50%" cy="42%" r="35%">
+                <stop offset="0%"   stopColor="rgba(110,35,210,0.22)" />
+                <stop offset="100%" stopColor="rgba(0,0,0,0)" />
+              </radialGradient>
             </defs>
 
             {/* 1 Outer drop shadow */}
-            <ellipse cx="50%" cy="52%" rx="48%" ry="47%"
-              fill="rgba(0,0,0,0.85)" style={{ filter: 'blur(14px)' }} />
+            <ellipse cx="50%" cy="52%" rx="48%" ry="49%"
+              fill="rgba(0,0,0,0.85)" style={{ filter: 'blur(22px)' }} />
 
             {/* 2 Mahogany wood rail */}
             <ellipse cx="50%" cy="50%" rx="48%" ry="47%"
               fill="#2d1005" style={{ filter: 'url(#wg)' }} />
+            {/* 2b Wood rail highlight rim */}
+            <ellipse cx="50%" cy="50%" rx="47%" ry="46%"
+              fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
 
             {/* 3 Top bevel highlight */}
             <ellipse cx="50%" cy="44%" rx="45%" ry="42%"
@@ -174,10 +187,18 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
             <ellipse cx="50%" cy="50%" rx="40%" ry="39%"
               fill="none" stroke="url(#neonRim)" strokeWidth="2"
               style={{ filter: 'drop-shadow(0 0 4px rgba(180,80,255,0.95)) drop-shadow(0 0 12px rgba(180,80,255,0.5))' }} />
+            {/* 6b Secondary softer neon trim */}
+            <ellipse cx="50%" cy="50%" rx="38.5%" ry="37.5%"
+              fill="none" stroke="rgba(140,50,255,0.25)" strokeWidth="8"
+              style={{ filter: 'drop-shadow(0 0 20px rgba(140,50,255,0.4))' }} />
 
             {/* 7 Felt surface */}
             <ellipse cx="50%" cy="50%" rx="38%" ry="37%"
               fill="url(#feltGrad)" style={{ filter: 'url(#felt)' }} />
+
+            {/* 7b Felt spotlight overlay */}
+            <ellipse cx="50%" cy="50%" rx="38%" ry="37%"
+              fill="url(#feltSpot)" />
 
             {/* 8 Felt reflection */}
             <ellipse cx="50%" cy="34%" rx="28%" ry="16%"
@@ -186,6 +207,14 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
             {/* 9 Felt center glow */}
             <ellipse cx="50%" cy="46%" rx="22%" ry="16%"
               fill="rgba(110,35,210,0.14)" style={{ filter: 'blur(10px)' }} />
+
+            {/* 10 Table action zone arc markings */}
+            <ellipse cx="50%" cy="50%" rx="28%" ry="24%"
+              fill="none" stroke="rgba(255,255,255,0.025)" strokeWidth="0.5" strokeDasharray="3 10" />
+
+            {/* 11 Dealer button marker */}
+            <circle cx="58%" cy="64%" r="1.5%" fill="rgba(212,175,55,0.6)" stroke="rgba(255,215,0,0.8)" strokeWidth="0.4%" />
+            <text x="58%" y="64.8%" textAnchor="middle" fontSize="2.2%" fill="#1a1a0a" fontWeight="bold" fontFamily="Arial">D</text>
           </svg>
 
           {/* Center: community cards + pot */}

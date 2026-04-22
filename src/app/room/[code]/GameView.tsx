@@ -127,7 +127,10 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
           />
         </div>
 
-        <div className="flex-shrink-0 flex flex-col">
+        <div
+          className="flex-shrink-0 flex flex-col"
+          style={{ background: 'linear-gradient(180deg, transparent 0%, rgba(4,2,12,0.4) 100%)' }}
+        >
           {isMyTurn && hand && (
             <TurnTimer
               key={`${hand.id}-${currentSeat}`}
@@ -138,17 +141,24 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
 
           {isMyTurn && (
             <div className="flex justify-center py-1">
-              <div
-                className="px-5 py-1 rounded-full text-xs font-black tracking-[0.2em] uppercase"
-                style={{
-                  background: 'linear-gradient(90deg, rgba(255,215,0,0.12), rgba(255,215,0,0.22), rgba(255,215,0,0.12))',
-                  border: '1px solid rgba(255,215,0,0.5)',
-                  color: '#ffd700',
-                  boxShadow: '0 0 12px rgba(255,215,0,0.25), 0 0 24px rgba(255,215,0,0.1)',
-                  animation: 'cardPulse 1.8s ease-in-out infinite',
-                }}
-              >
-                {t.fold === 'Fold' ? 'YOUR TURN' : 'あなたのターン'}
+              <div className="relative flex items-center justify-center">
+                {/* Animated ping ring */}
+                <div
+                  className="absolute animate-ping rounded-full border-2 border-[#ffd700] opacity-30"
+                  style={{ inset: '-6px' }}
+                />
+                <div
+                  className="px-6 py-1.5 rounded-full text-xs font-black tracking-[0.2em] uppercase"
+                  style={{
+                    background: 'linear-gradient(90deg, rgba(255,215,0,0.12), rgba(255,215,0,0.28), rgba(255,215,0,0.12))',
+                    border: '1px solid rgba(255,215,0,0.6)',
+                    color: '#ffd700',
+                    boxShadow: '0 0 20px rgba(255,215,0,0.4), 0 0 40px rgba(255,215,0,0.15)',
+                    animation: 'cardPulse 1.8s ease-in-out infinite',
+                  }}
+                >
+                  {t.fold === 'Fold' ? 'YOUR TURN' : 'あなたのターン'}
+                </div>
               </div>
             </div>
           )}

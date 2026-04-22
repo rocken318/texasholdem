@@ -301,3 +301,30 @@ body {
   0%, 100% { box-shadow: 0 0 24px rgba(212,175,55,0.4), 0 4px 16px rgba(0,0,0,0.4); }
   50%       { box-shadow: 0 0 44px rgba(212,175,55,0.7), 0 4px 20px rgba(0,0,0,0.5); }
 }
+
+/* ── Cinematic overlay & game-over premium animations ── */
+
+@keyframes fadeUp {
+  0%   { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cardGoldSweep {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+@keyframes casinoLight {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes spotBeam {
+  0%, 100% { opacity: 0; }
+  50%       { opacity: 1; }
+}
+
+@keyframes btnSparkle {
+  0%, 100% { transform: scale(0); opacity: 0; }
+  50%       { transform: scale(1); opacity: 1; }
+}

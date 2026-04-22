@@ -42,7 +42,13 @@ export function CommunityCards({ cards }: { cards: PokerCard[] }) {
   }
 
   return (
-    <div className="flex gap-1">
+    <div
+      style={{
+        filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.8))',
+        backdropFilter: 'blur(2px)',
+      }}
+      className="flex gap-1"
+    >
       {Array.from({ length: 5 }).map((_, i) => {
         const card = cards[i]
         const revealed = !!card

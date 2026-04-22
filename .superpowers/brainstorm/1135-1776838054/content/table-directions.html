@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>テーブルデザイン方向性</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0a0010;
+    color: #e8e0f0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px 40px;
+  }
+  h1 { font-size: 22px; font-weight: 700; text-align: center; color: #d4a0ff; margin-bottom: 6px; letter-spacing: 0.05em; }
+  .sub { text-align: center; color: rgba(255,255,255,0.5); font-size: 13px; margin-bottom: 28px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 28px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.04);
+    border: 1.5px solid rgba(180,80,255,0.2);
+    border-radius: 18px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s;
+    position: relative;
+  }
+  .card:hover { border-color: rgba(180,80,255,0.6); transform: translateY(-2px); }
+  .card.selected { border-color: #bf80ff; box-shadow: 0 0 24px rgba(180,80,255,0.35); }
+  .card.selected::after {
+    content: '✓ 選択中';
+    position: absolute;
+    top: 12px; right: 14px;
+    background: #7c3aed;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+  }
+
+  .preview { padding: 20px 20px 0; }
+  .label { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; color: #bf80ff; text-transform: uppercase; margin-bottom: 4px; }
+  .title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .desc { font-size: 13px; color: rgba(255,255,255,0.55); margin-bottom: 16px; line-height: 1.5; }
+
+  .features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 20px 20px;
+  }
+  .feature {
+    font-size: 11px;
+    background: rgba(180,80,255,0.12);
+    border: 1px solid rgba(180,80,255,0.25);
+    color: #d4a0ff;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+
+  /* Option A — 3D Perspective Table */
+  .table-a-wrap {
+    position: relative;
+    width: 100%;
+    padding-bottom: 48%;
+    perspective: 600px;
+  }
+  .table-a {
+    position: absolute;
+    inset: 0;
+    transform: rotateX(28deg) scaleX(0.92);
+    transform-origin: 50% 80%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Option B — Ultra-detailed top-down */
+  .table-b-wrap {
+    position: relative;
+    width: 100%;
+    padding-bottom: 52%;
+  }
+
+  /* Option C — Floating glass table */
+  .table-c-wrap {
+    position: relative;
+    width: 100%;
+    padding-bottom: 52%;
+  }
+
+  svg text { user-select: none; }
+
+  .recommend {
+    display: inline-block;
+    background: linear-gradient(90deg, #7c3aed, #bf80ff);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    padding: 2px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+
+<h1>テーブルデザイン 3方向</h1>
+<p class="sub">どのスタイルが最もカッコいいですか？クリックして選択</p>
+
+<div class="grid">
+
+  <!-- ===== Option A: 3D Perspective ===== -->
+  <div class="card" onclick="select(this, 'perspective-3d')">
+    <div class="preview">
+      <div class="label">Option A <span class="recommend">おすすめ</span></div>
+      <div class="title">奥行き3Dパース — 没入型</div>
+      <div class="desc">カメラを低い角度に傾けた視点。本物のポーカーテーブルを手元から見ているような臨場感。</div>
+
+      <div class="table-a-wrap">
+        <div class="table-a">
+          <svg width="100%" height="100%" viewBox="0 0 560 260" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0">
+            <defs>
+              <!-- Realistic wood grain -->
+              <filter id="wgA" x="-5%" y="-5%" width="110%" height="110%" colorInterpolationFilters="sRGB">
+                <feTurbulence type="fractalNoise" baseFrequency="0.008 0.6" numOctaves="6" seed="42" result="noise"/>
+                <feColorMatrix in="noise" type="matrix"
+                  values="0.6 0.3 0.05 0 0.08
+                          0.3 0.15 0.02 0 0.03
+                          0.1 0.05 0.01 0 0.01
+                          0   0   0    1 0" result="wood"/>
+                <feComposite in="wood" in2="wood" operator="arithmetic" k1="0" k2="1.15" k3="0" k4="-0.1"/>
+              </filter>
+              <!-- Felt fabric texture -->
+              <filter id="feltA" x="0%" y="0%" width="100%" height="100%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.65 0.65" numOctaves="3" seed="7" result="noise"/>
+                <feColorMatrix in="noise" type="matrix"
+                  values="0 0 0 0 0.04
+                          0 0 0 0 0.00
+                          0 0 0 0 0.12
+                          0 0 0 0.18 0" result="feltTex"/>
+                <feBlend in="SourceGraphic" in2="feltTex" mode="overlay"/>
+              </filter>
+              <!-- Neon glow -->
+              <filter id="neonA">
+                <feGaussianBlur stdDeviation="3" result="blur"/>
+                <feFlood floodColor="rgba(180,80,255,1)" result="color"/>
+                <feComposite in="color" in2="blur" operator="in" result="glow"/>
+                <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <!-- Felt gradient -->
+              <radialGradient id="feltGradA" cx="50%" cy="35%" r="70%">
+                <stop offset="0%" stopColor="#1e0050"/>
+                <stop offset="50%" stopColor="#0f0030"/>
+                <stop offset="100%" stopColor="#060015"/>
+              </radialGradient>
+              <!-- Leather padding gradient -->
+              <linearGradient id="leatherA" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#5a2a0a"/>
+                <stop offset="30%" stopColor="#3d1a05"/>
+                <stop offset="100%" stopColor="#1a0a00"/>
+              </linearGradient>
+              <!-- Reflection on felt -->
+              <radialGradient id="reflectA" cx="50%" cy="20%" r="60%">
+                <stop offset="0%" stopColor="rgba(255,255,255,0.06)"/>
+                <stop offset="100%" stopColor="rgba(255,255,255,0)"/>
+              </radialGradient>
+              <!-- Metal trim gradient -->
+              <linearGradient id="metalA" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#d4a0ff"/>
+                <stop offset="40%" stopColor="#7c3aed"/>
+                <stop offset="100%" stopColor="#3d1a70"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Outer drop shadow -->
+            <ellipse cx="280" cy="138" rx="268" ry="128" fill="rgba(0,0,0,0.9)" filter="url(#blur-shadow)"/>
+
+            <!-- Wood rail — dark mahogany -->
+            <ellipse cx="280" cy="135" rx="268" ry="122" fill="#3d1f0a" filter="url(#wgA)"/>
+
+            <!-- Rail highlight (bevel top) -->
+            <ellipse cx="280" cy="120" rx="255" ry="108" fill="none" stroke="rgba(255,255,255,0.09)" strokeWidth="3"/>
+
+            <!-- Leather padding band -->
+            <ellipse cx="280" cy="135" rx="245" ry="110" fill="url(#leatherA)"/>
+
+            <!-- Stitching dots on leather -->
+            <ellipse cx="280" cy="135" rx="240" ry="105" fill="none" stroke="rgba(255,220,150,0.25)" strokeWidth="1" strokeDasharray="4 6"/>
+
+            <!-- Neon metal trim ring -->
+            <ellipse cx="280" cy="135" rx="228" ry="96"
+              fill="none"
+              stroke="url(#metalA)"
+              strokeWidth="2"
+              style="filter: drop-shadow(0 0 4px rgba(180,80,255,1)) drop-shadow(0 0 10px rgba(180,80,255,0.6))"/>
+
+            <!-- Felt surface -->
+            <ellipse cx="280" cy="135" rx="222" ry="90" fill="url(#feltGradA)" filter="url(#feltA)"/>
+
+            <!-- Felt reflection highlight -->
+            <ellipse cx="280" cy="110" rx="180" ry="55" fill="url(#reflectA)"/>
+
+            <!-- Felt center glow -->
+            <ellipse cx="280" cy="120" rx="130" ry="50" fill="rgba(100,30,200,0.15)" style="filter:blur(12px)"/>
+
+            <!-- Community card slots -->
+            <g opacity="0.6">
+              {[160,196,232,268,304].map((x,i) => (
+                <rect key={i} x={x} y="108" width="30" height="42" rx="4" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
+              ))}
+            </g>
+            <rect x="160" y="108" width="30" height="42" rx="4" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
+            <rect x="196" y="108" width="30" height="42" rx="4" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
+            <rect x="232" y="108" width="30" height="42" rx="4" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
+            <rect x="268" y="108" width="30" height="42" rx="4" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
+            <rect x="304" y="108" width="30" height="42" rx="4" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
+
+            <!-- POT badge -->
+            <rect x="248" y="164" width="64" height="18" rx="9" fill="rgba(0,0,0,0.7)" stroke="rgba(180,80,255,0.5)" strokeWidth="1"/>
+            <text x="280" y="176.5" textAnchor="middle" fill="#bf80ff" fontSize="9" fontWeight="700" fontFamily="monospace">POT: 2,400</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="features">
+      <span class="feature">CSS perspective tilt</span>
+      <span class="feature">フェルト布テクスチャ</span>
+      <span class="feature">本革パッディング風</span>
+      <span class="feature">ステッチ縫い目</span>
+      <span class="feature">ネオン金属トリム</span>
+      <span class="feature">フェルト反射光</span>
+    </div>
+  </div>
+
+  <!-- ===== Option B: Ultra-detailed Top-down ===== -->
+  <div class="card" onclick="select(this, 'topdown-ultra')">
+    <div class="preview">
+      <div class="label">Option B</div>
+      <div class="title">超精細トップビュー — クラシック</div>
+      <div class="desc">真上からの視点。カード・チップが全プレイヤーに公平に見える。ラスベガス風の豪華なデコ装飾。</div>
+
+      <div class="table-b-wrap">
+        <svg width="100%" height="100%" viewBox="0 0 560 290" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0">
+          <defs>
+            <filter id="wgB" x="-5%" y="-5%" width="110%" height="110%" colorInterpolationFilters="sRGB">
+              <feTurbulence type="turbulence" baseFrequency="0.01 0.5" numOctaves="7" seed="17" result="noise"/>
+              <feColorMatrix in="noise" type="matrix"
+                values="0.5 0.2 0.05 0 0.12
+                        0.25 0.1 0.02 0 0.05
+                        0.07 0.03 0.01 0 0.01
+                        0 0 0 1 0"/>
+            </filter>
+            <filter id="feltB" x="0%" y="0%" width="100%" height="100%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.9 0.9" numOctaves="4" seed="3"/>
+              <feColorMatrix type="matrix"
+                values="0 0 0 0 0.05
+                        0 0 0 0 0.00
+                        0 0 0 0 0.15
+                        0 0 0 0.2 0" result="tex"/>
+              <feBlend in="SourceGraphic" in2="tex" mode="soft-light"/>
+            </filter>
+            <radialGradient id="feltGradB" cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stopColor="#1a0045"/>
+              <stop offset="60%" stopColor="#0d0025"/>
+              <stop offset="100%" stopColor="#050010"/>
+            </radialGradient>
+            <radialGradient id="goldRingB" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#ffd700"/>
+              <stop offset="50%" stopColor="#c0902a"/>
+              <stop offset="100%" stopColor="#8b6820"/>
+            </radialGradient>
+          </defs>
+
+          <!-- Outer shadow -->
+          <ellipse cx="280" cy="145" rx="272" ry="138" fill="rgba(0,0,0,0.85)" style="filter:blur(12px)"/>
+
+          <!-- Wood rail -->
+          <ellipse cx="280" cy="145" rx="270" ry="136" fill="#2d1408" filter="url(#wgB)"/>
+
+          <!-- Gold decorative outer ring -->
+          <ellipse cx="280" cy="145" rx="260" ry="126" fill="none" stroke="url(#goldRingB)" strokeWidth="3" opacity="0.7"/>
+
+          <!-- Inner wood band -->
+          <ellipse cx="280" cy="145" rx="252" ry="118" fill="#3d1f0a" filter="url(#wgB)"/>
+
+          <!-- Neon purple trim -->
+          <ellipse cx="280" cy="145" rx="238" ry="104"
+            fill="none" stroke="rgba(180,80,255,0.9)" strokeWidth="1.5"
+            style="filter:drop-shadow(0 0 5px rgba(180,80,255,1)) drop-shadow(0 0 14px rgba(180,80,255,0.5))"/>
+
+          <!-- Felt -->
+          <ellipse cx="280" cy="145" rx="232" ry="98" fill="url(#feltGradB)" filter="url(#feltB)"/>
+
+          <!-- Decorative pattern on felt -->
+          <ellipse cx="280" cy="145" rx="200" ry="75" fill="none" stroke="rgba(180,80,255,0.08)" strokeWidth="1" strokeDasharray="8 12"/>
+          <ellipse cx="280" cy="145" rx="160" ry="55" fill="none" stroke="rgba(180,80,255,0.06)" strokeWidth="1" strokeDasharray="6 10"/>
+
+          <!-- Center glow -->
+          <ellipse cx="280" cy="140" rx="140" ry="60" fill="rgba(100,30,200,0.12)" style="filter:blur(15px)"/>
+
+          <!-- Card slots -->
+          <rect x="160" y="120" width="28" height="40" rx="4" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+          <rect x="194" y="120" width="28" height="40" rx="4" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+          <rect x="228" y="120" width="28" height="40" rx="4" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+          <rect x="262" y="120" width="28" height="40" rx="4" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+          <rect x="296" y="120" width="28" height="40" rx="4" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+
+          <!-- Dealer logo area -->
+          <ellipse cx="280" cy="80" rx="30" ry="15" fill="rgba(180,80,255,0.08)" stroke="rgba(180,80,255,0.2)" strokeWidth="1"/>
+          <text x="280" y="84" textAnchor="middle" fill="rgba(180,80,255,0.6)" fontSize="8" fontWeight="700" letterSpacing="2">POKER</text>
+        </svg>
+      </div>
+    </div>
+    <div class="features">
+      <span class="feature">二重木目レール</span>
+      <span class="feature">ゴールドリング装飾</span>
+      <span class="feature">フェルト幾何学模様</span>
+      <span class="feature">クラシックラスベガス風</span>
+    </div>
+  </div>
+
+  <!-- ===== Option C: Glassmorphism Luxury ===== -->
+  <div class="card" onclick="select(this, 'glass-luxury')">
+    <div class="preview">
+      <div class="label">Option C</div>
+      <div class="title">グラスモーフィズム — 未来型</div>
+      <div class="desc">半透明ガラス × 発光エフェクト。背景の煙・シャンデリアが透けて見える、最先端ラグジュアリー感。</div>
+
+      <div class="table-c-wrap">
+        <svg width="100%" height="100%" viewBox="0 0 560 290" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0">
+          <defs>
+            <radialGradient id="glassGrad" cx="50%" cy="40%" r="65%">
+              <stop offset="0%" stopColor="rgba(140,50,255,0.25)"/>
+              <stop offset="60%" stopColor="rgba(80,20,180,0.15)"/>
+              <stop offset="100%" stopColor="rgba(20,5,60,0.35)"/>
+            </radialGradient>
+            <filter id="glassBlur">
+              <feGaussianBlur stdDeviation="0.5"/>
+            </filter>
+          </defs>
+
+          <!-- Outer glow ring -->
+          <ellipse cx="280" cy="145" rx="270" ry="136" fill="rgba(120,40,255,0.08)" style="filter:blur(20px)"/>
+
+          <!-- Glass rail with thick border -->
+          <ellipse cx="280" cy="145" rx="268" ry="134"
+            fill="rgba(30,10,60,0.4)"
+            stroke="rgba(180,80,255,0.7)" strokeWidth="3"
+            style="filter:drop-shadow(0 0 8px rgba(180,80,255,0.8)) drop-shadow(0 0 25px rgba(180,80,255,0.3)); backdrop-filter:blur(10px)"/>
+
+          <!-- Inner glass highlight top -->
+          <ellipse cx="280" cy="128" rx="250" ry="115" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5"/>
+
+          <!-- Inner glass panel -->
+          <ellipse cx="280" cy="145" rx="238" ry="106"
+            fill="url(#glassGrad)"
+            stroke="rgba(200,130,255,0.3)" strokeWidth="1"/>
+
+          <!-- Frosted layer -->
+          <ellipse cx="280" cy="145" rx="232" ry="100" fill="rgba(255,255,255,0.02)"/>
+
+          <!-- Scanlines effect for glass -->
+          <ellipse cx="280" cy="145" rx="232" ry="100" fill="none" stroke="rgba(180,80,255,0.04)" strokeWidth="100" strokeDasharray="1 3"/>
+
+          <!-- Center intense glow -->
+          <ellipse cx="280" cy="130" rx="160" ry="65" fill="rgba(140,40,255,0.18)" style="filter:blur(18px)"/>
+
+          <!-- Card slots -->
+          <rect x="163" y="118" width="28" height="40" rx="5" fill="rgba(180,80,255,0.08)" stroke="rgba(180,80,255,0.35)" strokeWidth="1"
+            style="filter:drop-shadow(0 0 4px rgba(180,80,255,0.3))"/>
+          <rect x="197" y="118" width="28" height="40" rx="5" fill="rgba(180,80,255,0.08)" stroke="rgba(180,80,255,0.35)" strokeWidth="1"
+            style="filter:drop-shadow(0 0 4px rgba(180,80,255,0.3))"/>
+          <rect x="231" y="118" width="28" height="40" rx="5" fill="rgba(180,80,255,0.08)" stroke="rgba(180,80,255,0.35)" strokeWidth="1"
+            style="filter:drop-shadow(0 0 4px rgba(180,80,255,0.3))"/>
+          <rect x="265" y="118" width="28" height="40" rx="5" fill="rgba(180,80,255,0.08)" stroke="rgba(180,80,255,0.35)" strokeWidth="1"
+            style="filter:drop-shadow(0 0 4px rgba(180,80,255,0.3))"/>
+          <rect x="299" y="118" width="28" height="40" rx="5" fill="rgba(180,80,255,0.08)" stroke="rgba(180,80,255,0.35)" strokeWidth="1"
+            style="filter:drop-shadow(0 0 4px rgba(180,80,255,0.3))"/>
+
+          <!-- Floating particles -->
+          <circle cx="180" cy="100" r="1.5" fill="rgba(200,130,255,0.6)"/>
+          <circle cx="380" cy="90" r="1" fill="rgba(200,130,255,0.5)"/>
+          <circle cx="320" cy="185" r="2" fill="rgba(180,80,255,0.4)"/>
+          <circle cx="150" cy="170" r="1.5" fill="rgba(200,150,255,0.5)"/>
+        </svg>
+      </div>
+    </div>
+    <div class="features">
+      <span class="feature">半透明ガラス素材</span>
+      <span class="feature">強烈ネオングロー</span>
+      <span class="feature">浮遊パーティクル</span>
+      <span class="feature">サイバーパンク風</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function select(el, choice) {
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  if (window.__companion) window.__companion.select(choice, el.querySelector('.title').textContent);
+}
+</script>
+</body>
+</html>

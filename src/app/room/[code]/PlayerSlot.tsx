@@ -11,6 +11,16 @@ interface PlayerSlotProps {
   cards?: PokerCard[]
 }
 
+/** Tiny inline SVG chip icon — 8×8 circle with a center dot */
+function ChipIcon() {
+  return (
+    <svg width="8" height="8" viewBox="0 0 8 8" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+      <circle cx="4" cy="4" r="3.5" fill="none" stroke="#5ce65c" strokeWidth="1" />
+      <circle cx="4" cy="4" r="1.2" fill="#5ce65c" />
+    </svg>
+  )
+}
+
 export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards }: PlayerSlotProps) {
   const inHand = player.status !== 'folded' && player.status !== 'out'
   const isFolded = player.status === 'folded'
@@ -20,25 +30,48 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards }: Pla
 
   return (
     <div className="flex flex-col items-center gap-0.5 relative">
-      {/* Turn indicator arrow */}
+      {/* Turn indicator arrow — double-arrow with glow trail */}
       {isActive && (
         <div
           style={{
             position: 'absolute',
-            top: -22,
+            top: -28,
             left: '50%',
+            transform: 'translateX(-50%)',
             animation: 'arrowBob 0.9s ease-in-out infinite',
             zIndex: 20,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 1,
             lineHeight: 1,
           }}
         >
-          <svg width="14" height="12" viewBox="0 0 14 12" xmlns="http://www.w3.org/2000/svg">
+          {/* Primary arrow */}
+          <svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg">
             <polygon
-              points="7,12 0,0 14,0"
+              points="7,10 0,0 14,0"
               fill="#ffd700"
-              style={{ filter: 'drop-shadow(0 0 4px rgba(255,215,0,0.9)) drop-shadow(0 0 8px rgba(255,215,0,0.5))' }}
+              style={{ filter: 'drop-shadow(0 0 5px rgba(255,215,0,0.95)) drop-shadow(0 0 10px rgba(255,215,0,0.6))' }}
             />
           </svg>
+          {/* Secondary smaller arrow for double-arrow effect */}
+          <svg width="9" height="7" viewBox="0 0 9 7" xmlns="http://www.w3.org/2000/svg">
+            <polygon
+              points="4.5,7 0,0 9,0"
+              fill="#ffd700"
+              style={{ opacity: 0.55, filter: 'drop-shadow(0 0 3px rgba(255,215,0,0.7))' }}
+            />
+          </svg>
+          {/* Glow trail below arrows */}
+          <div
+            style={{
+              width: 2,
+              height: 8,
+              background: 'linear-gradient(180deg, rgba(255,215,0,0.5) 0%, transparent 100%)',
+              borderRadius: 1,
+            }}
+          />
         </div>
       )}
 
@@ -73,19 +106,21 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards }: Pla
       {/* Main player HUD */}
       <div
         className={cn(
-          'relative flex flex-col items-center rounded-lg px-1.5 py-1 min-w-[52px] max-w-[64px] transition-all duration-300',
+          'relative flex flex-col items-center rounded-lg px-1.5 py-1 min-w-[56px] max-w-[68px] transition-all duration-300',
         )}
         style={{
           background: isMe
-            ? 'linear-gradient(180deg, rgba(140,50,255,0.18) 0%, rgba(20,10,40,0.88) 40%, rgba(12,5,28,0.95) 100%)'
+            ? 'linear-gradient(180deg, rgba(160,60,255,0.28) 0%, rgba(20,10,40,0.92) 40%, rgba(12,5,28,0.98) 100%)'
             : 'linear-gradient(180deg, rgba(30,15,55,0.82) 0%, rgba(15,8,30,0.92) 100%)',
           border: isAllIn
             ? '1px solid rgba(255,50,50,0.9)'
             : isMe
-            ? '1px solid rgba(180,80,255,0.45)'
+            ? '1px solid rgba(180,80,255,0.55)'
             : '1px solid rgba(180,80,255,0.15)',
           boxShadow: isActive
             ? '0 0 14px rgba(180,80,255,0.75), 0 0 28px rgba(180,80,255,0.35)'
+            : isMe
+            ? '0 2px 10px rgba(140,50,255,0.25), 0 2px 8px rgba(0,0,0,0.6)'
             : '0 2px 8px rgba(0,0,0,0.6)',
           backdropFilter: 'blur(8px)',
           animation: isOut
@@ -98,6 +133,21 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards }: Pla
           opacity: isFolded ? 1 : undefined,
         }}
       >
+        {/* Top inner highlight glow line */}
+        <div
+          className="absolute top-0 inset-x-0 rounded-t-lg overflow-hidden"
+          style={{ height: 2, pointerEvents: 'none' }}
+        >
+          <div
+            style={{
+              height: '100%',
+              width: '80%',
+              margin: '0 auto',
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)',
+            }}
+          />
+        </div>
+
         {/* Active pulsing ring */}
         {isActive && (
           <div
@@ -130,17 +180,20 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards }: Pla
           </div>
         )}
 
-        {/* Avatar */}
+        {/* Avatar — styled as a casino chip */}
         <div
           className={cn(
-            'w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0',
-            isActive && 'ring-2 ring-[#bf80ff] ring-offset-1 ring-offset-transparent',
+            'w-6 h-6 rounded-full flex items-center justify-center text-[11px] shrink-0',
+            isMe ? 'font-black' : 'font-bold',
           )}
           style={{
             background: isMe
               ? 'linear-gradient(135deg, #bf80ff 0%, #7c3aed 100%)'
               : 'linear-gradient(135deg, #3a2060 0%, #1e0f40 100%)',
             color: '#fff',
+            boxShadow: isMe
+              ? '0 0 0 1.5px rgba(180,80,255,0.55), 0 0 0 3px rgba(0,0,0,0.5), 0 0 0 4.5px rgba(180,80,255,0.25)'
+              : '0 0 0 1.5px rgba(180,80,255,0.3), 0 0 0 3px rgba(0,0,0,0.5), 0 0 0 4.5px rgba(180,80,255,0.12)',
           }}
         >
           {initial}
@@ -148,37 +201,52 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards }: Pla
 
         {/* Name — gold when active, purple when me, white otherwise */}
         <span
-          className="text-[8px] font-semibold max-w-[56px] truncate block leading-tight mt-0.5"
-          style={{ color: isActive ? '#ffd700' : isMe ? '#d4a0ff' : 'rgba(255,255,255,0.85)' }}
+          className="text-[9px] font-semibold max-w-[60px] truncate block leading-tight mt-0.5"
+          style={{
+            color: isActive ? '#ffd700' : isMe ? '#d4a0ff' : 'rgba(255,255,255,0.85)',
+            textShadow: isActive ? '0 0 8px rgba(255,215,0,0.6)' : undefined,
+          }}
         >
           {player.display_name}
         </span>
 
-        {/* Chip count */}
+        {/* Chip count with inline chip icon */}
         <div className="flex items-center gap-0.5 mt-0.5">
-          <span className="text-[7px]" style={{ color: '#5ce65c' }}>$</span>
+          <ChipIcon />
           <span className="text-[8px] font-mono font-semibold" style={{ color: '#5ce65c' }}>
             {player.chips.toLocaleString()}
           </span>
         </div>
 
-        {/* Bet amount badge */}
+        {/* Bet amount badge — chip-style BET label */}
         {betAmount > 0 && (
-          <div
-            className="flex items-center gap-0.5 mt-0.5 px-1.5 py-0 rounded-sm"
-            style={{
-              background: 'linear-gradient(180deg, rgba(180,80,255,0.25) 0%, rgba(180,80,255,0.1) 100%)',
-              border: '1px solid rgba(180,80,255,0.35)',
-            }}
-          >
-            <span className="text-[8px]" style={{ color: '#bf80ff' }}>BET</span>
-            <span className="text-[10px] font-mono font-bold" style={{ color: '#d4a0ff' }}>
+          <div className="flex items-center gap-0.5 mt-0.5">
+            {/* BET chip circle */}
+            <div
+              className="w-4 h-4 rounded-full flex items-center justify-center text-[6px] font-black"
+              style={{
+                background: 'rgba(180,80,255,0.3)',
+                border: '1px solid rgba(180,80,255,0.5)',
+                color: '#d4a0ff',
+                lineHeight: 1,
+              }}
+            >
+              BET
+            </div>
+            {/* Amount */}
+            <span
+              className="text-[10px] font-mono font-bold"
+              style={{
+                color: '#d4a0ff',
+                textShadow: '0 0 6px rgba(180,80,255,0.5)',
+              }}
+            >
               {betAmount.toLocaleString()}
             </span>
           </div>
         )}
 
-        {/* All-in badge */}
+        {/* All-in badge (second instance, after chip count) */}
         {isAllIn && (
           <div
             className="text-[11px] font-bold uppercase tracking-wider px-1.5 py-0 rounded-sm mt-0.5"

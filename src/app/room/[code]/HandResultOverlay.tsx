@@ -1,6 +1,6 @@
 // src/app/room/[code]/HandResultOverlay.tsx
 'use client'
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import type { PokerCard } from '@/types/domain'
 import { Card } from '@/components/Card'
 
@@ -23,18 +23,27 @@ const DURATION_MS = 5000
 
 // Deterministic confetti pieces — fixed positions & colors to avoid hydration mismatches
 const CONFETTI_PIECES = [
-  { left: '8%',  color: '#ffd700', delay: 0 },
-  { left: '18%', color: '#bf80ff', delay: 120 },
-  { left: '28%', color: '#4ade80', delay: 240 },
-  { left: '38%', color: '#f87171', delay: 360 },
-  { left: '48%', color: '#ffd700', delay: 80 },
-  { left: '58%', color: '#bf80ff', delay: 480 },
-  { left: '68%', color: '#4ade80', delay: 600 },
-  { left: '78%', color: '#f87171', delay: 720 },
-  { left: '88%', color: '#ffd700', delay: 840 },
-  { left: '13%', color: '#4ade80', delay: 1000 },
-  { left: '53%', color: '#f87171', delay: 160 },
-  { left: '93%', color: '#bf80ff', delay: 900 },
+  { left: '8%',  color: '#ffd700', delay: 0,    width: 6,  height: 6,  borderRadius: 1 },
+  { left: '18%', color: '#bf80ff', delay: 120,  width: 6,  height: 6,  borderRadius: 1 },
+  { left: '28%', color: '#4ade80', delay: 240,  width: 6,  height: 6,  borderRadius: 1 },
+  { left: '38%', color: '#f87171', delay: 360,  width: 6,  height: 6,  borderRadius: 1 },
+  { left: '48%', color: '#ffd700', delay: 80,   width: 6,  height: 6,  borderRadius: 1 },
+  { left: '58%', color: '#bf80ff', delay: 480,  width: 6,  height: 6,  borderRadius: 1 },
+  { left: '68%', color: '#4ade80', delay: 600,  width: 6,  height: 6,  borderRadius: 1 },
+  { left: '78%', color: '#f87171', delay: 720,  width: 6,  height: 6,  borderRadius: 1 },
+  { left: '88%', color: '#ffd700', delay: 840,  width: 6,  height: 6,  borderRadius: 1 },
+  { left: '13%', color: '#4ade80', delay: 1000, width: 6,  height: 6,  borderRadius: 1 },
+  { left: '53%', color: '#f87171', delay: 160,  width: 6,  height: 6,  borderRadius: 1 },
+  { left: '93%', color: '#bf80ff', delay: 900,  width: 6,  height: 6,  borderRadius: 1 },
+  // 8 additional pieces with more variety
+  { left: '5%',  color: '#60d4f7', delay: 200,  width: 8,  height: 8,  borderRadius: '50%' },
+  { left: '22%', color: '#ff9f43', delay: 450,  width: 4,  height: 12, borderRadius: 2 },
+  { left: '35%', color: '#60d4f7', delay: 700,  width: 8,  height: 8,  borderRadius: '50%' },
+  { left: '44%', color: '#ff9f43', delay: 1100, width: 4,  height: 12, borderRadius: 2 },
+  { left: '61%', color: '#ffd700', delay: 300,  width: 8,  height: 8,  borderRadius: '50%' },
+  { left: '72%', color: '#60d4f7', delay: 950,  width: 4,  height: 12, borderRadius: 2 },
+  { left: '82%', color: '#ff9f43', delay: 1300, width: 8,  height: 8,  borderRadius: '50%' },
+  { left: '96%', color: '#4ade80', delay: 1400, width: 4,  height: 12, borderRadius: 2 },
 ]
 
 export function HandResultOverlay({ winnerIds, winnerNames, pot, showdownResults, onDismiss }: HandResultOverlayProps) {
@@ -75,6 +84,9 @@ export function HandResultOverlay({ winnerIds, winnerNames, pot, showdownResults
     return () => clearTimeout(t)
   }, [])
 
+  // Find the winner's hand name from showdownResults
+  const winnerHandName = showdownResults.find(r => winnerIds.includes(r.playerId))?.handName
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -90,6 +102,15 @@ export function HandResultOverlay({ winnerIds, winnerNames, pot, showdownResults
         }}
         onClick={e => e.stopPropagation()}
       >
+        {/* Casino light sweep background */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'conic-gradient(from 0deg at 50% 120%, transparent 0%, rgba(212,175,55,0.04) 15%, transparent 30%)',
+            animation: 'casinoLight 8s linear infinite',
+          }}
+        />
+
         {/* Confetti layer */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
           {CONFETTI_PIECES.map((p, i) => (
@@ -99,9 +120,9 @@ export function HandResultOverlay({ winnerIds, winnerNames, pot, showdownResults
                 position: 'absolute',
                 top: 0,
                 left: p.left,
-                width: 6,
-                height: 6,
-                borderRadius: 1,
+                width: p.width,
+                height: p.height,
+                borderRadius: p.borderRadius as number | string,
                 background: p.color,
                 animation: `confettiFall 1.4s ease-in ${p.delay}ms both`,
               }}
@@ -120,22 +141,40 @@ export function HandResultOverlay({ winnerIds, winnerNames, pot, showdownResults
         <div className="p-5 flex flex-col items-center gap-4 relative z-20">
           {/* Trophy + winner — styled header */}
           <div className="text-center w-full">
-            {/* Pulsing gold ring around trophy */}
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: 72,
-                height: 72,
-                borderRadius: '50%',
-                border: '2.5px solid rgba(255,215,0,0.7)',
-                boxShadow: '0 0 0 4px rgba(255,215,0,0.15), 0 0 24px rgba(255,215,0,0.35)',
-                animation: 'goldRingPulse 1.6s ease-in-out infinite',
-                marginBottom: 8,
-              }}
-            >
-              <span style={{ fontSize: 40, lineHeight: 1 }}>🏆</span>
+            {/* Trophy area with glow overlay */}
+            <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+              {/* Radial glow behind trophy */}
+              <div
+                style={{
+                  position: 'absolute',
+                  width: 120,
+                  height: 120,
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle, rgba(255,215,0,0.15) 0%, transparent 70%)',
+                  filter: 'blur(12px)',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  pointerEvents: 'none',
+                }}
+              />
+              {/* Pulsing gold ring around trophy */}
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 72,
+                  height: 72,
+                  borderRadius: '50%',
+                  border: '2.5px solid rgba(255,215,0,0.7)',
+                  boxShadow: '0 0 0 4px rgba(255,215,0,0.15), 0 0 24px rgba(255,215,0,0.35)',
+                  animation: 'goldRingPulse 1.6s ease-in-out infinite',
+                  position: 'relative',
+                }}
+              >
+                <span style={{ fontSize: 48, lineHeight: 1 }}>🏆</span>
+              </div>
             </div>
 
             {/* WINNER badge */}
@@ -190,6 +229,23 @@ export function HandResultOverlay({ winnerIds, winnerNames, pot, showdownResults
                 {pot.toLocaleString()}
               </span>
             </div>
+
+            {/* Winning hand name label */}
+            {winnerHandName && (
+              <div
+                style={{
+                  color: '#D4AF37',
+                  fontSize: 11,
+                  letterSpacing: '0.08em',
+                  fontStyle: 'italic',
+                  opacity: 0,
+                  animation: 'fadeUp 0.4s 0.8s ease both',
+                  marginTop: 2,
+                }}
+              >
+                with {winnerHandName}
+              </div>
+            )}
           </div>
 
           {/* Showdown hands — staggered reveal */}
@@ -212,28 +268,43 @@ export function HandResultOverlay({ winnerIds, winnerNames, pot, showdownResults
                     >
                       {/* Hole cards — flip reveal on appearance */}
                       <div className="flex gap-1 shrink-0" style={{ perspective: 600 }}>
-                        {r.holeCards.map((card, i) => (
-                          <div
-                            key={i}
-                            style={{
-                              animation: isRevealed
-                                ? `flipReveal 0.44s ease-in-out ${i * 80}ms both`
-                                : 'none',
-                              filter: isRevealed
-                                ? isWinner
-                                  ? 'drop-shadow(0 0 12px rgba(255,215,0,0.9)) drop-shadow(0 0 24px rgba(255,215,0,0.5))'
-                                  : 'grayscale(0.7) opacity(0.5)'
-                                : 'none',
-                              display: 'inline-block',
-                            }}
-                          >
-                            <Card
-                              card={card}
-                              small
-                              className={isWinner ? 'ring-2 ring-[#D4AF37]/70' : ''}
+                        {/* Shimmer wrapper for winner cards */}
+                        <div style={{ position: 'relative', overflow: 'hidden', display: 'flex', gap: 4 }}>
+                          {r.holeCards.map((card, i) => (
+                            <div
+                              key={i}
+                              style={{
+                                animation: isRevealed
+                                  ? `flipReveal 0.44s ease-in-out ${i * 80}ms both`
+                                  : 'none',
+                                filter: isRevealed
+                                  ? isWinner
+                                    ? 'drop-shadow(0 0 12px rgba(255,215,0,0.9)) drop-shadow(0 0 24px rgba(255,215,0,0.5))'
+                                    : 'grayscale(0.7) opacity(0.5)'
+                                  : 'none',
+                                display: 'inline-block',
+                              }}
+                            >
+                              <Card
+                                card={card}
+                                small
+                                className={isWinner ? 'ring-2 ring-[#D4AF37]/70' : ''}
+                              />
+                            </div>
+                          ))}
+                          {/* Gold shimmer sweep for winner cards */}
+                          {isWinner && isRevealed && (
+                            <div
+                              style={{
+                                position: 'absolute',
+                                inset: 0,
+                                background: 'linear-gradient(105deg, transparent 40%, rgba(255,215,0,0.35) 50%, transparent 60%)',
+                                animation: 'cardGoldSweep 0.8s 0.5s ease both',
+                                pointerEvents: 'none',
+                              }}
                             />
-                          </div>
-                        ))}
+                          )}
+                        </div>
                       </div>
 
                       {/* Name + hand */}
