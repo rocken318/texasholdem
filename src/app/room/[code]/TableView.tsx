@@ -47,6 +47,14 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
   const prevBetsRef = useRef<Record<string, number>>({})
   const [flyingChips, setFlyingChips] = useState<FlyingChip[]>([])
   const [potPulseKey, setPotPulseKey] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   useEffect(() => {
     const container = wrapRef.current
@@ -78,9 +86,9 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
   }, [tableBets, seated, mySeatIndex])
 
   return (
-    <div style={{ perspective: '900px', width: '100%' }}>
+    <div style={{ perspective: isMobile ? 'none' : '900px', width: '100%' }}>
       <div style={{
-        transform: 'rotateX(16deg) scaleX(0.93)',
+        transform: isMobile ? 'none' : 'rotateX(16deg) scaleX(0.93)',
         transformOrigin: '50% 85%',
         transformStyle: 'preserve-3d',
       }}>
@@ -175,7 +183,7 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
           </svg>
 
           {/* Center: community cards + pot */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-8 pointer-events-none">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 pointer-events-none">
             <CommunityCards cards={communityCards} />
             {pot > 0 && (
               <div className="flex flex-col items-center gap-0.5">
