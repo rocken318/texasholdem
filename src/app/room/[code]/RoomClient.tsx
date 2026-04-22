@@ -33,6 +33,7 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
   const [joining, setJoining] = useState(false)
   const [rankings, setRankings] = useState<{ playerId: string; displayName: string; chips: number; rank: number }[]>([])
   const [showdownResults, setShowdownResults] = useState<ShowdownResult[]>([])
+  const [showdownCommunity, setShowdownCommunity] = useState<PokerCard[]>([])
   const [handResult, setHandResult] = useState<{ winnerIds: string[]; pot: number } | null>(null)
   const [botIds, setBotIds] = useState<Set<string>>(() => {
     if (typeof window === 'undefined') return new Set()
@@ -149,6 +150,7 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
       setLastAction(null)
       setHandResult(null)
       setShowdownResults([])
+      setShowdownCommunity([])
       // Always create a fresh hand object — even if hand is currently null
       setHand({
         id: event.handId,
@@ -230,6 +232,7 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
         ...r,
         displayName: playersRef.current.find(p => p.id === r.playerId)?.display_name ?? '?',
       })))
+      setShowdownCommunity(event.communityCards)
     }
     if (event.type === 'hand_finished') {
       setHand(h => h ? { ...h, street: 'finished', winner_ids: event.winnerIds } : h)
@@ -299,6 +302,7 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
   function handleHandResultDismiss() {
     setHandResult(null)
     setShowdownResults([])
+    setShowdownCommunity([])
     // Apply any hand_started event that arrived while the overlay was showing
     const pending = pendingHandStartRef.current
     if (pending) {
@@ -389,6 +393,7 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
       currentSeat={currentSeat}
       handResult={handResult}
       showdownResults={showdownResults}
+      showdownCommunity={showdownCommunity}
       onHandResultDismiss={handleHandResultDismiss}
       onHandResultReady={handleReady}
       t={t}

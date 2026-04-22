@@ -244,9 +244,9 @@ export async function advanceStreet(params: {
     const results = eligible.map(hp => ({
       playerId: hp.player_id,
       holeCards: hp.hole_cards,
-      handName: evaluateHand(hp.hole_cards, community).name,
+      handName: evaluateHand(hp.hole_cards, community).descr,
     }))
-    await broadcastRoomEvent(roomId, { type: 'showdown', results })
+    await broadcastRoomEvent(roomId, { type: 'showdown', results, communityCards: community })
 
     await resolveHand({
       handId: hand.id, roomId, winnerIds, pots, handPlayers, players,

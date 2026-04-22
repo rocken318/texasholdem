@@ -11,7 +11,7 @@ export type PokerEvent =
   | { type: 'turn_started'; playerId: string; seatIndex: number; timeoutSec: number }
   | { type: 'player_action'; playerId: string; action: string; amount: number; pot: number; currentBet: number }
   | { type: 'community_dealt'; cards: PokerCard[]; street: string }
-  | { type: 'showdown'; results: { playerId: string; holeCards: PokerCard[]; handName: string }[] }
+  | { type: 'showdown'; results: { playerId: string; holeCards: PokerCard[]; handName: string }[]; communityCards: PokerCard[] }
   | { type: 'chips_updated'; players: { id: string; chips: number }[] }
   | { type: 'hand_finished'; winnerIds: string[]; pot: number; nextDealerSeat: number }
   | { type: 'game_finished'; rankings: { playerId: string; displayName: string; chips: number; rank: number }[] }

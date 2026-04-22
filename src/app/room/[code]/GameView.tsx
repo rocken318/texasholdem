@@ -22,6 +22,7 @@ interface GameViewProps {
   currentSeat: number | null
   handResult: { winnerIds: string[]; pot: number } | null
   showdownResults: ShowdownResult[]
+  showdownCommunity: PokerCard[]
   onHandResultDismiss: () => void
   onHandResultReady: () => void
   t: Translations
@@ -82,7 +83,7 @@ function getActionColor(action: string): string {
   }
 }
 
-export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrentBet, tableBets, lastAction, currentSeat, handResult, showdownResults, onHandResultDismiss, onHandResultReady, t }: GameViewProps) {
+export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrentBet, tableBets, lastAction, currentSeat, handResult, showdownResults, showdownCommunity, onHandResultDismiss, onHandResultReady, t }: GameViewProps) {
   const [submittingAction, setSubmittingAction] = useState(false)
   const isMyTurn = !submittingAction && myPlayer?.seat_index === currentSeat && currentSeat !== null
   const [peekingCards, setPeekingCards] = useState(false)
@@ -156,6 +157,7 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
             winnerNames={winnerNames}
             pot={handResult.pot}
             showdownResults={showdownResults}
+            communityCards={showdownCommunity}
             onDismiss={onHandResultDismiss}
             onReady={onHandResultReady}
           />
