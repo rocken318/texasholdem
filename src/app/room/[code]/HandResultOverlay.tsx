@@ -17,9 +17,10 @@ interface HandResultOverlayProps {
   pot: number
   showdownResults: ShowdownResult[]
   onDismiss: () => void
+  onReady: () => void
 }
 
-const DURATION_MS = 10000
+const DURATION_MS = 7000
 const WINNER_PHASE_MS = 3500
 
 // Deterministic confetti pieces — fixed positions & colors to avoid hydration mismatches
@@ -47,13 +48,21 @@ const CONFETTI_PIECES = [
   { left: '96%', color: '#4ade80', delay: 1400, width: 4,  height: 12, borderRadius: 2 },
 ]
 
-export function HandResultOverlay({ winnerIds, winnerNames, pot, showdownResults, onDismiss }: HandResultOverlayProps) {
+export function HandResultOverlay({ winnerIds, winnerNames, pot, showdownResults, onDismiss, onReady }: HandResultOverlayProps) {
   const [progress, setProgress] = useState(100)
   const [phase, setPhase] = useState<'winner' | 'showdown'>('winner')
+  const [myReady, setMyReady] = useState(false)
   // Track which player indices have been revealed so far
   const [revealedCount, setRevealedCount] = useState(0)
 
   const dismiss = useCallback(() => onDismiss(), [onDismiss])
+
+  const handleNext = useCallback(() => {
+    if (myReady) return
+    setMyReady(true)
+    onReady()
+    onDismiss()
+  }, [myReady, onReady, onDismiss])
 
   // Countdown bar — always from mount, total DURATION_MS
   useEffect(() => {
@@ -104,7 +113,6 @@ export function HandResultOverlay({ winnerIds, winnerNames, pot, showdownResults
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(6px)' }}
-      onClick={dismiss}
     >
       <div
         className="w-full rounded-2xl overflow-hidden relative"
@@ -473,7 +481,33 @@ export function HandResultOverlay({ winnerIds, winnerNames, pot, showdownResults
             </div>
           )}
 
-          <p className="text-white/20 text-xs">タップして続ける</p>
+          {/* Next button */}
+          <button
+            onClick={handleNext}
+            disabled={myReady}
+            style={{
+              marginTop: 4,
+              padding: '10px 36px',
+              borderRadius: 999,
+              border: myReady ? '1.5px solid rgba(255,215,0,0.25)' : '1.5px solid rgba(255,215,0,0.8)',
+              background: myReady
+                ? 'rgba(255,215,0,0.06)'
+                : 'linear-gradient(180deg, rgba(255,215,0,0.22) 0%, rgba(255,215,0,0.10) 100%)',
+              color: myReady ? 'rgba(255,215,0,0.35)' : '#ffd700',
+              fontSize: 15,
+              fontWeight: 800,
+              letterSpacing: '0.08em',
+              boxShadow: myReady ? 'none' : '0 0 16px rgba(255,215,0,0.3)',
+              cursor: myReady ? 'default' : 'pointer',
+              transition: 'all 0.2s ease',
+              minWidth: 160,
+            }}
+          >
+            {myReady ? '✓ 準備完了' : '次へ進む →'}
+          </button>
+          <p className="text-white/20 text-[11px] -mt-1">
+            {Math.ceil((progress / 100) * DURATION_MS / 1000)}秒後に自動で次へ
+          </p>
         </div>
       </div>
     </div>

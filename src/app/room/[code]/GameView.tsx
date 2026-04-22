@@ -22,6 +22,7 @@ interface GameViewProps {
   handResult: { winnerIds: string[]; pot: number } | null
   showdownResults: ShowdownResult[]
   onHandResultDismiss: () => void
+  onHandResultReady: () => void
   t: Translations
 }
 
@@ -80,7 +81,7 @@ function getActionColor(action: string): string {
   }
 }
 
-export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrentBet, tableBets, lastAction, currentSeat, handResult, showdownResults, onHandResultDismiss, t }: GameViewProps) {
+export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrentBet, tableBets, lastAction, currentSeat, handResult, showdownResults, onHandResultDismiss, onHandResultReady, t }: GameViewProps) {
   const [submittingAction, setSubmittingAction] = useState(false)
   const isMyTurn = !submittingAction && myPlayer?.seat_index === currentSeat && currentSeat !== null
   const [peekingCards, setPeekingCards] = useState(false)
@@ -143,6 +144,7 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
             pot={handResult.pot}
             showdownResults={showdownResults}
             onDismiss={onHandResultDismiss}
+            onReady={onHandResultReady}
           />
         )}
 
@@ -159,7 +161,7 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
           </div>
         )}
 
-        <div className="flex-1 min-h-0 relative overflow-hidden pt-6">
+        <div className="flex-1 min-h-0 relative overflow-hidden pt-6 pb-2">
           <TableView
             players={players}
             myPlayerId={myPlayer?.id ?? null}

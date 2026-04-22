@@ -327,6 +327,15 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
     }
   }
 
+  async function handleReady() {
+    if (!myPlayer?.id) return
+    await fetch(`/api/rooms/${room.id}/ready`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerId: myPlayer.id }),
+    })
+  }
+
   async function handleStart() {
     if (!hostPlayerId) return
     await fetch(`/api/rooms/${room.id}/start`, {
@@ -381,6 +390,7 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
       handResult={handResult}
       showdownResults={showdownResults}
       onHandResultDismiss={handleHandResultDismiss}
+      onHandResultReady={handleReady}
       t={t}
     />
   )
