@@ -15,6 +15,7 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards }: Pla
   const inHand = player.status !== 'folded' && player.status !== 'out'
   const isFolded = player.status === 'folded'
   const isAllIn = player.status === 'all_in'
+  const isOut = player.status === 'out'
   const initial = player.display_name.charAt(0).toUpperCase()
 
   return (
@@ -60,10 +61,10 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards }: Pla
       )}
       {isFolded && (
         <div className="flex -space-x-1.5 mb-0.5" style={{ transform: 'scale(0.7)', transformOrigin: 'bottom center' }}>
-          <div style={{ animation: 'foldDiscardL 0.45s ease-out forwards' }}>
+          <div style={{ animation: 'foldDiscardL 0.5s ease-in forwards' }}>
             <Card faceDown small />
           </div>
-          <div style={{ animation: 'foldDiscardR 0.45s ease-out 0.06s forwards' }}>
+          <div style={{ animation: 'foldDiscardR 0.5s ease-in forwards' }}>
             <Card faceDown small />
           </div>
         </div>
@@ -73,19 +74,28 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards }: Pla
       <div
         className={cn(
           'relative flex flex-col items-center rounded-lg px-1.5 py-1 min-w-[52px] max-w-[64px] transition-all duration-300',
-          !inHand && 'opacity-50',
         )}
         style={{
           background: isMe
             ? 'linear-gradient(180deg, rgba(140,50,255,0.18) 0%, rgba(20,10,40,0.88) 40%, rgba(12,5,28,0.95) 100%)'
             : 'linear-gradient(180deg, rgba(30,15,55,0.82) 0%, rgba(15,8,30,0.92) 100%)',
-          border: isMe
+          border: isAllIn
+            ? '1px solid rgba(255,50,50,0.9)'
+            : isMe
             ? '1px solid rgba(180,80,255,0.45)'
             : '1px solid rgba(180,80,255,0.15)',
           boxShadow: isActive
             ? '0 0 14px rgba(180,80,255,0.75), 0 0 28px rgba(180,80,255,0.35)'
             : '0 2px 8px rgba(0,0,0,0.6)',
           backdropFilter: 'blur(8px)',
+          animation: isOut
+            ? 'bustOut 0.8s ease-out forwards'
+            : isAllIn
+            ? 'allInPulse 1s ease-in-out infinite'
+            : isFolded
+            ? 'foldSlotFade 0.5s ease-in 0.4s forwards'
+            : undefined,
+          opacity: isFolded ? 1 : undefined,
         }}
       >
         {/* Active pulsing ring */}
@@ -103,6 +113,20 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards }: Pla
               className="h-full rounded-full"
               style={{ background: 'linear-gradient(90deg, #7c3aed, #bf80ff)', animation: 'shrinkBar 15s linear infinite' }}
             />
+          </div>
+        )}
+
+        {/* All-in badge above avatar */}
+        {isAllIn && (
+          <div
+            className="text-[11px] font-bold uppercase tracking-wider px-1 py-0 rounded-sm mb-0.5"
+            style={{
+              background: 'linear-gradient(90deg, #cc0000, #ff3333)',
+              color: '#fff',
+              animation: 'allInBadge 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards',
+            }}
+          >
+            ALL IN!
           </div>
         )}
 
@@ -157,10 +181,14 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards }: Pla
         {/* All-in badge */}
         {isAllIn && (
           <div
-            className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0 rounded-sm mt-0.5"
-            style={{ background: 'linear-gradient(90deg, #7c3aed, #bf80ff)', color: '#fff' }}
+            className="text-[11px] font-bold uppercase tracking-wider px-1.5 py-0 rounded-sm mt-0.5"
+            style={{
+              background: 'linear-gradient(90deg, #cc0000, #ff3333)',
+              color: '#fff',
+              animation: 'allInBadge 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards',
+            }}
           >
-            All In
+            ALL IN!
           </div>
         )}
 
@@ -169,6 +197,21 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards }: Pla
           <div className="absolute inset-0 rounded-xl flex items-center justify-center bg-black/50">
             <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.5)' }}>
               FOLD
+            </span>
+          </div>
+        )}
+
+        {/* Eliminated overlay — fades in after shake animation */}
+        {isOut && (
+          <div
+            className="absolute inset-0 rounded-xl flex items-center justify-center"
+            style={{ background: 'rgba(0,0,0,0.6)', animation: 'eliminatedFadeIn 0.8s ease-out forwards' }}
+          >
+            <span
+              className="text-[9px] font-bold uppercase tracking-widest text-center leading-tight"
+              style={{ color: 'rgba(255,60,60,0.95)' }}
+            >
+              ELIM<br />INATED
             </span>
           </div>
         )}

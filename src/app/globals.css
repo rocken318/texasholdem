@@ -173,14 +173,48 @@ body {
   50%       { transform: translateX(-50%) translateY(-5px); }
 }
 
-/* ── Fold discard animation ── */
+/* ── Fold discard animation (enhanced — dramatic fly to center) ── */
 @keyframes foldDiscardL {
   0%   { transform: rotate(-6deg) scale(1); opacity: 0.85; }
-  55%  { transform: rotate(-38deg) translateX(-6px) translateY(-6px) scale(0.9); opacity: 0.5; }
-  100% { transform: rotate(-35deg) translateX(-4px) translateY(5px) scale(0.82); opacity: 0.28; }
+  100% { transform: rotate(-45deg) translateX(-40px) translateY(-20px) scale(0.3); opacity: 0; }
 }
 @keyframes foldDiscardR {
   0%   { transform: rotate(6deg) scale(1); opacity: 0.85; }
-  55%  { transform: rotate(38deg) translateX(6px) translateY(-6px) scale(0.9); opacity: 0.5; }
-  100% { transform: rotate(35deg) translateX(4px) translateY(5px) scale(0.82); opacity: 0.28; }
+  100% { transform: rotate(45deg) translateX(40px) translateY(-20px) scale(0.3); opacity: 0; }
+}
+
+/* ── Fold slot fade ── */
+@keyframes foldSlotFade {
+  0%   { opacity: 1; filter: none; }
+  100% { opacity: 0.4; filter: grayscale(1); }
+}
+
+/* ── All-in border pulse ── */
+@keyframes allInPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(255,50,50,0.8), 0 0 20px rgba(255,50,50,0.4); }
+  50%       { box-shadow: 0 0 20px rgba(255,100,100,1), 0 0 40px rgba(255,50,50,0.7); }
+}
+
+/* ── All-in badge bounce in ── */
+@keyframes allInBadge {
+  0%   { transform: scale(0) rotate(-10deg); opacity: 0; }
+  70%  { transform: scale(1.2) rotate(3deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* ── Bust/eliminate shake-and-collapse ── */
+@keyframes bustOut {
+  0%   { transform: translateX(0); }
+  20%  { transform: translateX(-8px); }
+  40%  { transform: translateX(8px); }
+  60%  { transform: translateX(-4px); }
+  80%  { transform: translateX(4px) scale(0.95); }
+  100% { transform: translateY(20px) scale(0.7); opacity: 0; }
+}
+
+/* ── Eliminated text fade in ── */
+@keyframes eliminatedFadeIn {
+  0%   { opacity: 0; }
+  40%  { opacity: 0; }
+  100% { opacity: 1; }
 }
