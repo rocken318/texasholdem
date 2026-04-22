@@ -31,6 +31,13 @@ body {
   100% { width: 0%; }
 }
 
+@keyframes toastFade {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(-4px); }
+  10%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+  75%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-4px); }
+}
+
 /* ── ActionBar custom range slider ── */
 .action-slider {
   -webkit-appearance: none;
@@ -49,18 +56,18 @@ body {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  border: 2px solid #fde68a;
-  box-shadow: 0 0 8px rgba(251, 191, 35, 0.5), 0 2px 4px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(135deg, #bf80ff, #7c3aed);
+  border: 2px solid #d4a0ff;
+  box-shadow: 0 0 8px rgba(180, 80, 255, 0.6), 0 2px 4px rgba(0, 0, 0, 0.4);
   cursor: pointer;
 }
 .action-slider::-moz-range-thumb {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  border: 2px solid #fde68a;
-  box-shadow: 0 0 8px rgba(251, 191, 35, 0.5), 0 2px 4px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(135deg, #bf80ff, #7c3aed);
+  border: 2px solid #d4a0ff;
+  box-shadow: 0 0 8px rgba(180, 80, 255, 0.6), 0 2px 4px rgba(0, 0, 0, 0.4);
   cursor: pointer;
 }
 
@@ -93,7 +100,7 @@ body {
   height: 6px;
   margin-top: -3px;
   border-radius: 3px;
-  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  background: linear-gradient(90deg, #7c3aed, #bf80ff);
   z-index: 1;
   pointer-events: none;
 }

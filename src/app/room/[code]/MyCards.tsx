@@ -13,12 +13,12 @@ export function MyCards({ cards }: { cards: PokerCard[] }) {
               ? '-rotate-6 hover:-translate-y-3 transition-transform duration-200 origin-bottom'
               : 'rotate-6 hover:-translate-y-3 transition-transform duration-200 origin-bottom'
           }
-          style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.6))' }}
+          style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.7)) drop-shadow(0 0 12px rgba(140,50,255,0.3))' }}
         >
           <Card
             card={card}
             large
-            className="ring-2 ring-amber-400/60 shadow-2xl"
+            className="ring-2 ring-[#bf80ff]/70 shadow-2xl"
           />
         </div>
       ))}

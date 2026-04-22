@@ -70,8 +70,8 @@ export function ActionBar({ currentBet, myCurrentBet, myChips, bigBlind, onActio
                 key={p.label}
                 onClick={() => snapTo(p.value)}
                 className="flex-1 py-1.5 rounded-lg text-xs font-bold tracking-wide
-                  bg-white/10 text-amber-200/90 border border-white/10
-                  active:bg-amber-500/30 active:border-amber-400/40
+                  bg-white/8 text-purple-200/90 border border-white/10
+                  active:bg-purple-500/30 active:border-purple-400/40
                   transition-colors duration-100"
               >
                 {p.label}
@@ -79,7 +79,7 @@ export function ActionBar({ currentBet, myCurrentBet, myChips, bigBlind, onActio
             ))}
             {/* Amount display */}
             <div className="min-w-[4.5rem] py-1.5 px-2 rounded-lg text-center
-              bg-black/50 border border-amber-400/30 font-mono text-sm font-bold text-amber-300 tabular-nums">
+              bg-black/50 border border-[rgba(180,80,255,0.35)] font-mono text-sm font-bold text-[#d4a0ff] tabular-nums">
               {raiseAmount}
             </div>
           </div>
