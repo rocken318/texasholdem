@@ -104,3 +104,71 @@ body {
   z-index: 1;
   pointer-events: none;
 }
+
+/* ── Deal fly-in — hole card 1 ── */
+@keyframes dealIn1 {
+  0%   { transform: translate(-160px, -80px) rotate(-22deg) scale(0.25); opacity: 0; }
+  55%  { transform: translate(2px, 2px) rotate(-5deg) scale(1.06); opacity: 1; }
+  75%  { transform: translate(0, 0) rotate(-6deg) scale(0.98); }
+  100% { transform: translate(0, 0) rotate(-6deg) scale(1); opacity: 1; }
+}
+
+/* ── Deal fly-in — hole card 2 ── */
+@keyframes dealIn2 {
+  0%,
+  18%  { transform: translate(-160px, -80px) rotate(-22deg) scale(0.25); opacity: 0; }
+  70%  { transform: translate(2px, 2px) rotate(5deg) scale(1.06); opacity: 1; }
+  88%  { transform: translate(0, 0) rotate(6deg) scale(0.98); }
+  100% { transform: translate(0, 0) rotate(6deg) scale(1); opacity: 1; }
+}
+
+/* ── Deal fly-in — community card (apply with delay via style) ── */
+@keyframes dealInCommunity {
+  0%   { transform: translateY(-40px) scale(0.5); opacity: 0; }
+  60%  { transform: translateY(2px) scale(1.04); opacity: 1; }
+  80%  { transform: translateY(0) scale(0.98); }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* ── My-turn card glow pulse ── */
+@keyframes cardPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(180,80,255,0); filter: drop-shadow(0 8px 20px rgba(0,0,0,0.7)) drop-shadow(0 0 6px rgba(140,50,255,0.3)); }
+  50%       { box-shadow: 0 0 0 3px rgba(180,80,255,0.5); filter: drop-shadow(0 8px 24px rgba(0,0,0,0.8)) drop-shadow(0 0 18px rgba(140,50,255,0.65)); }
+}
+
+/* ── 3D card flip reveal ── */
+@keyframes flipReveal {
+  0%   { transform: rotateY(0deg); }
+  45%  { transform: rotateY(90deg); }
+  55%  { transform: rotateY(90deg); }
+  100% { transform: rotateY(0deg); }
+}
+
+/* ── Chip arc fly to pot ── */
+@keyframes chipFlyArc {
+  0%   { transform: translate(calc(-50% + var(--fx)), calc(-50% + var(--fy))) scale(1.1); opacity: 1; }
+  45%  { transform: translate(calc(-50% + var(--fx) * 0.38), calc(-50% + var(--fy) * 0.38 - 32px)) scale(0.88); opacity: 1; }
+  85%  { transform: translate(calc(-50% + var(--fx) * 0.05), calc(-50% + var(--fy) * 0.05)) scale(0.15); opacity: 0.5; }
+  100% { transform: translate(-50%, -50%) scale(0.05); opacity: 0; }
+}
+
+/* ── Win chip rain ── */
+@keyframes chipRain {
+  0%   { transform: translateY(-70px) rotate(0deg) scale(0.8); opacity: 0; }
+  8%   { opacity: 1; }
+  100% { transform: translateY(110px) rotate(400deg) scale(1); opacity: 0; }
+}
+
+/* ── Pot badge pulse when bet lands ── */
+@keyframes potPulse {
+  0%, 100% { transform: scale(1); }
+  30%       { transform: scale(1.18); }
+  60%       { transform: scale(0.95); }
+  80%       { transform: scale(1.06); }
+}
+
+/* ── Turn indicator arrow bob ── */
+@keyframes arrowBob {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%       { transform: translateX(-50%) translateY(-5px); }
+}
