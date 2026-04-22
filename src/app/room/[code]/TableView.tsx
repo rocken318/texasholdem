@@ -25,12 +25,15 @@ interface FlyingChip {
   fy: number
 }
 
-function getSeatPosition(seatIndex: number, total: number, mySeatIndex: number | null, rx = 41, ry = 35) {
+function getSeatPosition(seatIndex: number, total: number, mySeatIndex: number | null, rx = 41, ry = 35, sideBoost = 0) {
   const offset = mySeatIndex !== null ? mySeatIndex : 0
   const angle = ((seatIndex - offset) / total) * 2 * Math.PI + Math.PI / 2
+  // Push side players (where cos² is large) further down to avoid
+  // overlapping with community cards in the center.
+  const boost = sideBoost * Math.pow(Math.cos(angle), 2)
   return {
     left: `${50 + rx * Math.cos(angle)}%`,
-    top:  `${50 + ry * Math.sin(angle)}%`,
+    top:  `${50 + ry * Math.sin(angle) + boost}%`,
   }
 }
 
@@ -276,7 +279,7 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
           {/* Player slots */}
           {seated.map(player => {
             const isMe = player.id === myPlayerId
-            const pos = getSeatPosition(player.seat_index!, seated.length, mySeatIndex, isMobile ? 42 : 41, isMobile ? 40 : 35)
+            const pos = getSeatPosition(player.seat_index!, seated.length, mySeatIndex, isMobile ? 42 : 41, isMobile ? 40 : 35, isMobile ? 10 : 0)
             return (
               <div
                 key={player.id}

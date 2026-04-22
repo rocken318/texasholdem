@@ -209,7 +209,7 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
             </div>
           )}
 
-          {hand && myPlayer && (
+          {hand && myPlayer && isMyTurn && (
             <ActionBar
               currentBet={hand.current_bet}
               myCurrentBet={myHandCurrentBet}
@@ -217,7 +217,7 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
               bigBlind={room.settings.bigBlind}
               onAction={handleAction}
               t={t}
-              disabled={!isMyTurn}
+              disabled={false}
             />
           )}
         </div>
