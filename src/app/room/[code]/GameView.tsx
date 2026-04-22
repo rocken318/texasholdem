@@ -116,10 +116,11 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
     }
   }, [lastAction, players, t])
 
-  async function handleAction(action: string, amount?: number) {
+  function handleAction(action: string, amount?: number) {
     if (!myPlayer) return
     setSubmittingAction(true)
-    await fetch(`/api/rooms/${room.id}/action`, {
+    // Fire-and-forget: don't await, UI updates via SSE events
+    fetch(`/api/rooms/${room.id}/action`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ playerId: myPlayer.id, action, amount }),

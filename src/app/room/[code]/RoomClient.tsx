@@ -187,7 +187,7 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
       setCurrentSeat(event.seatIndex)
       // Auto-act for bots (host only)
       if (hostPlayerId && botIdsRef.current.has(event.playerId)) {
-        const delay = 200 + Math.random() * 400
+        const delay = 100 + Math.random() * 200
         setTimeout(() => triggerBotAction(event.playerId), delay)
       }
     }
