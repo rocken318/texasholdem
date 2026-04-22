@@ -8,6 +8,7 @@ import { ActionBar } from './ActionBar'
 import { TurnTimer } from './TurnTimer'
 import { HandResultOverlay, type ShowdownResult } from './HandResultOverlay'
 import { Card } from '@/components/Card'
+import { playTurnSound, playWinSound } from '@/lib/sounds'
 
 interface GameViewProps {
   room: Room
@@ -89,6 +90,18 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
   useEffect(() => {
     setSubmittingAction(false)
   }, [currentSeat])
+
+  // Play turn notification sound
+  useEffect(() => {
+    if (isMyTurn) playTurnSound()
+  }, [isMyTurn])
+
+  // Play win sound
+  useEffect(() => {
+    if (handResult && myPlayer && handResult.winnerIds.includes(myPlayer.id)) {
+      playWinSound()
+    }
+  }, [handResult, myPlayer])
 
   // Action toast — derived from lastAction, no setState in effects
   const toastData = useMemo(() => {

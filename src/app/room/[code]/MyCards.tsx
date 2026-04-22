@@ -1,5 +1,7 @@
+import { useEffect, useRef } from 'react'
 import type { PokerCard } from '@/types/domain'
 import { Card } from '@/components/Card'
+import { playCardSound } from '@/lib/sounds'
 
 interface MyCardsProps {
   cards: PokerCard[]
@@ -7,6 +9,14 @@ interface MyCardsProps {
 }
 
 export function MyCards({ cards, isMyTurn = false }: MyCardsProps) {
+  const prevLen = useRef(0)
+  useEffect(() => {
+    if (cards.length > prevLen.current) {
+      playCardSound()
+    }
+    prevLen.current = cards.length
+  }, [cards.length])
+
   if (cards.length === 0) return null
 
   return (

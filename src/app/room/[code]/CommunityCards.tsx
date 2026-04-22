@@ -2,6 +2,7 @@
 import { useRef, useState, useEffect } from 'react'
 import type { PokerCard } from '@/types/domain'
 import { Card } from '@/components/Card'
+import { playCardSound } from '@/lib/sounds'
 
 function useIsMobile() {
   const [mobile, setMobile] = useState(false)
@@ -33,6 +34,10 @@ export function CommunityCards({ cards }: { cards: PokerCard[] }) {
     }
     if (Object.keys(newFlips).length > 0) {
       setFlipState(s => ({ ...s, ...newFlips }))
+      // Play card sound staggered for each new card
+      Object.keys(newFlips).forEach((_, idx) => {
+        setTimeout(() => playCardSound(), idx * 60)
+      })
     }
     prevCardsRef.current = [...cards]
   }, [cards])

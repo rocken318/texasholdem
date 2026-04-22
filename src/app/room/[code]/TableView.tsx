@@ -5,6 +5,7 @@ import type { Player, PokerCard } from '@/types/domain'
 import { PlayerSlot } from './PlayerSlot'
 import { CommunityCards } from './CommunityCards'
 import { ChipStack } from '@/components/ChipStack'
+import { playChipSound } from '@/lib/sounds'
 
 interface TableViewProps {
   players: Player[]
@@ -83,6 +84,7 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
     if (newChips.length > 0) {
       setFlyingChips(c => [...c, ...newChips])
       setPotPulseKey(k => k + 1)
+      playChipSound()
     }
     prevBetsRef.current = { ...tableBets }
   }, [tableBets, seated, mySeatIndex])

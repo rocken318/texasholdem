@@ -2,6 +2,7 @@
 'use client'
 import { useState, useCallback, useEffect } from 'react'
 import type { Translations } from '@/lib/i18n'
+import { playChipSound, playFoldSound, playCheckSound, playAllInSound } from '@/lib/sounds'
 
 interface ActionBarProps {
   currentBet: number
@@ -33,6 +34,10 @@ export function ActionBar({ currentBet, myCurrentBet, myChips, bigBlind, onActio
     if (pending || disabled) return
     setPending(true)
     setPressedAction(action)
+    if (action === 'fold') playFoldSound()
+    else if (action === 'check') playCheckSound()
+    else if (action === 'all_in') playAllInSound()
+    else playChipSound()
     onAction(action, amount)
   }
 

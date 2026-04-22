@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import type { Player, PokerCard } from '@/types/domain'
 import { Card } from '@/components/Card'
 import { cn } from '@/lib/utils'
+import { playCardSound, playFoldSound } from '@/lib/sounds'
 
 interface PlayerSlotProps {
   player: Player
@@ -40,6 +41,7 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCar
   useEffect(() => {
     if (prevStatusRef.current !== 'folded' && player.status === 'folded') {
       setFoldAnimActive(true)
+      playFoldSound()
       const t = setTimeout(() => setFoldAnimActive(false), THROW_MS)
       return () => clearTimeout(t)
     }
