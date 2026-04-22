@@ -7,8 +7,6 @@ import { TableView } from './TableView'
 import { ActionBar } from './ActionBar'
 import { TurnTimer } from './TurnTimer'
 import { HandResultOverlay, type ShowdownResult } from './HandResultOverlay'
-import { CommunityCards } from './CommunityCards'
-import { ChipStack } from '@/components/ChipStack'
 
 interface GameViewProps {
   room: Room
@@ -116,35 +114,17 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
           </div>
         )}
 
-        {/* Table — players only, no community cards inside */}
-        <div className="flex-1 min-h-0 relative overflow-hidden">
+        <div className="flex-1 min-h-0 relative overflow-hidden pt-6">
           <TableView
             players={players}
             myPlayerId={myPlayer?.id ?? null}
             mySeatIndex={myPlayer?.seat_index ?? null}
             currentSeat={currentSeat}
+            communityCards={hand?.community_cards ?? []}
+            pot={hand?.pot ?? 0}
             tableBets={tableBets}
             myCards={myCards}
           />
-        </div>
-
-        {/* Community cards strip — always below the table, never overlaps */}
-        <div className="flex-shrink-0 flex flex-col items-center justify-center gap-1 py-2"
-          style={{ minHeight: 72 }}>
-          <CommunityCards cards={hand?.community_cards ?? []} />
-          {(hand?.pot ?? 0) > 0 && (
-            <div className="flex items-center gap-1.5 px-3 py-0.5 rounded-full"
-              style={{
-                background: 'linear-gradient(180deg,rgba(0,0,0,0.55),rgba(0,0,0,0.75))',
-                border: '1px solid rgba(180,80,255,0.4)',
-              }}>
-              <span className="text-[10px]" style={{ color: '#bf80ff' }}>POT</span>
-              <ChipStack amount={hand!.pot} small />
-              <span className="text-[11px] font-mono font-semibold" style={{ color: '#bf80ff' }}>
-                {hand!.pot.toLocaleString()}
-              </span>
-            </div>
-          )}
         </div>
 
         <div className="flex-shrink-0 flex flex-col">

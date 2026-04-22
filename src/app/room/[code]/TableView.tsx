@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect } from 'react'
 import type { Player, PokerCard } from '@/types/domain'
 import { PlayerSlot } from './PlayerSlot'
+import { CommunityCards } from './CommunityCards'
 import { ChipStack } from '@/components/ChipStack'
 
 interface TableViewProps {
@@ -10,6 +11,8 @@ interface TableViewProps {
   myPlayerId: string | null
   mySeatIndex: number | null
   currentSeat: number | null
+  communityCards: PokerCard[]
+  pot: number
   tableBets: Record<string, number>
   myCards?: PokerCard[]
 }
@@ -39,11 +42,12 @@ function getBetPosition(seatIndex: number, total: number, mySeatIndex: number | 
   }
 }
 
-export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, tableBets, myCards = [] }: TableViewProps) {
+export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, communityCards, pot, tableBets, myCards = [] }: TableViewProps) {
   const seated = players.filter(p => p.seat_index !== null)
   const wrapRef = useRef<HTMLDivElement>(null)
   const prevBetsRef = useRef<Record<string, number>>({})
   const [flyingChips, setFlyingChips] = useState<FlyingChip[]>([])
+  const [potPulseKey, setPotPulseKey] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -77,6 +81,7 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, table
 
     if (newChips.length > 0) {
       setFlyingChips(c => [...c, ...newChips])
+      setPotPulseKey(k => k + 1)
     }
     prevBetsRef.current = { ...tableBets }
   }, [tableBets, seated, mySeatIndex])
@@ -182,6 +187,22 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, table
             <ellipse cx="50%" cy="46%" rx="22%" ry="16%"
               fill="rgba(110,35,210,0.14)" style={{ filter: 'blur(10px)' }} />
           </svg>
+
+          {/* Center: community cards + pot */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 pointer-events-none">
+            <CommunityCards cards={communityCards} />
+            {pot > 0 && (
+              <div className="flex items-center gap-1.5 px-3 py-0.5 rounded-full font-semibold"
+                style={{
+                  background: 'linear-gradient(180deg,rgba(0,0,0,0.55),rgba(0,0,0,0.75))',
+                  border: '1px solid rgba(180,80,255,0.4)',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
+                }}>
+                <span className="text-xs" style={{ color: '#bf80ff' }}>POT</span>
+                <span className="font-mono text-sm" style={{ color: '#bf80ff' }}>{pot.toLocaleString()}</span>
+              </div>
+            )}
+          </div>
 
           {/* Flying chips (arc to pot) */}
           {flyingChips.map(fc => (
