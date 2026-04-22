@@ -1,5 +1,5 @@
 // src/lib/events/types.ts
-import type { Player, PokerCard, SidePot } from '@/types/domain'
+import type { Player, PokerCard } from '@/types/domain'
 
 export type PokerEvent =
   | { type: 'connected'; roomId: string }

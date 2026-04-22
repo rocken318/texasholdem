@@ -61,12 +61,29 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
     if (!saved) return
     fetch(`/api/rooms/${room.id}/players`)
       .then(r => r.json())
-      .then(({ players: ps }: { players: Player[] }) => {
+      .then(async ({ players: ps }: { players: Player[] }) => {
         setPlayers(ps)
         const me = ps.find(p => p.id === saved.playerId)
-        if (me) {
-          setMyPlayer(me)
-          setView(room.status === 'playing' ? 'playing' : 'lobby')
+        if (!me) return
+        setMyPlayer(me)
+        if (room.status === 'playing') {
+          setView('playing')
+          // Restore current hand state so the board isn't blank on re-entry
+          const res = await fetch(`/api/rooms/${room.id}/current-hand`)
+          if (!res.ok) return
+          const data = await res.json() as {
+            hand: (Omit<Hand, 'deck' | 'winner_ids'> & { winner_ids?: null }) | null
+            tableBets: Record<string, number>
+            handPlayers: { player_id: string; current_bet: number; total_bet: number; status: string }[]
+          }
+          if (!data.hand) return
+          setHand({ ...data.hand, deck: [], winner_ids: null } as Hand)
+          setTableBets(data.tableBets)
+          setCurrentSeat(data.hand.current_seat)
+          const myHp = data.handPlayers.find(hp => hp.player_id === me.id)
+          if (myHp) setMyHandCurrentBet(myHp.current_bet)
+        } else {
+          setView('lobby')
         }
       })
   // eslint-disable-next-line react-hooks/exhaustive-deps

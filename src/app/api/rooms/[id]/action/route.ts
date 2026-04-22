@@ -54,6 +54,7 @@ export async function POST(
   } else if (body.action === 'check') {
     if (!validActions.canCheck) return NextResponse.json({ error: 'Cannot check' }, { status: 400 })
   } else if (body.action === 'call') {
+    if (!validActions.canCall) return NextResponse.json({ error: 'Cannot call' }, { status: 400 })
     const callAmt = validActions.callAmount
     newChips -= callAmt
     newCurrentBet += callAmt
@@ -91,7 +92,7 @@ export async function POST(
   })
 
   const newHandCurrentBet = body.action === 'raise'
-    ? Math.max(body.amount ?? validActions.minRaise, validActions.minRaise)
+    ? newCurrentBet  // already clamped to raiseTotal
     : body.action === 'all_in'
     ? Math.max(hand.current_bet, newCurrentBet)
     : hand.current_bet

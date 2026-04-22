@@ -3,7 +3,7 @@ import { store } from '@/lib/store'
 import { broadcastRoomEvent } from '@/lib/events/broadcast'
 import { createDeck, shuffle, deal } from '@/lib/poker/deck'
 import { evaluateHand, findWinners } from '@/lib/poker/evaluator'
-import { calculatePots, totalPot } from '@/lib/poker/pot'
+import { totalPot } from '@/lib/poker/pot'
 import { getNextActiveSeat } from '@/lib/poker/engine'
 import { generateId } from '@/lib/utils'
 import type { Player, Room, Hand, HandPlayer, SidePot, PokerCard, Street } from '@/types/domain'
@@ -49,6 +49,8 @@ export async function startNewHand(
 
   const sbAmount = Math.min(settings.smallBlind, sbPlayer.chips)
   const bbAmount = Math.min(settings.bigBlind, bbPlayer.chips)
+  const sbIsAllIn = sbPlayer.chips <= settings.smallBlind
+  const bbIsAllIn = bbPlayer.chips <= settings.bigBlind
 
   await store.createHand({
     id: handId,
@@ -69,11 +71,23 @@ export async function startNewHand(
 
   await store.createHandPlayers(handPlayers)
 
-  // Post blinds
-  await store.updateHandPlayer(handId, sbPlayer.id, { current_bet: sbAmount, total_bet: sbAmount })
-  await store.updateHandPlayer(handId, bbPlayer.id, { current_bet: bbAmount, total_bet: bbAmount })
-  await store.updatePlayer(sbPlayer.id, { chips: sbPlayer.chips - sbAmount })
-  await store.updatePlayer(bbPlayer.id, { chips: bbPlayer.chips - bbAmount })
+  // Post blinds (mark as all_in if blind exhausts chips)
+  await store.updateHandPlayer(handId, sbPlayer.id, {
+    current_bet: sbAmount, total_bet: sbAmount,
+    ...(sbIsAllIn ? { status: 'all_in' } : {}),
+  })
+  await store.updateHandPlayer(handId, bbPlayer.id, {
+    current_bet: bbAmount, total_bet: bbAmount,
+    ...(bbIsAllIn ? { status: 'all_in' } : {}),
+  })
+  await store.updatePlayer(sbPlayer.id, {
+    chips: sbPlayer.chips - sbAmount,
+    ...(sbIsAllIn ? { status: 'all_in' } : {}),
+  })
+  await store.updatePlayer(bbPlayer.id, {
+    chips: bbPlayer.chips - bbAmount,
+    ...(bbIsAllIn ? { status: 'all_in' } : {}),
+  })
 
   await broadcastRoomEvent(roomId, { type: 'hand_started', handId, handNumber, dealerSeat })
   await broadcastRoomEvent(roomId, {
@@ -114,14 +128,44 @@ export async function resolveHand(params: {
   const { handId, roomId, winnerIds, pots, handPlayers, players, room, handNumber, dealerSeat, community } = params
   const pot = totalPot(pots)
 
-  // Distribute chips (simple split — full side-pot distribution for future enhancement)
-  const perWinner = Math.floor(pot / winnerIds.length)
-  for (const wId of winnerIds) {
-    const p = players.find(pl => pl.id === wId)
-    if (p) await store.updatePlayer(wId, { chips: p.chips + perWinner })
+  // Distribute chips per side pot, respecting eligibility
+  const chipDeltas: Record<string, number> = {}
+  const allPotWinnerIds = new Set<string>()
+
+  for (const sidePot of pots) {
+    const eligible = handPlayers.filter(
+      hp => sidePot.eligiblePlayerIds.includes(hp.player_id) && hp.status !== 'folded'
+    )
+    if (eligible.length === 0) continue
+
+    let potWinners: string[]
+    if (community && community.length === 5) {
+      // Showdown: evaluate hands among this pot's eligible players
+      potWinners = findWinners(
+        eligible.map(hp => ({ playerId: hp.player_id, hole: hp.hole_cards })),
+        community
+      )
+    } else {
+      // Pre-showdown (everyone else folded): filter winnerIds to eligible
+      potWinners = winnerIds.filter(id => sidePot.eligiblePlayerIds.includes(id))
+      if (potWinners.length === 0) potWinners = [eligible[0].player_id]
+    }
+
+    const perWinner = Math.floor(sidePot.amount / potWinners.length)
+    for (const wId of potWinners) {
+      chipDeltas[wId] = (chipDeltas[wId] ?? 0) + perWinner
+      allPotWinnerIds.add(wId)
+    }
   }
 
-  await store.updateHand(handId, { street: 'finished', winner_ids: winnerIds, finished_at: Date.now() })
+  const effectiveWinnerIds = allPotWinnerIds.size > 0 ? [...allPotWinnerIds] : winnerIds
+
+  for (const [wId, delta] of Object.entries(chipDeltas)) {
+    const p = players.find(pl => pl.id === wId)
+    if (p) await store.updatePlayer(wId, { chips: p.chips + delta })
+  }
+
+  await store.updateHand(handId, { street: 'finished', winner_ids: effectiveWinnerIds, finished_at: Date.now() })
 
   const updatedPlayers = await store.getPlayersByRoom(roomId)
   await broadcastRoomEvent(roomId, {
@@ -130,7 +174,7 @@ export async function resolveHand(params: {
   })
 
   const nextDealerSeat = getNextDealerSeat(updatedPlayers, dealerSeat)
-  await broadcastRoomEvent(roomId, { type: 'hand_finished', winnerIds, pot, nextDealerSeat })
+  await broadcastRoomEvent(roomId, { type: 'hand_finished', winnerIds: effectiveWinnerIds, pot, nextDealerSeat })
 
   // Tournament end check
   const activePlayers = updatedPlayers.filter(p => p.chips > 0 && p.seat_index !== null)
