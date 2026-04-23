@@ -38,7 +38,7 @@ body {
   100% { opacity: 0; transform: translateX(-50%) translateY(-4px); }
 }
 
-/* ── ActionBar custom range slider ── */
+/* ── ActionBar custom range slider — green theme ── */
 .action-slider {
   -webkit-appearance: none;
   appearance: none;
@@ -56,18 +56,18 @@ body {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #bf80ff, #7c3aed);
-  border: 2px solid #d4a0ff;
-  box-shadow: 0 0 8px rgba(180, 80, 255, 0.6), 0 2px 4px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(135deg, #4ade80, #16a34a);
+  border: 2px solid #86efac;
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.6), 0 2px 4px rgba(0, 0, 0, 0.4);
   cursor: pointer;
 }
 .action-slider::-moz-range-thumb {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #bf80ff, #7c3aed);
-  border: 2px solid #d4a0ff;
-  box-shadow: 0 0 8px rgba(180, 80, 255, 0.6), 0 2px 4px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(135deg, #4ade80, #16a34a);
+  border: 2px solid #86efac;
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.6), 0 2px 4px rgba(0, 0, 0, 0.4);
   cursor: pointer;
 }
 
@@ -100,7 +100,7 @@ body {
   height: 6px;
   margin-top: -3px;
   border-radius: 3px;
-  background: linear-gradient(90deg, #7c3aed, #bf80ff);
+  background: linear-gradient(90deg, #16a34a, #4ade80);
   z-index: 1;
   pointer-events: none;
 }
@@ -132,8 +132,8 @@ body {
 
 /* ── My-turn card glow pulse ── */
 @keyframes cardPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(180,80,255,0); filter: drop-shadow(0 8px 20px rgba(0,0,0,0.7)) drop-shadow(0 0 6px rgba(140,50,255,0.3)); }
-  50%       { box-shadow: 0 0 0 3px rgba(180,80,255,0.5); filter: drop-shadow(0 8px 24px rgba(0,0,0,0.8)) drop-shadow(0 0 18px rgba(140,50,255,0.65)); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); filter: drop-shadow(0 8px 20px rgba(0,0,0,0.7)) drop-shadow(0 0 6px rgba(74,222,128,0.3)); }
+  50%       { box-shadow: 0 0 0 3px rgba(74,222,128,0.5); filter: drop-shadow(0 8px 24px rgba(0,0,0,0.8)) drop-shadow(0 0 18px rgba(74,222,128,0.65)); }
 }
 
 /* ── 3D card flip reveal ── */
@@ -249,7 +249,7 @@ body {
    Result / Game-Over screen animations
    ════════════════════════════════════════ */
 
-/* Subtle purple-hued background pulse */
+/* Subtle green-hued background pulse */
 @keyframes bgPulse {
   0%, 100% { filter: hue-rotate(0deg) brightness(1); }
   50%       { filter: hue-rotate(12deg) brightness(1.04); }

@@ -38,16 +38,16 @@ function CardPeekModal({ cards, onClose }: { cards: PokerCard[]; onClose: () => 
     >
       <div className="flex flex-col items-center gap-6">
         {/* Title */}
-        <div className="text-xs font-bold tracking-[0.3em] uppercase" style={{ color: '#bf80ff' }}>
+        <div className="text-xs font-bold tracking-[0.3em] uppercase" style={{ color: '#4ade80' }}>
           YOUR HAND / あなたの手
         </div>
 
         {/* Large cards */}
         <div className="flex gap-4">
-          <div style={{ filter: 'drop-shadow(0 0 20px rgba(140,50,255,0.8))' }}>
+          <div style={{ filter: 'drop-shadow(0 0 20px rgba(0,0,0,0.8))' }}>
             <Card card={cards[0]} large />
           </div>
-          <div style={{ filter: 'drop-shadow(0 0 20px rgba(140,50,255,0.8))' }}>
+          <div style={{ filter: 'drop-shadow(0 0 20px rgba(0,0,0,0.8))' }}>
             <Card card={cards[1]} large />
           </div>
         </div>
@@ -109,7 +109,6 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
     if (!lastAction) return null
     const player = players.find(p => p.id === lastAction.playerId)
     return {
-      // key encodes enough action data to restart CSS animation on each unique action
       key: `toast-${lastAction.playerId}-${lastAction.action}-${lastAction.amount}`,
       message: `${player?.display_name ?? '?'}: ${getActionLabel(lastAction.action, lastAction.amount, t)}`,
       color: getActionColor(lastAction.action),
@@ -119,7 +118,6 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
   function handleAction(action: string, amount?: number) {
     if (!myPlayer) return
     setSubmittingAction(true)
-    // Fire-and-forget: don't await, UI updates via SSE events
     fetch(`/api/rooms/${room.id}/action`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -136,13 +134,22 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
     <main
       className="h-[100dvh] flex flex-col overflow-hidden relative"
       style={{
-        backgroundImage: "url('/bg/casino.png')",
-        backgroundSize: 'cover',
-        backgroundPosition: 'center 30%',
+        background: 'linear-gradient(180deg, #0a0f0a 0%, #0d1810 30%, #0a120c 60%, #060a08 100%)',
       }}
     >
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black/60 pointer-events-none z-0" />
+      {/* Dark ambient overlay with subtle vignette */}
+      <div className="absolute inset-0 pointer-events-none z-0"
+        style={{
+          background: 'radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.5) 100%)',
+        }}
+      />
+
+      {/* Subtle ambient light from above */}
+      <div className="absolute inset-0 pointer-events-none z-0"
+        style={{
+          background: 'radial-gradient(ellipse 60% 30% at 50% 0%, rgba(30,60,40,0.15) 0%, transparent 100%)',
+        }}
+      />
 
       {/* Content above overlay */}
       <div className="relative z-10 flex flex-col h-full overflow-hidden">
@@ -164,7 +171,7 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
           />
         )}
 
-        {/* Action toast — key restarts CSS animation on each new action */}
+        {/* Action toast */}
         {toastData && (
           <div
             key={toastData.key}
@@ -177,6 +184,11 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
           </div>
         )}
 
+        {/* Subtle センキャバ branding */}
+        <div className="absolute top-2 right-3 z-20">
+          <span className="text-[8px] font-medium" style={{ color: 'rgba(255,255,255,0.15)' }}>センキャバ</span>
+        </div>
+
         <div className="flex-1 min-h-0 relative overflow-hidden pt-6 pb-2">
           <TableView
             players={players}
@@ -188,12 +200,15 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
             tableBets={tableBets}
             myCards={myCards}
             onMyCardTap={() => setPeekingCards(true)}
+            dealerSeat={hand?.dealer_seat ?? null}
+            smallBlind={room.settings.smallBlind}
+            bigBlind={room.settings.bigBlind}
           />
         </div>
 
         <div
           className="flex-shrink-0 flex flex-col"
-          style={{ background: 'linear-gradient(180deg, transparent 0%, rgba(4,2,12,0.4) 100%)' }}
+          style={{ background: 'linear-gradient(180deg, transparent 0%, rgba(0,8,4,0.4) 100%)' }}
         >
           {isMyTurn && hand && (
             <TurnTimer

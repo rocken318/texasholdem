@@ -13,9 +13,12 @@ interface PlayerSlotProps {
   betAmount?: number
   cards?: PokerCard[]
   onCardTap?: () => void
+  isDealer?: boolean
+  isSB?: boolean
+  isBB?: boolean
 }
 
-/** Tiny inline SVG chip icon — 8×8 circle with a center dot */
+/** Tiny inline SVG chip icon */
 function ChipIcon() {
   return (
     <svg width="8" height="8" viewBox="0 0 8 8" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -27,7 +30,7 @@ function ChipIcon() {
 
 const THROW_MS = 580
 
-export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCardTap }: PlayerSlotProps) {
+export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCardTap, isDealer, isSB, isBB }: PlayerSlotProps) {
   const isFolded = player.status === 'folded'
   const isAllIn = player.status === 'all_in'
   const isOut = player.status === 'out'
@@ -61,7 +64,32 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCar
 
   return (
     <div className="flex flex-col items-center gap-0.5 relative">
-      {/* Turn indicator arrow — double-arrow with glow trail */}
+      {/* Fold text above player (CoinPoker style) */}
+      {isFolded && !foldAnimActive && (
+        <div
+          className="text-[10px] font-bold uppercase tracking-wider mb-0.5"
+          style={{ color: 'rgba(255,255,255,0.45)' }}
+        >
+          Fold
+        </div>
+      )}
+
+      {/* BB/SB badge ABOVE avatar (CoinPoker style) */}
+      {(isBB || isSB) && (
+        <div
+          className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0 rounded-sm mb-0.5"
+          style={{
+            background: isBB ? '#2a7a8a' : '#3a8a7a',
+            color: '#fff',
+            fontSize: '8px',
+            lineHeight: '14px',
+          }}
+        >
+          {isBB ? 'BB' : 'SB'}
+        </div>
+      )}
+
+      {/* Turn indicator arrow */}
       {isActive && (
         <div
           style={{
@@ -92,14 +120,6 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCar
               style={{ opacity: 0.55, filter: 'drop-shadow(0 0 3px rgba(255,215,0,0.7))' }}
             />
           </svg>
-          <div
-            style={{
-              width: 2,
-              height: 8,
-              background: 'linear-gradient(180deg, rgba(255,215,0,0.5) 0%, transparent 100%)',
-              borderRadius: 1,
-            }}
-          />
         </div>
       )}
 
@@ -118,8 +138,8 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCar
           <div style={{ display: 'inline-block', ...(!foldAnimActive ? { transform: 'rotate(-6deg)' } : throwAnimL) }}>
             {hasMyCards
               ? (
-                <div style={{ filter: 'drop-shadow(0 4px 8px rgba(140,50,255,0.5))' }}>
-                  <Card card={cards![0]} className="ring-1 ring-[#bf80ff]/60" />
+                <div style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.5))' }}>
+                  <Card card={cards![0]} className="ring-1 ring-emerald-400/40" />
                 </div>
               )
               : <Card faceDown small />
@@ -129,8 +149,8 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCar
           <div style={{ display: 'inline-block', marginLeft: foldAnimActive ? 4 : -12, ...(!foldAnimActive ? { transform: 'rotate(6deg)' } : throwAnimR) }}>
             {hasMyCards
               ? (
-                <div style={{ filter: 'drop-shadow(0 4px 8px rgba(140,50,255,0.5))' }}>
-                  <Card card={cards![1]} className="ring-1 ring-[#bf80ff]/60" />
+                <div style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.5))' }}>
+                  <Card card={cards![1]} className="ring-1 ring-emerald-400/40" />
                 </div>
               )
               : <Card faceDown small />
@@ -140,59 +160,46 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCar
       )}
       {/* Eye hint for my cards */}
       {hasMyCards && !foldAnimActive && !isFolded && onCardTap && (
-        <div className="text-[8px] text-center -mt-0.5 mb-0.5" style={{ color: 'rgba(180,80,255,0.6)' }}>👁</div>
+        <div className="text-[8px] text-center -mt-0.5 mb-0.5" style={{ color: 'rgba(100,200,120,0.6)' }}>👁</div>
       )}
 
-      {/* ── Main player HUD ── */}
+      {/* ── Main player HUD — CoinPoker style: large avatar + dark box ── */}
       <div
         className={cn(
-          'relative flex flex-col items-center rounded-lg px-1.5 py-1 min-w-[56px] max-w-[68px] transition-all duration-300',
+          'relative flex flex-col items-center rounded-xl px-2 py-1.5 min-w-[64px] max-w-[76px] transition-all duration-300',
         )}
         style={{
           background: isMe
-            ? 'linear-gradient(180deg, rgba(160,60,255,0.28) 0%, rgba(20,10,40,0.92) 40%, rgba(12,5,28,0.98) 100%)'
-            : 'linear-gradient(180deg, rgba(30,15,55,0.82) 0%, rgba(15,8,30,0.92) 100%)',
+            ? 'linear-gradient(180deg, rgba(30,60,40,0.9) 0%, rgba(15,25,18,0.95) 100%)'
+            : 'linear-gradient(180deg, rgba(25,30,35,0.88) 0%, rgba(12,14,18,0.95) 100%)',
           border: isAllIn
             ? '1px solid rgba(255,50,50,0.9)'
+            : isActive
+            ? '1px solid rgba(255,215,0,0.6)'
             : isMe
-            ? '1px solid rgba(180,80,255,0.55)'
-            : '1px solid rgba(180,80,255,0.15)',
+            ? '1px solid rgba(80,180,100,0.4)'
+            : '1px solid rgba(255,255,255,0.1)',
           boxShadow: isActive
-            ? '0 0 14px rgba(180,80,255,0.75), 0 0 28px rgba(180,80,255,0.35)'
+            ? '0 0 14px rgba(255,215,0,0.5), 0 0 28px rgba(255,215,0,0.2)'
             : isMe
-            ? '0 2px 10px rgba(140,50,255,0.25), 0 2px 8px rgba(0,0,0,0.6)'
+            ? '0 2px 10px rgba(0,0,0,0.6)'
             : '0 2px 8px rgba(0,0,0,0.6)',
           backdropFilter: 'blur(8px)',
           animation: isOut
             ? 'bustOut 0.8s ease-out forwards'
             : isAllIn
             ? 'allInPulse 1s ease-in-out infinite'
-            : isFolded
+            : isFolded && !foldAnimActive
             ? 'foldSlotFade 0.5s ease-in 0.4s forwards'
             : undefined,
           opacity: isFolded ? 1 : undefined,
         }}
       >
-        {/* Top inner highlight glow line */}
-        <div
-          className="absolute top-0 inset-x-0 rounded-t-lg overflow-hidden"
-          style={{ height: 2, pointerEvents: 'none' }}
-        >
-          <div
-            style={{
-              height: '100%',
-              width: '80%',
-              margin: '0 auto',
-              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)',
-            }}
-          />
-        </div>
-
         {/* Active pulsing ring */}
         {isActive && (
           <div
             className="absolute -inset-[2px] rounded-xl animate-pulse"
-            style={{ border: '2px solid #bf80ff', boxShadow: '0 0 8px rgba(180,80,255,0.6)' }}
+            style={{ border: '2px solid #ffd700', boxShadow: '0 0 8px rgba(255,215,0,0.4)' }}
           />
         )}
 
@@ -201,7 +208,7 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCar
           <div className="absolute top-0 left-2 right-2 h-[2px] rounded-full overflow-hidden">
             <div
               className="h-full rounded-full"
-              style={{ background: 'linear-gradient(90deg, #7c3aed, #bf80ff)', animation: 'shrinkBar 15s linear infinite' }}
+              style={{ background: 'linear-gradient(90deg, #4ade80, #22c55e)', animation: 'shrinkBar 15s linear infinite' }}
             />
           </div>
         )}
@@ -220,31 +227,53 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCar
           </div>
         )}
 
-        {/* Avatar */}
+        {/* Avatar — larger circle (CoinPoker style) */}
         <div
           className={cn(
-            'w-6 h-6 rounded-full flex items-center justify-center text-[11px] shrink-0',
+            'w-10 h-10 rounded-full flex items-center justify-center text-[16px] shrink-0',
             isMe ? 'font-black' : 'font-bold',
           )}
           style={{
             background: isMe
-              ? 'linear-gradient(135deg, #bf80ff 0%, #7c3aed 100%)'
-              : 'linear-gradient(135deg, #3a2060 0%, #1e0f40 100%)',
+              ? 'linear-gradient(135deg, #4ade80 0%, #16a34a 100%)'
+              : 'linear-gradient(135deg, #3a4550 0%, #1e2830 100%)',
             color: '#fff',
             boxShadow: isMe
-              ? '0 0 0 1.5px rgba(180,80,255,0.55), 0 0 0 3px rgba(0,0,0,0.5), 0 0 0 4.5px rgba(180,80,255,0.25)'
-              : '0 0 0 1.5px rgba(180,80,255,0.3), 0 0 0 3px rgba(0,0,0,0.5), 0 0 0 4.5px rgba(180,80,255,0.12)',
+              ? '0 0 0 2px rgba(74,222,128,0.5), 0 0 0 4px rgba(0,0,0,0.5)'
+              : '0 0 0 2px rgba(255,255,255,0.15), 0 0 0 4px rgba(0,0,0,0.5)',
           }}
         >
           {initial}
         </div>
 
-        {/* Name */}
+        {/* Dealer button — red diamond with D (CoinPoker style) */}
+        {isDealer && (
+          <div
+            className="absolute flex items-center justify-center"
+            style={{
+              top: '50%',
+              right: -14,
+              transform: 'translateY(-50%)',
+              width: 18,
+              height: 18,
+              background: '#e53e3e',
+              borderRadius: 3,
+              border: '1px solid #fc8181',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.5)',
+              rotate: '45deg',
+            }}
+          >
+            <span style={{ rotate: '-45deg', color: '#fff', fontSize: 9, fontWeight: 800, lineHeight: 1 }}>D</span>
+          </div>
+        )}
+
+        {/* Name in dark box */}
         <span
-          className="text-[9px] font-semibold max-w-[60px] truncate block leading-tight mt-0.5"
+          className="text-[10px] font-semibold max-w-[68px] truncate block leading-tight mt-1 px-1 py-0.5 rounded"
           style={{
-            color: isActive ? '#ffd700' : isMe ? '#d4a0ff' : 'rgba(255,255,255,0.85)',
+            color: isActive ? '#ffd700' : isMe ? '#a0e0a0' : 'rgba(255,255,255,0.85)',
             textShadow: isActive ? '0 0 8px rgba(255,215,0,0.6)' : undefined,
+            background: 'rgba(0,0,0,0.3)',
           }}
         >
           {player.display_name}
@@ -253,7 +282,7 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCar
         {/* Chip count */}
         <div className="flex items-center gap-0.5 mt-0.5">
           <ChipIcon />
-          <span className="text-[8px] font-mono font-semibold" style={{ color: '#5ce65c' }}>
+          <span className="text-[9px] font-mono font-semibold" style={{ color: '#5ce65c' }}>
             {player.chips.toLocaleString()}
           </span>
         </div>
@@ -262,19 +291,15 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCar
         {betAmount > 0 && (
           <div className="flex items-center gap-0.5 mt-0.5">
             <div
-              className="w-4 h-4 rounded-full flex items-center justify-center text-[6px] font-black"
+              className="w-3 h-3 rounded-full flex items-center justify-center"
               style={{
-                background: 'rgba(180,80,255,0.3)',
-                border: '1px solid rgba(180,80,255,0.5)',
-                color: '#d4a0ff',
-                lineHeight: 1,
+                background: '#e53e3e',
+                border: '1px solid #fc8181',
               }}
-            >
-              BET
-            </div>
+            />
             <span
               className="text-[10px] font-mono font-bold"
-              style={{ color: '#d4a0ff', textShadow: '0 0 6px rgba(180,80,255,0.5)' }}
+              style={{ color: '#fbbf24' }}
             >
               {betAmount.toLocaleString()}
             </span>
@@ -292,15 +317,6 @@ export function PlayerSlot({ player, isMe, isActive, betAmount = 0, cards, onCar
             }}
           >
             ALL IN!
-          </div>
-        )}
-
-        {/* Fold overlay */}
-        {isFolded && (
-          <div className="absolute inset-0 rounded-xl flex items-center justify-center bg-black/50">
-            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.5)' }}>
-              FOLD
-            </span>
           </div>
         )}
 

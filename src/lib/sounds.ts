@@ -17,70 +17,74 @@ function noise(ac: AudioContext, duration: number, volume: number): AudioBufferS
   return src
 }
 
-/** Card deal / flip — short snap */
+/** Card deal — smooth "su" slide sound */
 export function playCardSound() {
   try {
     const ac = getCtx()
     const t = ac.currentTime
 
-    // High-pass filtered noise burst = card snap
-    const n = noise(ac, 0.06, 0.4)
-    const hp = ac.createBiquadFilter()
-    hp.type = 'highpass'
-    hp.frequency.value = 2000
-    const gain = ac.createGain()
-    gain.gain.setValueAtTime(0.5, t)
-    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.06)
+    // Soft bandpass noise sweep = card sliding on felt "スッ"
+    const n = noise(ac, 0.12, 0.5)
+    const bp = ac.createBiquadFilter()
+    bp.type = 'bandpass'
+    bp.frequency.setValueAtTime(1200, t)
+    bp.frequency.exponentialRampToValueAtTime(600, t + 0.12)
+    bp.Q.value = 0.8
 
-    n.connect(hp).connect(gain).connect(ac.destination)
+    const gain = ac.createGain()
+    gain.gain.setValueAtTime(0, t)
+    gain.gain.linearRampToValueAtTime(0.35, t + 0.015)
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12)
+
+    n.connect(bp).connect(gain).connect(ac.destination)
     n.start(t)
-    n.stop(t + 0.06)
+    n.stop(t + 0.12)
   } catch {}
 }
 
-/** Chip bet / collect — ceramic chip clatter "kasha" */
+/** Chip bet / collect — sharp "kasha!" ceramic chip impact */
 export function playChipSound() {
   try {
     const ac = getCtx()
     const t = ac.currentTime
 
-    // Layer 1: filtered noise burst for the "kasha" attack
-    const n1 = noise(ac, 0.08, 0.6)
-    const bp1 = ac.createBiquadFilter()
-    bp1.type = 'bandpass'
-    bp1.frequency.value = 4000
-    bp1.Q.value = 2
+    // Layer 1: sharp attack — highpass noise for the "ka" crack
+    const n1 = noise(ac, 0.04, 0.8)
+    const hp = ac.createBiquadFilter()
+    hp.type = 'highpass'
+    hp.frequency.value = 3000
     const g1 = ac.createGain()
-    g1.gain.setValueAtTime(0.35, t)
-    g1.gain.exponentialRampToValueAtTime(0.001, t + 0.08)
-    n1.connect(bp1).connect(g1).connect(ac.destination)
+    g1.gain.setValueAtTime(0.45, t)
+    g1.gain.exponentialRampToValueAtTime(0.001, t + 0.04)
+    n1.connect(hp).connect(g1).connect(ac.destination)
     n1.start(t)
-    n1.stop(t + 0.08)
+    n1.stop(t + 0.04)
 
-    // Layer 2: second hit slightly delayed (chips stacking)
-    const n2 = noise(ac, 0.06, 0.5)
-    const bp2 = ac.createBiquadFilter()
-    bp2.type = 'bandpass'
-    bp2.frequency.value = 3200
-    bp2.Q.value = 1.8
+    // Layer 2: "sha" tail — bandpass noise for the ceramic rattle
+    const n2 = noise(ac, 0.1, 0.5)
+    const bp = ac.createBiquadFilter()
+    bp.type = 'bandpass'
+    bp.frequency.setValueAtTime(5000, t + 0.02)
+    bp.frequency.exponentialRampToValueAtTime(2000, t + 0.1)
+    bp.Q.value = 1.5
     const g2 = ac.createGain()
-    g2.gain.setValueAtTime(0.25, t + 0.03)
-    g2.gain.exponentialRampToValueAtTime(0.001, t + 0.09)
-    n2.connect(bp2).connect(g2).connect(ac.destination)
-    n2.start(t + 0.03)
-    n2.stop(t + 0.09)
+    g2.gain.setValueAtTime(0.3, t + 0.02)
+    g2.gain.exponentialRampToValueAtTime(0.001, t + 0.1)
+    n2.connect(bp).connect(g2).connect(ac.destination)
+    n2.start(t + 0.02)
+    n2.stop(t + 0.1)
 
-    // Layer 3: short metallic ring for ceramic resonance
-    const osc = ac.createOscillator()
-    osc.type = 'sine'
-    osc.frequency.setValueAtTime(6000, t)
-    osc.frequency.exponentialRampToValueAtTime(2500, t + 0.05)
+    // Layer 3: second chip landing — slightly delayed smaller impact
+    const n3 = noise(ac, 0.03, 0.4)
+    const hp2 = ac.createBiquadFilter()
+    hp2.type = 'highpass'
+    hp2.frequency.value = 4000
     const g3 = ac.createGain()
-    g3.gain.setValueAtTime(0.06, t)
-    g3.gain.exponentialRampToValueAtTime(0.001, t + 0.07)
-    osc.connect(g3).connect(ac.destination)
-    osc.start(t)
-    osc.stop(t + 0.07)
+    g3.gain.setValueAtTime(0.2, t + 0.05)
+    g3.gain.exponentialRampToValueAtTime(0.001, t + 0.08)
+    n3.connect(hp2).connect(g3).connect(ac.destination)
+    n3.start(t + 0.05)
+    n3.stop(t + 0.08)
   } catch {}
 }
 

@@ -17,6 +17,9 @@ interface TableViewProps {
   tableBets: Record<string, number>
   myCards?: PokerCard[]
   onMyCardTap?: () => void
+  dealerSeat?: number | null
+  smallBlind?: number
+  bigBlind?: number
 }
 
 interface FlyingChip {
@@ -44,13 +47,37 @@ function getBetPosition(seatIndex: number, total: number, mySeatIndex: number | 
   }
 }
 
-export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, communityCards, pot, tableBets, myCards = [], onMyCardTap }: TableViewProps) {
+export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, communityCards, pot, tableBets, myCards = [], onMyCardTap, dealerSeat, smallBlind, bigBlind }: TableViewProps) {
   const seated = players.filter(p => p.seat_index !== null)
   const wrapRef = useRef<HTMLDivElement>(null)
   const prevBetsRef = useRef<Record<string, number>>({})
   const [flyingChips, setFlyingChips] = useState<FlyingChip[]>([])
   const [potPulseKey, setPotPulseKey] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
+
+  // Compute SB/BB seats from dealer seat
+  const sbSeat = dealerSeat !== null && dealerSeat !== undefined
+    ? (seated.length === 2
+        ? dealerSeat
+        : (() => {
+            const sortedSeats = seated.map(p => p.seat_index!).sort((a, b) => a - b)
+            const dealerIdx = sortedSeats.indexOf(dealerSeat)
+            return dealerIdx >= 0 ? sortedSeats[(dealerIdx + 1) % sortedSeats.length] : null
+          })())
+    : null
+  const bbSeat = dealerSeat !== null && dealerSeat !== undefined
+    ? (seated.length === 2
+        ? (() => {
+            const sortedSeats = seated.map(p => p.seat_index!).sort((a, b) => a - b)
+            const dealerIdx = sortedSeats.indexOf(dealerSeat)
+            return dealerIdx >= 0 ? sortedSeats[(dealerIdx + 1) % sortedSeats.length] : null
+          })()
+        : (() => {
+            const sortedSeats = seated.map(p => p.seat_index!).sort((a, b) => a - b)
+            const dealerIdx = sortedSeats.indexOf(dealerSeat)
+            return dealerIdx >= 0 ? sortedSeats[(dealerIdx + 2) % sortedSeats.length] : null
+          })())
+    : null
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 640)
@@ -103,13 +130,7 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
       }}>
         <div ref={wrapRef} className="relative w-full h-full">
 
-          {/* Ambient purple glow behind table */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{ background: 'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(80,30,160,0.08) 0%, transparent 100%)' }}
-          />
-
-          {/* SVG table surface */}
+          {/* SVG table surface — CoinPoker-style green felt capsule */}
           <svg
             className="absolute inset-1"
             width="100%" height="100%"
@@ -117,124 +138,90 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
             style={{ overflow: 'visible' }}
           >
             <defs>
-              <filter id="wg" x="-5%" y="-5%" width="110%" height="110%" colorInterpolationFilters="sRGB">
-                <feTurbulence type="fractalNoise" baseFrequency="0.008 0.55" numOctaves={7} seed={42} result="noise" />
-                <feColorMatrix in="noise" type="matrix"
-                  values="0.52 0.22 0.04 0 0.08
-                          0.26 0.11 0.02 0 0.03
-                          0.07 0.03 0.01 0 0.01
-                          0    0    0    1 0"
-                  result="wood" />
-                <feComposite in="wood" in2="wood" operator="arithmetic" k1="0" k2="1.12" k3="0" k4="-0.09" />
-              </filter>
+              {/* Felt texture filter */}
               <filter id="felt" x="0%" y="0%" width="100%" height="100%">
-                <feTurbulence type="fractalNoise" baseFrequency="0.75 0.75" numOctaves={4} seed={7} result="tex" />
+                <feTurbulence type="fractalNoise" baseFrequency="0.9 0.9" numOctaves={4} seed={7} result="tex" />
                 <feColorMatrix in="tex" type="matrix"
-                  values="0 0 0 0 0.04
-                          0 0 0 0 0.00
-                          0 0 0 0 0.12
-                          0 0 0 0.18 0"
+                  values="0 0 0 0 0
+                          0 0 0 0 0.02
+                          0 0 0 0 0
+                          0 0 0 0.08 0"
                   result="feltTex" />
                 <feBlend in="SourceGraphic" in2="feltTex" mode="overlay" />
               </filter>
-              <radialGradient id="feltGrad" cx="50%" cy="38%" r="68%">
-                <stop offset="0%"   stopColor="#1e0052" />
-                <stop offset="48%"  stopColor="#0f0030" />
-                <stop offset="100%" stopColor="#060015" />
+              {/* Green felt gradient */}
+              <radialGradient id="feltGrad" cx="50%" cy="40%" r="65%">
+                <stop offset="0%"   stopColor="#1a5c2a" />
+                <stop offset="50%"  stopColor="#0f4420" />
+                <stop offset="100%" stopColor="#0a3018" />
               </radialGradient>
-              <radialGradient id="feltReflect" cx="50%" cy="18%" r="55%">
-                <stop offset="0%"   stopColor="rgba(255,255,255,0.07)" />
+              {/* Subtle light reflection */}
+              <radialGradient id="feltReflect" cx="50%" cy="25%" r="50%">
+                <stop offset="0%"   stopColor="rgba(255,255,255,0.06)" />
                 <stop offset="100%" stopColor="rgba(255,255,255,0)" />
               </radialGradient>
-              <linearGradient id="neonRim" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%"   stopColor="#d4a0ff" />
-                <stop offset="42%"  stopColor="#7c3aed" />
-                <stop offset="100%" stopColor="#3d1a70" />
-              </linearGradient>
-              <linearGradient id="leather" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%"   stopColor="#4a2008" />
-                <stop offset="40%"  stopColor="#2e1205" />
-                <stop offset="100%" stopColor="#160800" />
-              </linearGradient>
-              <radialGradient id="feltSpot" cx="50%" cy="42%" r="35%">
-                <stop offset="0%"   stopColor="rgba(110,35,210,0.22)" />
+              {/* Center glow */}
+              <radialGradient id="centerGlow" cx="50%" cy="45%" r="30%">
+                <stop offset="0%"   stopColor="rgba(30,120,50,0.2)" />
                 <stop offset="100%" stopColor="rgba(0,0,0,0)" />
               </radialGradient>
             </defs>
 
-            {/* 1 Outer drop shadow */}
-            <ellipse cx="50%" cy="52%" rx="48%" ry="49%"
-              fill="rgba(0,0,0,0.85)" style={{ filter: 'blur(22px)' }} />
+            {/* 1 Drop shadow */}
+            <rect x="6%" y="10%" width="88%" height="80%" rx="40%" ry="40%"
+              fill="rgba(0,0,0,0.7)" style={{ filter: 'blur(18px)' }} />
 
-            {/* 2 Mahogany wood rail */}
-            <ellipse cx="50%" cy="50%" rx="48%" ry="47%"
-              fill="#2d1005" style={{ filter: 'url(#wg)' }} />
-            {/* 2b Wood rail highlight rim */}
-            <ellipse cx="50%" cy="50%" rx="47%" ry="46%"
-              fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+            {/* 2 Dark border/edge */}
+            <rect x="8%" y="12%" width="84%" height="76%" rx="38%" ry="38%"
+              fill="#1a1a1a" stroke="#0d0d0d" strokeWidth="2" />
 
-            {/* 3 Top bevel highlight */}
-            <ellipse cx="50%" cy="44%" rx="45%" ry="42%"
-              fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="2.5" />
+            {/* 3 Thin accent border */}
+            <rect x="9%" y="13%" width="82%" height="74%" rx="37%" ry="37%"
+              fill="none" stroke="rgba(40,80,50,0.5)" strokeWidth="1.5" />
 
-            {/* 4 Leather padding band */}
-            <ellipse cx="50%" cy="50%" rx="43%" ry="42%"
-              fill="url(#leather)" />
-
-            {/* 5 Stitching ring */}
-            <ellipse cx="50%" cy="50%" rx="41.5%" ry="40.5%"
-              fill="none" stroke="rgba(220,185,100,0.22)" strokeWidth="1"
-              strokeDasharray="4 7" />
-
-            {/* 6 Neon metal trim */}
-            <ellipse cx="50%" cy="50%" rx="40%" ry="39%"
-              fill="none" stroke="url(#neonRim)" strokeWidth="2"
-              style={{ filter: 'drop-shadow(0 0 4px rgba(180,80,255,0.95)) drop-shadow(0 0 12px rgba(180,80,255,0.5))' }} />
-            {/* 6b Secondary softer neon trim */}
-            <ellipse cx="50%" cy="50%" rx="38.5%" ry="37.5%"
-              fill="none" stroke="rgba(140,50,255,0.25)" strokeWidth="8"
-              style={{ filter: 'drop-shadow(0 0 20px rgba(140,50,255,0.4))' }} />
-
-            {/* 7 Felt surface */}
-            <ellipse cx="50%" cy="50%" rx="38%" ry="37%"
+            {/* 4 Green felt surface */}
+            <rect x="10%" y="14%" width="80%" height="72%" rx="36%" ry="36%"
               fill="url(#feltGrad)" style={{ filter: 'url(#felt)' }} />
 
-            {/* 7b Felt spotlight overlay */}
-            <ellipse cx="50%" cy="50%" rx="38%" ry="37%"
-              fill="url(#feltSpot)" />
-
-            {/* 8 Felt reflection */}
-            <ellipse cx="50%" cy="34%" rx="28%" ry="16%"
+            {/* 5 Felt reflection */}
+            <rect x="10%" y="14%" width="80%" height="72%" rx="36%" ry="36%"
               fill="url(#feltReflect)" />
 
-            {/* 9 Felt center glow */}
-            <ellipse cx="50%" cy="46%" rx="22%" ry="16%"
-              fill="rgba(110,35,210,0.14)" style={{ filter: 'blur(10px)' }} />
+            {/* 6 Center glow */}
+            <rect x="10%" y="14%" width="80%" height="72%" rx="36%" ry="36%"
+              fill="url(#centerGlow)" />
 
-            {/* 10 Table action zone arc markings */}
-            <ellipse cx="50%" cy="50%" rx="28%" ry="24%"
-              fill="none" stroke="rgba(255,255,255,0.025)" strokeWidth="0.5" strokeDasharray="3 10" />
-
-            {/* 11 Dealer button marker */}
-            <circle cx="58%" cy="64%" r="1.5%" fill="rgba(212,175,55,0.6)" stroke="rgba(255,215,0,0.8)" strokeWidth="0.4%" />
-            <text x="58%" y="64.8%" textAnchor="middle" fontSize="2.2%" fill="#1a1a0a" fontWeight="bold" fontFamily="Arial">D</text>
+            {/* 7 Subtle inner line */}
+            <rect x="15%" y="20%" width="70%" height="60%" rx="30%" ry="30%"
+              fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
           </svg>
 
-          {/* Center: community cards + pot */}
+          {/* Center: blinds info + community cards + pot */}
           <div
-            className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-2 pointer-events-none z-10"
+            className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1.5 pointer-events-none z-10"
             style={{ top: isMobile ? '38%' : '44%' }}
           >
+            {/* Blinds info */}
+            {smallBlind && bigBlind && (
+              <div className="text-[10px] font-semibold tracking-wider px-3 py-0.5 rounded-full"
+                style={{
+                  background: 'rgba(0,0,0,0.5)',
+                  color: 'rgba(200,220,200,0.7)',
+                  border: '1px solid rgba(80,140,80,0.2)',
+                }}>
+                NLH | Blinds: {smallBlind}/{bigBlind}
+              </div>
+            )}
             <CommunityCards cards={communityCards} />
             {pot > 0 && (
               <div className="flex items-center gap-1.5 px-3 py-0.5 rounded-full font-semibold"
                 style={{
-                  background: 'linear-gradient(180deg,rgba(0,0,0,0.55),rgba(0,0,0,0.75))',
-                  border: '1px solid rgba(180,80,255,0.4)',
+                  background: 'rgba(0,0,0,0.6)',
+                  border: '1px solid rgba(80,160,80,0.3)',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
                 }}>
-                <span className="text-xs" style={{ color: '#bf80ff' }}>POT</span>
-                <span className="font-mono text-sm" style={{ color: '#bf80ff' }}>{pot.toLocaleString()}</span>
+                <span className="text-xs" style={{ color: '#7ec87e' }}>Pot</span>
+                <span className="font-mono text-sm" style={{ color: '#a0e0a0' }}>{pot.toLocaleString()}</span>
               </div>
             )}
           </div>
@@ -279,6 +266,9 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
           {seated.map(player => {
             const isMe = player.id === myPlayerId
             const pos = getSeatPosition(player.seat_index!, seated.length, mySeatIndex, isMobile ? 44 : 41, isMobile ? 44 : 35)
+            const isDealer = player.seat_index === dealerSeat
+            const isSB = player.seat_index === sbSeat
+            const isBB = player.seat_index === bbSeat
             return (
               <div
                 key={player.id}
@@ -292,6 +282,9 @@ export function TableView({ players, myPlayerId, mySeatIndex, currentSeat, commu
                   betAmount={tableBets[player.id] ?? 0}
                   cards={isMe ? myCards : undefined}
                   onCardTap={isMe ? onMyCardTap : undefined}
+                  isDealer={isDealer}
+                  isSB={isSB}
+                  isBB={isBB}
                 />
               </div>
             )

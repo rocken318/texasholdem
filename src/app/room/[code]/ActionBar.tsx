@@ -70,8 +70,8 @@ export function ActionBar({ currentBet, myCurrentBet, myChips, bigBlind, onActio
     <div
       className="flex flex-col gap-1 px-2 pt-1.5 pb-2 backdrop-blur-sm"
       style={{
-        background: 'linear-gradient(180deg, rgba(8,4,20,0) 0%, rgba(8,4,20,0.7) 30%, rgba(4,2,12,0.95) 100%)',
-        borderTop: '1px solid rgba(140,50,255,0.2)',
+        background: 'linear-gradient(180deg, rgba(4,12,8,0) 0%, rgba(4,12,8,0.7) 30%, rgba(2,8,4,0.95) 100%)',
+        borderTop: '1px solid rgba(50,140,80,0.2)',
         opacity: isMyTurn ? 1 : 0.4,
         transition: 'opacity 0.3s ease',
       }}
@@ -88,9 +88,9 @@ export function ActionBar({ currentBet, myCurrentBet, myChips, bigBlind, onActio
                 onClick={() => snapTo(p.value)}
                 className="flex-1 py-1 rounded-md text-[10px] font-bold tracking-wide transition-colors duration-100"
                 style={{
-                  background: 'linear-gradient(180deg, rgba(30,15,55,0.9) 0%, rgba(15,8,30,0.95) 100%)',
-                  border: '1px solid rgba(140,50,255,0.35)',
-                  color: '#d4a0ff',
+                  background: 'linear-gradient(180deg, rgba(15,35,20,0.9) 0%, rgba(8,20,12,0.95) 100%)',
+                  border: '1px solid rgba(50,140,80,0.35)',
+                  color: '#7ec87e',
                 }}
               >
                 {p.label}
@@ -99,9 +99,9 @@ export function ActionBar({ currentBet, myCurrentBet, myChips, bigBlind, onActio
             <div
               className="min-w-[3.5rem] py-1 px-1.5 rounded-md text-center font-mono text-[11px] font-bold tabular-nums"
               style={{
-                background: 'linear-gradient(180deg, #050210 0%, #0a0420 100%)',
-                border: '1px solid rgba(180,80,255,0.5)',
-                color: '#d4a0ff',
+                background: 'linear-gradient(180deg, #051005 0%, #0a1a0a 100%)',
+                border: '1px solid rgba(80,180,100,0.5)',
+                color: '#7ec87e',
               }}
             >
               {raiseAmount}

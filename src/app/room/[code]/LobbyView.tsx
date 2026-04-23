@@ -20,29 +20,45 @@ export function LobbyView({ room, players, myPlayer, hostPlayerId, onStart, onAd
   return (
     <main
       className="min-h-screen flex flex-col items-center gap-6 p-6 relative overflow-hidden"
-      style={{ background: 'linear-gradient(180deg, #0c0518 0%, #060310 100%)' }}
+      style={{ background: 'linear-gradient(180deg, #0a120c 0%, #060a08 100%)' }}
     >
       {/* Background */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(60,20,100,0.4)_0%,_rgba(12,5,24,0.8)_50%,_rgba(4,2,12,1)_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(20,60,30,0.4)_0%,_rgba(8,18,12,0.8)_50%,_rgba(4,8,6,1)_100%)]" />
       <div className="absolute inset-0 opacity-[0.03]" style={{
         backgroundImage: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M5 0h1L0 5V4zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E")`,
       }} />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_40%,_rgba(0,0,0,0.6)_100%)]" />
 
       <div className="relative z-10 flex flex-col items-center gap-6 w-full max-w-sm mt-4">
+        {/* Banner: キャバクラ探すならセンキャバ */}
+        <div
+          className="w-full text-center py-2 px-4 rounded-xl"
+          style={{
+            background: 'linear-gradient(90deg, rgba(212,175,55,0.15), rgba(212,175,55,0.25), rgba(212,175,55,0.15))',
+            border: '1px solid rgba(212,175,55,0.3)',
+          }}
+        >
+          <span
+            className="text-sm font-bold tracking-wide"
+            style={{ color: '#D4AF37' }}
+          >
+            キャバクラ探すならセンキャバ
+          </span>
+        </div>
+
         {/* Header with animated pulse dots */}
         <div className="flex items-center gap-3">
           <div className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse" />
           <h1
             className="text-2xl font-bold text-white tracking-wide animate-pulse"
-            style={{ color: 'rgba(180,80,255,0.85)', textShadow: '0 0 20px rgba(140,50,255,0.5)' }}
+            style={{ color: 'rgba(74,222,128,0.85)', textShadow: '0 0 20px rgba(74,222,128,0.4)' }}
           >{t.waitingForPlayers}</h1>
           <div className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse" />
         </div>
 
         {/* QR Code with gold frame */}
         <div className="relative p-[1px] rounded-2xl bg-gradient-to-b from-[#D4AF37]/40 to-[#D4AF37]/10">
-          <div className="bg-[#0c0518] rounded-2xl p-4">
+          <div className="bg-[#0a120c] rounded-2xl p-4">
             <GameQRCode joinCode={room.join_code} />
           </div>
         </div>
@@ -62,10 +78,10 @@ export function LobbyView({ room, players, myPlayer, hostPlayerId, onStart, onAd
                     ? 'bg-[#D4AF37]/10 border border-[#D4AF37]/20'
                     : 'bg-white/[0.03] hover:bg-white/[0.06]'
                 }`}
-                style={{ borderLeft: '2px solid rgba(140,50,255,0.3)' }}
+                style={{ borderLeft: '2px solid rgba(74,222,128,0.3)' }}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-7 h-7 rounded-full bg-[#2d5a27] flex items-center justify-center text-white/70 text-xs font-bold border border-white/10">
+                  <div className="w-7 h-7 rounded-full bg-[#1a5c2a] flex items-center justify-center text-white/70 text-xs font-bold border border-white/10">
                     {i + 1}
                   </div>
                   <span className="text-white font-medium">
@@ -122,7 +138,7 @@ export function LobbyView({ room, players, myPlayer, hostPlayerId, onStart, onAd
                 onClick={onAddBot}
                 className="w-full py-3 rounded-xl border border-white/15 text-white/60 font-semibold text-sm hover:border-white/30 hover:text-white/80 transition-all duration-200 active:scale-[0.98]"
               >
-                🤖 BOTを追加 / Add Bot
+                BOTを追加 / Add Bot
               </button>
             )}
             {seated.length >= 2 ? (
@@ -146,7 +162,7 @@ export function LobbyView({ room, players, myPlayer, hostPlayerId, onStart, onAd
             ) : (
               <p
                 className="text-sm text-center animate-pulse"
-                style={{ color: 'rgba(180,80,255,0.7)' }}
+                style={{ color: 'rgba(74,222,128,0.7)' }}
               >{t.needMorePlayers}</p>
             )}
           </div>
