@@ -301,6 +301,7 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
 
   function handleHandResultDismiss() {
     setHandResult(null)
+    handResultRef.current = null  // Sync ref immediately so SSE handler sees it
     setShowdownResults([])
     setShowdownCommunity([])
     // Apply any hand_started event that arrived while the overlay was showing
@@ -331,13 +332,13 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
     }
   }
 
-  async function handleReady() {
+  function handleReady() {
     if (!myPlayer?.id) return
-    // Trigger next hand directly
-    await fetch(`/api/rooms/${room.id}/next-hand`, {
+    // Trigger next hand — fire-and-forget, ignore errors (may already be started)
+    fetch(`/api/rooms/${room.id}/next-hand`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-    })
+    }).catch(() => {})
   }
 
   async function handleStart() {

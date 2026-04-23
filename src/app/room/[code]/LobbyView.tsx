@@ -31,8 +31,11 @@ export function LobbyView({ room, players, myPlayer, hostPlayerId, onStart, onAd
 
       <div className="relative z-10 flex flex-col items-center gap-6 w-full max-w-sm mt-4">
         {/* Banner: キャバクラ探すならセンキャバ */}
-        <div
-          className="w-full text-center py-2 px-4 rounded-xl"
+        <a
+          href="https://www.sencaba.com/download"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full text-center py-2 px-4 rounded-xl block"
           style={{
             background: 'linear-gradient(90deg, rgba(212,175,55,0.15), rgba(212,175,55,0.25), rgba(212,175,55,0.15))',
             border: '1px solid rgba(212,175,55,0.3)',
@@ -44,7 +47,7 @@ export function LobbyView({ room, players, myPlayer, hostPlayerId, onStart, onAd
           >
             キャバクラ探すならセンキャバ
           </span>
-        </div>
+        </a>
 
         {/* Header with animated pulse dots */}
         <div className="flex items-center gap-3">
