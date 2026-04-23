@@ -43,7 +43,7 @@ export function HandResultOverlay({ winnerIds, winnerNames, pot, showdownResults
     const id = setInterval(() => {
       const pct = Math.max(0, 100 - ((Date.now() - start) / DURATION_MS) * 100)
       setProgress(pct)
-      if (pct === 0) { clearInterval(id); dismiss() }
+      if (pct === 0) { clearInterval(id); onReady(); dismiss() }
     }, 50)
     return () => clearInterval(id)
   }, [dismiss])

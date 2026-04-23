@@ -6,7 +6,7 @@ import { evaluateHand, findWinners } from '@/lib/poker/evaluator'
 import { totalPot } from '@/lib/poker/pot'
 import { getNextActiveSeat } from '@/lib/poker/engine'
 import { generateId } from '@/lib/utils'
-import { openGate } from '@/lib/poker/readyGate'
+// Gate system removed — next hand triggered by client
 import type { Player, Room, Hand, HandPlayer, SidePot, PokerCard, Street } from '@/types/domain'
 
 export async function startNewHand(
@@ -191,11 +191,7 @@ export async function resolveHand(params: {
     return
   }
 
-  // Wait for all active players to press "next" or 7-second timeout
-  await openGate(roomId, activePlayers.map(p => p.id), 7000)
-
-  // Start next hand
-  await startNewHand(roomId, activePlayers, nextDealerSeat, room.settings, handNumber + 1)
+  // Next hand will be triggered by client via /api/rooms/[id]/next-hand
 }
 
 export async function advanceStreet(params: {

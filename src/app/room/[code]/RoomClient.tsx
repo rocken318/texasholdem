@@ -237,16 +237,6 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
     if (event.type === 'hand_finished') {
       setHand(h => h ? { ...h, street: 'finished', winner_ids: event.winnerIds } : h)
       setHandResult({ winnerIds: event.winnerIds, pot: event.pot })
-      // Auto-ready all bots (host only)
-      if (hostPlayerId) {
-        for (const botId of botIdsRef.current) {
-          fetch(`/api/rooms/${room.id}/ready`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ playerId: botId }),
-          })
-        }
-      }
     }
     if (event.type === 'game_finished') {
       setRankings(event.rankings)
@@ -343,10 +333,10 @@ export function RoomClient({ initialRoom }: RoomClientProps) {
 
   async function handleReady() {
     if (!myPlayer?.id) return
-    await fetch(`/api/rooms/${room.id}/ready`, {
+    // Trigger next hand directly
+    await fetch(`/api/rooms/${room.id}/next-hand`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ playerId: myPlayer.id }),
     })
   }
 

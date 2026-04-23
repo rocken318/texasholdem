@@ -11,7 +11,8 @@
       "Bash(python3 -c \"import sys,json; [print\\(f['name']\\) for f in json.load\\(sys.stdin\\)]\")",
       "WebSearch",
       "Bash(find:*)",
-      "Bash(xargs ls:*)"
+      "Bash(xargs ls:*)",
+      "Bash(ls Y:/texasholdem/src/app/api/rooms/[id]/)"
     ]
   }
 }
