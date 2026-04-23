@@ -189,7 +189,7 @@ export function GameView({ room, players, myPlayer, hand, myCards, myHandCurrent
           <span className="text-[8px] font-medium" style={{ color: 'rgba(255,255,255,0.15)' }}>センキャバ</span>
         </div>
 
-        <div className="flex-1 min-h-0 relative overflow-hidden pt-6 pb-2">
+        <div className="flex-1 min-h-0 relative overflow-hidden pt-4 pb-0">
           <TableView
             players={players}
             myPlayerId={myPlayer?.id ?? null}
